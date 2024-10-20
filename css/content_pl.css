@@ -1,0 +1,55 @@
+/* #wrapper .navbar-default {
+    background-color: #f9f6fe;
+    border-color: #c9abfc;
+}*/
+#patientCopy{
+    padding: 0 8px 8px;
+    font-size: 50px;
+    line-height: 50px;
+}
+
+/* class="dropZoneKeepAlive" */
+.dropZoneKeepAlive .upload-box {
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    background-color: rgba(0,0,0,.7);
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+    padding:0;
+}
+
+.dropZoneKeepAlive #uploadTable {
+    height: calc(100vh - 20px);
+    width: calc(100vw - 20px);
+    background-color: rgba(255, 255, 255, .5);
+    border-radius: 30px;
+    border:0;
+    box-shadow: 0px 0px 0px 1px #fff;
+}
+
+.dropZoneKeepAlive #tdNote,
+.dropZoneKeepAlive #tdType,
+.dropZoneKeepAlive #tdType+td {
+    display: none;
+}
+
+.dropZoneKeepAlive #uploadTable td {
+    text-align: center;
+}
+
+.dropZoneKeepAlive .upload {
+    background-image: none;
+    padding: 0;
+    transform: scale(3);
+}
+
+.dropZoneKeepAlive .upload span {
+    color: #fff;
+    text-shadow: 0px 1px 1px #666;
+}

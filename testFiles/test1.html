@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PCX Extension Test</title>
+  <link rel="stylesheet" href="../css/modal.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    button {
+      margin: 10px 0;
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    input, textarea {
+      margin: 10px 0;
+      padding: 10px;
+      width: 100%;
+    }
+    #insErrorMessage {
+      position: relative;
+      top: -10px;
+    }
+    .insChar {
+      display: inline-block;
+      padding: 4px 5px;
+      border: 1px solid;
+      font-family: monospace;
+    }
+
+    .insInvalidChar {
+      color: #f00;
+      font-weight: bold;
+      border-color: #f00;
+      background-color: #ff0000;
+    }
+
+    .insValidChar {
+    color: #000;
+    font-weight: bold;
+    border-color: #999;
+    background-color: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+
+<h1>PCX Extension Test Page</h1>
+
+<h2>Local Storage Operations</h2>
+<p>Key: <input type="text" id="storageKey" value="testKey"></p>
+<p>Value: <input type="text" id="storageValue" value="testValue"></p>
+<button id="setStorage">Set Local Storage</button>
+<button id="getStorage">Get Local Storage</button>
+<button id="removeStorage">Remove Local Storage</button>
+
+<h2>Clipboard Operations</h2>
+<textarea id="clipboardText">Copy this text to clipboard!</textarea>
+<button id="copyClipboard">Copy to Clipboard</button>
+<button id="readClipboard">Read from Clipboard</button>
+
+<h2>GUI Modal Notification</h2>
+<button id="showModal">Show GUI Modal</button>
+
+<h2>Simulate UI Event (Click)</h2>
+<button id="simulatedClick">Click Me</button>
+<button id="simulateClick">Simulate Click</button>
+<button id="focusButton">Simulate Focus</button>
+<button id="blurButton">Simulate Blur</button>
+<p>Input (will simulate focus/blur/enter): <input type="text" id="interactionInput"></p>
+<button id="simulateEnter">Simulate Enter Key</button>
+
+<h2>Regular Expression Check</h2>
+<p>Input (email format): <input type="text" id="regexInput" placeholder="Enter email"></p>
+<button id="checkRegex">Check Regex</button>
+<p id="regexResult"></p>
+
+<h2>Simulate User Interaction</h2>
+
+<h2>Detect State Changes</h2>
+<p>Input Field (detects keyup/keydown/focus/blur): <input type="text" id="stateChangeInput"></p>
+<p>Key Status: <span id="keyStatus"></span></p>
+
+<h2>Form Submit</h2>
+<form id="testForm">
+  <input type="text" placeholder="Type here and submit" id="formInput">
+  <button type="submit">Submit Form</button>
+</form>
+<p id="formSubmitResult"></p>
+
+<h2>Detect innerHTML Change</h2>
+<div id="innerHtmlDiv">This is original content.</div>
+<button id="changeContentButton">Change Content</button>
+<p id="innerHtmlStatus"></p>
+
+<h2>Medicare Validater</h2>
+<input type="text" id="patternInput" placeholder="Enter your ID here">
+
+
+<script src="../js/content.js"></script>
+<script src="../js/test1.js"></script>
+</body>
+</html>
+
+</body>
+</html>
