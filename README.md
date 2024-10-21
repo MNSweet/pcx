@@ -5,11 +5,12 @@ A suite of background checks to assist in the Validation and Quality Control of 
 
 
 ## Definitions
-### Labs
+### File Abbreviations for LIMS
 - PL: Prince Laboratories
 - PD: Principle Diagnostics
-- RR: R&R Laboratories
-### Pages - LinkId
+- RR: Reliable Result Labs
+
+### LIMS Pages - LinkId
 - **2070:** Accession List
   - Template: default.aspx
 - **2071:** Update Accession
@@ -27,8 +28,7 @@ A suite of background checks to assist in the Validation and Quality Control of 
   - Requires: PreauthorizationOrderId
   - Template: default.aspx
 
-## PL Test Categories / ID's
-
+## PL LIMS Test Categories / ID's
 - **Toxicology:** 1
 - **PGX:** 3
 - **CGX:** 4
@@ -44,6 +44,13 @@ A suite of background checks to assist in the Validation and Quality Control of 
 - **Thyroid:** 15
 - **Diabetes:** 16
 - **Cardio:** 17
+
+## PL LIMS Lab ID's / Codes
+- **Ipseity Diagnostics LLC:** 2 / IP
+- **SureQuest Diagnostics:** 1010 / SQ
+- **Reliable Result Labs:** 1011 / RR
+- **Prince Laboratories:** 1012 / PL
+- **Principle Diagnostics:** 1013 / PD
 
 ## Auto QA
 ### File Name Check
