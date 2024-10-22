@@ -1,16 +1,20 @@
 console.log("This is RR specific content script.");
+
+
+
+
 ///
 // Page IDs
 // Update Accession:  LinkId=2071
 // Create Accession:  LinkId=2088
-// Create Order:      LinkId=2011
+// Create Order:      LinkId=2011 && !OrderId=#
 ///
 
 const linkId = PCX_CMSInteraction.getUrlParams()['LinkId'];
+const OrderId = PCX_CMSInteraction.getUrlParams()['OrderId'];
 
-
-
-
+// Results List
+if (linkId == "2024") {
   // Function to handle the click event and get the row data
   function handleDownloadClick(event) {
     //event.preventDefault(); // Prevent the default link behavior [For testing, should be commented out]
@@ -26,13 +30,20 @@ const linkId = PCX_CMSInteraction.getUrlParams()['LinkId'];
 
       // Collect the text content of all <td> elements in the row into an array
       const rowData = Array.from(row.querySelectorAll('td')).map(td => td.textContent.trim());
-      
+      //console.log(row.querySelector('td:first-child'));
+      row.classList.add('dxgvSelectedRow_Metropolis');
+      const tdCheckBox = row.querySelector('td:first-child span');
+      tdCheckBox.classList.replace('dxWeb_edtCheckBoxUnchecked_Metropolis','dxWeb_edtCheckBoxChecked_Metropolis');
       const date = new Date();
       return "Results "
-            +`${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()} `
+            +('0' + (date.getMonth()+1)).slice(-2)
+            +"."+('0' + (date.getDate())).slice(-2)
+            +"."+(date.getFullYear().toString().substr(-2))
+            +" "
             +rowData[headings.indexOf('Last')]
             +" "
-            +rowData[headings.indexOf('First')]; // Output the row data as an array
+            +rowData[headings.indexOf('First')]
+            +".pdf"; // Output the row data as an array
     }
   }
 
@@ -43,8 +54,9 @@ const linkId = PCX_CMSInteraction.getUrlParams()['LinkId'];
       PCX_CMSInteraction.copyToClipboard(handleDownloadClick(event));
     }
   });
-if (linkId == "2011") { //Create Order
-console.log('Create Order Page - 2011');
+}
+if (linkId == "2011" && (typeof OrderId == undefined)) { //Create Order
+
 
   /********************************************
   *
@@ -53,6 +65,46 @@ console.log('Create Order Page - 2011');
   *********************************************/
 
   // content_rr.js
+  const fieldMappingRR = {
+    FirstName: '#rrFirstName',
+    LastName: '#rrLastName',
+    // Add more mappings as needed
+  };
+
+  function pasteRRPatientData() {
+    chrome.storage.local.get('patientData', ({ patientData }) => {
+
+      //Demo Data
+      patientData = {
+          "Address": "11 Demo dr ",
+          "Category": "11", //Immuno
+          "City": "DemoCity",
+          "DOB": [
+              "4",
+              "25",
+              "2000"
+          ],
+          "DOC": "4/28/2023",
+          "Email": "",
+          "FirstName": "DemoFirst",
+          "Gender": "Male",
+          "LastName": "DemoLast",
+          "MiddleName": "",
+          "Phone": "5551234567",
+          "Race": "Caucasian",
+          "State": "GA",
+          "Zip": "30043"
+      }
+
+      if (patientData) {
+
+        // Clear the patient data after usage
+        chrome.storage.local.set({ patientData: {} }, () => {
+          console.log('RR Patient data cleared after use');
+        });
+      }
+    });
+  }
 
   // Add a button to paste RR patient data
   const rrButton = document.createElement('button');
@@ -142,11 +194,6 @@ console.log('Create Order Page - 2011');
     16:-1  // Diabetes
   };
 
-  // RR Category Test Codes
-  testCodes = {
-    18:"Panel : Comprehensive Immunodeficiency Panel"
-  };
-
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'startCountdownBanner') {
       // If the banner is already present, don't recreate it
@@ -156,69 +203,22 @@ console.log('Create Order Page - 2011');
     }
   });
 
-
-  function pasteRRPatientData() {
-    // patientDataKeys
-    // patientDataValueDefaults
-    chrome.storage.local.get('patientData', ({ patientData }) => {
-
-      patientData = {
-          "Address": "11 Demo dr ",
-          "Category": "11", //Immuno
-          "City": "DemoCity",
-          "DOB": [
-              "4",
-              "25",
-              "2000"
-          ],
-          "DOC": "4/28/2023",
-          "Email": "",
-          "FirstName": "DemoFirst",
-          "Gender": "Male",
-          "LastName": "DemoLast",
-          "MiddleName": "",
-          "Phone": "5551234567",
-          "Race": "Caucasian",
-          "State": "GA",
-          "Zip": "30043"
-      }
-
-
-      if (patientData) {
-
-        // Translate Prince ID's to R&R ID's
-        patientData.Category = categoryTranslation[patientData.Category];
-
-        // Combine DOB for R&R's single text field
-        patientData['DOBString'] = patientData.DOB.join('/');
-
-
-
-        // Clear the patient data after usage
-        chrome.storage.local.set({ patientData: {} }, () => {
-          console.log('RR Patient data cleared after use');
-        });
-      }
-    });
-  }
-
-
-  /********************************************
-  *
-  * Set Defualt Fields onload
-  *
-  *********************************************/
+  // Prefill Location and Physician
   const eventKeySpace = new KeyboardEvent('keydown', { key: ' ', bubbles: true });
   const eventKeyTab = new KeyboardEvent('keydown', { bubbles: true, cancelable : true, key : "Tab",shiftKey : false, keyCode : 13 });
-
-
-  document.querySelector(patientDataKeys.Location).value = patientDataValueDefaults.Location;
-  document.querySelector(patientDataKeys.Location).dispatchEvent(eventKeySpace);
-  waitForElm(patientDataKeys.LocationMenu).then((elm) => {
-    document.querySelector(patientDataKeys.Location).dispatchEvent(eventKeyTab);
-    waitForElm(patientDataKeys.PhysicianOptions).then((elm) => {
-      document.querySelector(patientDataKeys.Physician).value = patientDataValueDefaults.Physician;
-    })
+  waitForElm(patientDataKeys.Location).then((elm) => {
+    document.querySelector(patientDataKeys.Location).value = patientDataValueDefaults.Location;
+    document.querySelector(patientDataKeys.Location).dispatchEvent(eventKeySpace);
+    waitForElm(patientDataKeys.LocationMenu).then((elm) => {
+      document.querySelector(patientDataKeys.Location).dispatchEvent(eventKeyTab);
+      waitForElm(patientDataKeys.PhysicianOptions).then((elm) => {
+        document.querySelector(patientDataKeys.Physician).value = patientDataValueDefaults.Physician;
+        document.querySelector("#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianId").value = 1896;
+        document.querySelector("#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianName").value = "Prince, Laboratories";
+         
+         
+      })
+    });
   });
   document.querySelector(patientDataKeys.BillTo).value = patientDataValueDefaults.BillTo;
   document.querySelector(patientDataKeys.Category).focus();

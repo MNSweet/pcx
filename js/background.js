@@ -5,8 +5,8 @@ function pcxDebug(message) {
     console.log(message);
   }
 }
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  /*
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+ /*
   * 
   * startCountdown
   * 

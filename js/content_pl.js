@@ -10,10 +10,48 @@ const linkId = PCX_CMSInteraction.getUrlParams()['LinkId'];
 
 // Accession List
 if (linkId == "2070") {
+  const intervalID = setInterval(handleResults, 500);
+  // Function to handle the click event and get the row data
+  function handleResults(event) {
+    let headings = document.getElementById('MainContent_ctl00_grid_DXHeadersRow0').textContent.replaceAll('\t','').replaceAll('\n','').split(" ");
+    if (headings.includes('Alt ID 1') && typeof headings.includes('Accession')) {
+      let rowData = document.querySelectorAll('.dxgvDataRow_Metropolis');
+
+		rowData.forEach((row) => {
+			let accessionID = row.querySelector('td:nth-child('+(headings.indexOf('Accession')+1)+') a').getAttribute('onclick').replace(/ShowForm\((\d*),this\)/i,'$1');
+	    	let resultLinkTD = row.querySelector('td:nth-child('+(headings.indexOf('Alt ID 1')+1)+')');
+
+	    	resultLinkTD.innerHTML = '<a href="https://prince.iatserv.com/?LinkId=2461&AccessionId='+accessionID+'" target="_blank">Results</a>'
+		});
+	    document.querySelector('#MainContent_ctl00_grid_DXHeadersRow0 td:nth-child('+(headings.indexOf('Alt ID 1')+1)+ ')').textContent = "Results";
+    }
+  }
+  handleResults();
 }
+
+// Event Keys
+const eventKeySpace = new KeyboardEvent('keydown', { key: ' ', bubbles: true });
+const eventKeyTab = new KeyboardEvent('keydown', { bubbles: true, cancelable : true, key : "Tab",shiftKey : false, keyCode : 13 });
+
 
 // Create Accession
 if (linkId == "2011") {
+	// Set Bill Type to Primary Insurance as default
+	document.querySelector("#MainContent_ctl00_ctl00_ddBillType_ddControl").value = 1;
+	// Set Status to Received as default
+	document.querySelector("#ddNewAccessionStatus").value = "Received";
+
+	// Disable Create Patient Button if no location is set
+	const locationInput = document.getElementById("MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbLocation_tbText");
+	const newPatientBtn = document.getElementById("btnAddEditPatient");
+	newPatientBtn.classList.add("disabled");
+	locationInput.addEventListener("blur", (event) => {
+		if(event.target.value != "" && newPatientBtn.classList.contains("disabled")) {
+			newPatientBtn.classList.remove("disabled");
+		}else if(!newPatientBtn.classList.contains("disabled")){
+			newPatientBtn.classList.add("disabled");
+		}
+	});
 }
 
 // Update Accession
