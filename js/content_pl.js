@@ -7,6 +7,41 @@ console.log("This is PL specific content script.");
 ///
 const linkId = PCX_CMSInteraction.getUrlParams()['LinkId'];
 
+// Event Keys
+const eventKeyEnd	= new KeyboardEvent('keydown', { bubbles: true, cancelable : true, key : "END",shiftKey : false, keyCode : 35 });
+const eventKeySpace = new KeyboardEvent('keydown', { key: ' ', bubbles: true });
+const eventKeyTab	= new KeyboardEvent('keydown', { bubbles: true, cancelable : true, key : "Tab",shiftKey : false, keyCode : 13 });
+
+// Page Element points to avoid multiple queries
+let pageElements = {};
+
+// Lab Lookup Table
+const labs = {
+	   2: {Code:"IP",Label:"Ipseity Diagnostics LLC"},
+	1010: {Code:"SQ",Label:"SureQuest Diagnostics"},
+	1011: {Code:"RR",Label:"Reliable Result Labs"},
+	1012: {Code:"PL",Label:"Prince Laboratories"},
+	1013: {Code:"PD",Label:"Principle Diagnostics"}
+};
+
+// Test Categories / Codes Lookup Table
+const testCategories = {
+	 1: {Code:"Toxicology",		Test:""},		// --
+	 3: {Code:"PGX",			Test:"PHARMA"},	// Panel - PHARMACOGENOMICSCOMPREHENSIVE
+	 4: {Code:"CGX",			Test:"CANCER"},	// Panel - COMPREHENSICE CANCER
+	 5: {Code:"STI",			Test:"STI"},	// Panel - STI Panel
+	 6: {Code:"UTI",			Test:"UTI"},	// Panel - UTI Panel
+	 7: {Code:"HPV",			Test:"HPV"},	// Panel - HPV Panel
+	 8: {Code:"Wound",			Test:"WOUND"},	// Panel - Wound Panel
+	 9: {Code:"COVID Flu RSV",	Test:"COVID"},	// Panel - COVIDFluRSV
+	11: {Code:"Immuno",			Test:"IMMUNO"},	// Panel - COMPREHENSICE PRIMARY IMMUNODEFICIENCY
+	12: {Code:"Neuro",			Test:"NEURO"},	// Panel - COMPREHENSIVE NEUROLOGY
+	13: {Code:"RPP",			Test:""},		// --
+	14: {Code:"Eyes Disorder",	Test:"EYE"},	// Panel - COMPREHENSIVE EYE DISORDER
+	15: {Code:"Thyroid",		Test:"THYROID"},// Panel - THYROID GENETIC DISEASE
+	16: {Code:"Diabetes",		Test:""},		// -- 
+	17: {Code:"Cardio",			Test:"CARDIO"}	// Panel - CARDIO-PULMONARY
+};
 
 // Accession List
 if (linkId == "2070") {
@@ -29,27 +64,57 @@ if (linkId == "2070") {
   handleResults();
 }
 
-// Event Keys
-const eventKeySpace = new KeyboardEvent('keydown', { key: ' ', bubbles: true });
-const eventKeyTab = new KeyboardEvent('keydown', { bubbles: true, cancelable : true, key : "Tab",shiftKey : false, keyCode : 13 });
-
-
 // Create Accession
 if (linkId == "2011") {
+	// Define Page Elements
+	pageElements['BillType']		= document.querySelector("#MainContent_ctl00_ctl00_ddBillType_ddControl");
+	if(PCX_CMSInteraction.getUrlParams()['type'] == "acs") {
+		pageElements['Status']			= document.querySelector("#ddNewAccessionStatus");
+	}
+	pageElements['locationInput']	= document.querySelector("#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbLocation_tbText");
+	pageElements['newPatientBtn']	= document.querySelector("#btnAddEditPatient");
+
+	document.querySelector('#MainContent_ctl00_ctl00_upPanel').addEventListener('change', (e) => {
+		// Ping reloaded Elements
+		pageElements['CategoryOpt']		= document.querySelector("#MainContent_ctl00_ctl00_ctrlOrderTestCategoryControl1_ddTestCategory option:checked");
+		pageElements['TestCodesInput']	= document.querySelector("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText");
+		pageElements['TestCodesOutput']	= document.querySelector("#dvSelectedItems");
+		if (e.target && e.target.id === 'MainContent_ctl00_ctl00_ctrlOrderTestCategoryControl1_ddTestCategory') {
+			checkTestCatLab(pageElements.CategoryOpt,{Input: pageElements.TestCodesInput,Output: pageElements.TestCodesOutput},testCategories);
+		}
+	});
+
+	async function checkTestCatLab(elCategory,elTestCodes,testCategories){
+		if(
+			elCategory.value != "" &&
+			elTestCodes.Output.querySelectorAll('.item').length <= 0
+		) {
+			console.log(elCategory.value);
+			elTestCodes.Input.value = testCategories[elCategory.value].Test;
+			await delay(1000);
+  			pageElements['TestCodesInput']	= elTestCodes.Input = document.querySelector("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText")
+      		elTestCodes.Input.dispatchEvent(eventKeyEnd);
+			await delay(500);
+      		elTestCodes.Input.dispatchEvent(eventKeyTab);
+			//document.querySelector("#MainContent_ctl00_ctl00_ctrlOrderTestCategoryControl1_ddTestCategory").focus();
+		}
+	}
+	function delay(ms) {
+		return new Promise(resolve => setTimeout(resolve, ms));
+	}
+
 	// Set Bill Type to Primary Insurance as default
-	document.querySelector("#MainContent_ctl00_ctl00_ddBillType_ddControl").value = 1;
+	pageElements.BillType.value = 1;
 	// Set Status to Received as default
-	document.querySelector("#ddNewAccessionStatus").value = "Received";
+	pageElements.Status.value = "Received";
 
 	// Disable Create Patient Button if no location is set
-	const locationInput = document.getElementById("MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbLocation_tbText");
-	const newPatientBtn = document.getElementById("btnAddEditPatient");
-	newPatientBtn.classList.add("disabled");
-	locationInput.addEventListener("blur", (event) => {
-		if(event.target.value != "" && newPatientBtn.classList.contains("disabled")) {
-			newPatientBtn.classList.remove("disabled");
-		}else if(!newPatientBtn.classList.contains("disabled")){
-			newPatientBtn.classList.add("disabled");
+	pageElements.newPatientBtn.classList.add("disabled");
+	pageElements.locationInput.addEventListener("blur", (event) => {
+		if(event.target.value != "" && pageElements.newPatientBtn.classList.contains("disabled")) {
+			pageElements.newPatientBtn.classList.remove("disabled");
+		}else if(!pageElements.newPatientBtn.classList.contains("disabled")){
+			pageElements.newPatientBtn.classList.add("disabled");
 		}
 	});
 }
@@ -57,6 +122,11 @@ if (linkId == "2011") {
 // Update Accession
 if (linkId == "2071") {
 	function capturePLData() {
+		// Temp Capture was already discussed with Drew and as long as 
+		// it never leaves the browser/local, it's HIPAA compliant.
+		// Fn startCountdownBanner() immediately takes the data after 
+		// being added to local storage and sets a deletion timer to purge
+		// the data from cache and local storage, never saving to hard disk
 		const patientData = {
 			Category: document.querySelector('#MainContent_ctl00_ctrlOrderTestCategoryControl_ddTestCategory option:checked').value,
 			DOC: document.querySelector('#MainContent_ctl00_tbCollectionDateTime_tbDate_tbText').value,
