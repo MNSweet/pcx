@@ -1,32 +1,78 @@
 // Define the PCX_CMSInteraction class in content.js
 class PCX_CMSInteraction {
-	// 1. Local Storage Operations
+
+/**
+ * 
+ * Local Storage Operations
+ * 
+ */
+	
+	/**
+	 * setLocalStorage 
+	 * @param STRING		key		A unique idenifer for the storage to pull from later
+	 * @param STRING(IFY)	value	Storaged as a string however the contents can be anything
+	 *
+	 * Used to add data to the storage
+	 */
 	static setLocalStorage(key, value) {
 		chrome.storage.local.set({ [key]: value }, () => {
 			pcxDebug(`Stored ${key}: ${value}`);
 		});
 	}
 
+	/**
+	 * getLocalStorage 
+	 * @param	STRING		key		A unique idenifer for the storage to pull from later
+	 * @param	FUNCTION	value	A function to manipulate the returned value
+	 * 
+	 * @return 	FUNCTION			output of callback
+	 *
+	 * Used to recall data from the storage
+	 */
 	static getLocalStorage(key, callback) {
 		chrome.storage.local.get([key], (result) => {
 			pcxDebug(`Fetched ${key}: ${result[key]}`);
-			callback(result[key]);
+			return callback(result[key]);
 		});
 	}
 
+
+	/**
+	 * clearLocalStorage 
+	 * 
+	 * Core functionality that purges all storage. Use With Caution!
+	 */
 	static clearLocalStorage() {
 		chrome.storage.local.clear(() => {
 			pcxDebug("Local storage cleared");
 		});
 	}
 
+
+	/**
+	 * removeLocalStorage 
+	 * @param STRING	key		A unique idenifer for the storage to pull from later
+	 *
+	 * Used to purge a specific key/value pair from the storage
+	 */
 	static removeLocalStorage(key) {
 		chrome.storage.local.remove([key], () => {
 			pcxDebug(`Removed key: ${key}`);
 		});
 	}
 
-	// 2. UI Interaction
+
+/**
+ * 
+ * UI Interaction
+ * 
+ */
+
+	/**
+	 * locateElement
+	 * @param  {[type]} selector [description]
+	 * @return {[type]}          [description]
+	 */
 	static locateElement(selector) {
 		pcxDebug(`Locating element: ${selector}`);
 		return document.querySelector(selector);
@@ -91,7 +137,13 @@ class PCX_CMSInteraction {
 		}
 	}
 
-	// 3. Clipboard Operations
+
+/**
+ * 
+ * Clipboard Operations
+ * 
+ */
+
 	static copyToClipboard(text) {
 		navigator.clipboard.writeText(text).then(
 			() => pcxDebug("Text copied to clipboard"),
@@ -109,7 +161,13 @@ class PCX_CMSInteraction {
 		}
 	}
 
-	// 4. Chrome Notifications (renamed)
+
+/**
+ * 
+ * Chrome Notifications
+ * 
+ */
+
 	static ChromeNotification(title, message, id, remindTime = 0) {
 		chrome.runtime.sendMessage({
 			action: "setNotification",
@@ -131,6 +189,12 @@ class PCX_CMSInteraction {
 		});
 	}
 
+/**
+ * 
+ * Basic Notification Template
+ * 
+ */
+	
 	static showGUIModalNotification(title, message, id, remindTime = 0) {
 		// Load external CSS file
 		if (!document.getElementById("pcx-modal-style")) {
@@ -153,7 +217,7 @@ class PCX_CMSInteraction {
 			modal.appendChild(modalTitle);
 
 			const modalMessage = document.createElement("p");
-			modalMessage.textContent = message;
+			modalMessage.innerHTML = message;
 			modal.appendChild(modalMessage);
 
 			const buttonContainer = document.createElement("div");
@@ -185,6 +249,12 @@ class PCX_CMSInteraction {
 	}
 
 
+
+/**
+ * 
+ * State and Navigation
+ * 
+ */
 	static getUrlParams() {
 		const params = {};
 		const queryString = window.location.search;
@@ -202,6 +272,143 @@ class PCX_CMSInteraction {
 
 // Expose PCX_CMSInteraction to the window
 window.PCX_CMSInteraction = PCX_CMSInteraction;
+
+
+
+/**
+ * QA Warning System
+ */
+class QAManager {
+	static notices = {};  // Shared object for all instances
+	static noticePhrases = [
+		"Right-o, seems a little fix is needed here!",
+		"Oops-a-daisy, looks like something went amiss.",
+		"No worries, we’ll have this sorted in a jiffy!",
+		"Steady on, just a small correction needed.",
+		"Good show so far, just a tweak here, please!",
+		"Blimey! Let’s double-check that bit, eh?",
+		"Sorry, love, seems we’ve hit a tiny bump!",
+		"Don’t fret, just a spot of bother, that’s all!",
+		"Well, that’s a tad unusual. Shall we try again?",
+		"Oops! Seems like we’ve gone a bit pear-shaped.",
+		"All’s well, just a quick change to carry on!",
+		"Nearly there! Just a smidgen off, that’s all.",
+		"Hold tight! Let’s have a little look here, shall we?",
+		"Whoops, bit of a hiccup there. Let's get it sorted!",
+		"Cheerio! Just a bit of fine-tuning needed here.",
+		"Right-o, a quick adjustment, and we’re golden!",
+		"Jolly good, but let’s tweak that, shall we?",
+		"Ah, almost had it! Just a wee nudge now.",
+		"Mind the gap! Seems we’ve a detail to fix.",
+		"Bit of a whoopsie there, nothing to worry about!"
+	];
+
+	static addNotice(code, message) {
+		//if (!QAManager.notices[code]) {
+			QAManager.notices[code] = message;
+			console.log(`Notice added with code ${code}: ${message}`);
+		//}
+	}
+
+	static removeNotice(code) {
+		if (QAManager.notices[code]) {
+			delete QAManager.notices[code];
+			console.log(`Notice removed with code ${code}`);
+		}
+	}
+
+	static hasNotice(code) {
+		return code in QAManager.notices;
+	}
+
+	static getAllNoticeCodes() {
+		return Object.keys(QAManager.notices);
+	}
+
+	static getNoticeCount() {
+		return Object.keys(QAManager.notices).length;
+	}
+
+	static getNoticeMessage(code) {
+		return QAManager.notices[code] || null;
+	}
+
+	static clearNotices() {
+		QAManager.notices = {};
+		console.log("All notices cleared.");
+	}
+	static getRandomPhrase() {
+		return QAManager.noticePhrases[Math.floor(Math.random() * QAManager.noticePhrases.length)];
+	}
+
+
+	static showQAModalNotification() {
+		let noticeItems = "";
+
+		// Load external CSS file
+		if (!document.getElementById("pcx-modal-style")) {
+			const link = document.createElement("link");
+			link.id = "pcx-modal-style";
+			link.rel = "stylesheet";
+			link.href = chrome.runtime.getURL("css/modal.css");
+			document.head.appendChild(link);
+		}
+		if (!document.getElementById("pcx-qa-modal-container")) {
+			const modalContainer = document.createElement("div");
+			modalContainer.id = "pcx-qa-modal-container";
+
+			const modal = document.createElement("div");
+			modal.id = "pcx-qa-modal";
+
+			const modalTitle = document.createElement("div");
+			modalTitle.innerHTML = "<span>Prince Lab Manager</span>" + QAManager.getRandomPhrase();
+			modalTitle.id = "pcx-qa-modal-heading";
+			modal.appendChild(modalTitle);
+
+			for (const key of QAManager.getAllNoticeCodes()) {
+			let noticeItem = `<div class="noticeItem">
+			<div class="noticeDescription">${QAManager.notices[key]}
+			</div>
+			<div class="noticeActions">
+				<button class="noticeClear">It's correct: Clear notice.</button>
+				<button class="noticeCancel">Good catch: Let’s fix it</button>
+			</div>
+		</div>`;
+				noticeItems += noticeItem;
+				console.log(key + ": " + QAManager.notices[key]);
+			}
+
+
+			const modalMessage = document.createElement("div");
+			modalMessage.innerHTML = noticeItems;
+			modalMessage.id = "noticeContainer";
+			modal.appendChild(modalMessage);
+
+			const buttonContainer = document.createElement("div");
+			buttonContainer.id = "pcx-qa-modal-buttons";
+			modal.appendChild(buttonContainer);
+
+			const okButton = document.createElement("button");
+			okButton.textContent = "Close to fix errors";
+			okButton.onclick = () => {
+				document.body.removeChild(modalContainer);
+				pcxDebug("Modal dismissed");
+			};
+			buttonContainer.appendChild(okButton);
+
+			modalContainer.appendChild(modal);
+			document.body.appendChild(modalContainer);
+		}
+	}
+}
+//QAManager.addNotice("DOB","Seems like your patient hasn't been born yet. Is this date right? 10/10/2055");
+//QAManager.addNotice("Policy","You have selected a Medicare Insurance but the Policy Number does not follow Medicare's syntax");
+//QAManager.showQAModalNotification();
+
+// Expose QAManager to the window
+window.QAManager = QAManager;
+
+
 
 // Debugging function
 const DEBUG = true;
@@ -262,22 +469,42 @@ function updateBanner(timeLeft) {
 }
 
 function waitForElm(selector) {
-		return new Promise(resolve => {
-				if (document.querySelector(selector)) {
-						return resolve(document.querySelector(selector));
-				}
+	return new Promise(resolve => {
+		if (document.querySelector(selector)) {
+			return resolve(document.querySelector(selector));
+		}
 
-				const observer = new MutationObserver(mutations => {
-						if (document.querySelector(selector)) {
-								observer.disconnect();
-								resolve(document.querySelector(selector));
-						}
-				});
-
-				// If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
-				observer.observe(document.body, {
-						childList: true,
-						subtree: true
-				});
+		const observer = new MutationObserver(mutations => {
+			if (document.querySelector(selector)) {
+				observer.disconnect();
+				resolve(document.querySelector(selector));
+			}
 		});
+
+		// If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
+		observer.observe(document.body, {
+			childList: true,
+			subtree: true
+		});
+	});
+}
+function waitForIframeElm(frame,selector) {
+	return new Promise(resolve => {
+		if (document.querySelector(frame).contentWindow.document.querySelector(selector)) {
+			return resolve(document.querySelector(frame).contentWindow.document.querySelector(selector));
+		}
+
+		const observer = new MutationObserver(mutations => {
+			if (document.querySelector(frame).contentWindow.document.querySelector(selector)) {
+				observer.disconnect();
+				resolve(document.querySelector(frame).contentWindow.document.querySelector(selector));
+			}
+		});
+
+		// If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
+		observer.observe(document.querySelector(frame).contentWindow.document.body, {
+			childList: true,
+			subtree: true
+		});
+	});
 }

@@ -45,33 +45,35 @@ const testCategories = {
 
 // Accession List
 if (linkId == "2070") {
-  const intervalID = setInterval(handleResults, 500);
-  // Function to handle the click event and get the row data
-  function handleResults(event) {
-    let headings = document.getElementById('MainContent_ctl00_grid_DXHeadersRow0').textContent.replaceAll('\t','').replaceAll('\n','').split(" ");
-    if (headings.includes('Alt ID 1') && typeof headings.includes('Accession')) {
-      let rowData = document.querySelectorAll('.dxgvDataRow_Metropolis');
+	const intervalID = setInterval(handleResults, 500);
+	// Function to handle the click event and get the row data
+	function handleResults(event) {
+		let headings = document.getElementById('MainContent_ctl00_grid_DXHeadersRow0').textContent.replaceAll('\t','').replaceAll('\n','').split(" ");
+		if (headings.includes('Alt ID 1') && typeof headings.includes('Accession')) {
+		  let rowData = document.querySelectorAll('.dxgvDataRow_Metropolis');
 
-		rowData.forEach((row) => {
-			let accessionID = row.querySelector('td:nth-child('+(headings.indexOf('Accession')+1)+') a').getAttribute('onclick').replace(/ShowForm\((\d*),this\)/i,'$1');
-	    	let resultLinkTD = row.querySelector('td:nth-child('+(headings.indexOf('Alt ID 1')+1)+')');
+			rowData.forEach((row) => {
+				let accessionID = row.querySelector('td:nth-child('+(headings.indexOf('Accession')+1)+') a').getAttribute('onclick').replace(/ShowForm\((\d*),this\)/i,'$1');
+				let resultLinkTD = row.querySelector('td:nth-child('+(headings.indexOf('Alt ID 1')+1)+')');
 
-	    	resultLinkTD.innerHTML = '<a href="https://prince.iatserv.com/?LinkId=2461&AccessionId='+accessionID+'" target="_blank">Results</a>'
-		});
-	    document.querySelector('#MainContent_ctl00_grid_DXHeadersRow0 td:nth-child('+(headings.indexOf('Alt ID 1')+1)+ ')').textContent = "Results";
-    }
-  }
-  handleResults();
+				resultLinkTD.innerHTML = '<a href="https://prince.iatserv.com/?LinkId=2461&AccessionId='+accessionID+'" target="_blank">Results</a>'
+			});
+			document.querySelector('#MainContent_ctl00_grid_DXHeadersRow0 td:nth-child('+(headings.indexOf('Alt ID 1')+1)+ ')').textContent = "Results";
+		}
+	}
+	handleResults();
 }
 
 // Create Accession
 if (linkId == "2011") {
 	// Define Page Elements
-	pageElements['BillType']		= document.querySelector("#MainContent_ctl00_ctl00_ddBillType_ddControl");
+	pageElements['BillType']	= document.querySelector("#MainContent_ctl00_ctl00_ddBillType_ddControl");
 	if(PCX_CMSInteraction.getUrlParams()['type'] == "acs") {
-		pageElements['Status']			= document.querySelector("#ddNewAccessionStatus");
+		pageElements['Status']	= document.querySelector("#ddNewAccessionStatus");
 	}
 	pageElements['locationInput']	= document.querySelector("#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbLocation_tbText");
+	pageElements['Physician']		= "#ddPhysician";
+	pageElements['PhysicianOptions']= "#ddPhysician option";
 	pageElements['newPatientBtn']	= document.querySelector("#btnAddEditPatient");
 
 	document.querySelector('#MainContent_ctl00_ctl00_upPanel').addEventListener('change', (e) => {
@@ -80,11 +82,10 @@ if (linkId == "2011") {
 		pageElements['TestCodesInput']	= document.querySelector("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText");
 		pageElements['TestCodesOutput']	= document.querySelector("#dvSelectedItems");
 		if (e.target && e.target.id === 'MainContent_ctl00_ctl00_ctrlOrderTestCategoryControl1_ddTestCategory') {
-			checkTestCatLab(pageElements.CategoryOpt,{Input: pageElements.TestCodesInput,Output: pageElements.TestCodesOutput},testCategories);
+			checkTestCat(pageElements.CategoryOpt,{Input: pageElements.TestCodesInput,Output: pageElements.TestCodesOutput},testCategories);
 		}
 	});
-
-	async function checkTestCatLab(elCategory,elTestCodes,testCategories){
+	async function checkTestCat(elCategory,elTestCodes,testCategories){
 		if(
 			elCategory.value != "" &&
 			elTestCodes.Output.querySelectorAll('.item').length <= 0
@@ -92,17 +93,46 @@ if (linkId == "2011") {
 			console.log(elCategory.value);
 			elTestCodes.Input.value = testCategories[elCategory.value].Test;
 			await delay(1000);
-  			pageElements['TestCodesInput']	= elTestCodes.Input = document.querySelector("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText")
-      		elTestCodes.Input.dispatchEvent(eventKeyEnd);
+			pageElements['TestCodesInput']	= elTestCodes.Input = document.querySelector("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText")
+			elTestCodes.Input.dispatchEvent(eventKeyEnd);
 			await delay(500);
-      		elTestCodes.Input.dispatchEvent(eventKeyTab);
-			//document.querySelector("#MainContent_ctl00_ctl00_ctrlOrderTestCategoryControl1_ddTestCategory").focus();
+			elTestCodes.Input.dispatchEvent(eventKeyTab);
 		}
 	}
 	function delay(ms) {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	}
 
+	pageElements.newPatientBtn.addEventListener('click', async (e) => {
+		waitForElm(".fancybox-overlay.fancybox-overlay-fixed iframe").then( (elm) => {
+			document.querySelector(".fancybox-overlay.fancybox-overlay-fixed iframe").addEventListener('load', (el) => {
+				
+				// Date of Birth Checks
+				let inputDOB = document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_tbDOB_tbText');
+				let minorDate = new Date();
+					minorDate.setFullYear(minorDate.getFullYear() - 18);
+				inputDOB.addEventListener('blur',  (elme) => {
+					let dob = document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_tbDOB_tbText').value;	
+					//console.log(dob,Date.parse(dob),Date.now(),Date.parse(dob) >= Date.now());
+					if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= Date.now()){
+						QAManager.addNotice("DOB","Seems like your patient hasn't been born yet. Is this birthday correct? " + dob);
+						//QAManager.showQAModalNotification();
+					}else if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= minorDate.getTime()){ // 18+ Minor check
+						//console.log(Date.parse(dob), minorDate.getTime());
+						QAManager.addNotice("DOB","Intesting your patient is a minor. Just a quick check. Is this birthday correct? " + dob);
+						//QAManager.showQAModalNotification();
+					}else if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= 946702800000){ //Jan 1 2000
+						//console.log(Date.parse(dob), 946702800000);
+						QAManager.addNotice("DOB","Just being vigilant, Is this birthday correct? " + dob);
+						//QAManager.showQAModalNotification();
+					}else {
+						QAManager.removeNotice("DOB");
+					}
+				});
+				//QAManager.showQAModalNotification();
+			});
+		});
+	});
 	// Set Bill Type to Primary Insurance as default
 	pageElements.BillType.value = 1;
 	// Set Status to Received as default
@@ -112,6 +142,13 @@ if (linkId == "2011") {
 	pageElements.newPatientBtn.classList.add("disabled");
 	pageElements.locationInput.addEventListener("blur", (event) => {
 		if(event.target.value != "" && pageElements.newPatientBtn.classList.contains("disabled")) {
+			if(event.target.value.match("^(AM-|CTD-).*")){
+				waitForElm(pageElements.PhysicianOptions).then((elm) => {
+					document.querySelector(pageElements.Physician).innerHTML = `<option value="0" disabled selected hidden>Select a Physician</option>`+document.querySelector(pageElements.Physician).innerHTML;
+			        document.querySelector("#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianId").value = "";
+			        document.querySelector("#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianName").value = "";
+				});
+			}
 			pageElements.newPatientBtn.classList.remove("disabled");
 		}else if(!pageElements.newPatientBtn.classList.contains("disabled")){
 			pageElements.newPatientBtn.classList.add("disabled");
@@ -122,7 +159,7 @@ if (linkId == "2011") {
 // Update Accession
 if (linkId == "2071") {
 	function capturePLData() {
-		// Temp Capture was already discussed with Drew and as long as 
+		// Temp Capture was already discussed with Dean and as long as 
 		// it never leaves the browser/local, it's HIPAA compliant.
 		// Fn startCountdownBanner() immediately takes the data after 
 		// being added to local storage and sets a deletion timer to purge
@@ -228,7 +265,7 @@ if (linkId == "2071") {
 	});
 
 	dropArea.addEventListener("drop", (e) => {
-    	isDragging = false;
+		isDragging = false;
 		if (document.body.classList.contains('dropZoneKeepAlive')) {
 			document.body.classList.remove('dropZoneKeepAlive');
 			if(document.querySelector('.upload span').textContent == "Drop File"){
@@ -245,7 +282,7 @@ if (linkId == "2071") {
 	});
 
 	function dropZoneKeepAlive(isDragging, e) {
-    	isDragging = true;
+		isDragging = true;
 		console.log("Dragging");
 		if (!document.body.classList.contains('dropZoneKeepAlive')) {
 			document.body.classList.add('dropZoneKeepAlive');

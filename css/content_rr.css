@@ -1,4 +1,11 @@
-/* #wrapper .navbar-default {
-    background-color: #fef5f5;
-    border-color: #fca8a8;
-}*/
+#MainContent_ctl00_ctl00_upPanel .form-group .failureNotification {
+	position: absolute;
+	right: -82px;
+	top: 3px;
+	z-index: 2;
+	background-color: #a94442;
+	padding: 0px 4px;
+	border-radius: 4px;
+	box-sizing: border-box;
+	color:#ffffff;
+}
