@@ -268,6 +268,10 @@ class PCX_CMSInteraction {
 
 		return params;
 	}
+
+	static checkSystemType(type,overrider = false) {
+
+	}
 }
 
 // Expose PCX_CMSInteraction to the window
@@ -304,16 +308,14 @@ class QAManager {
 	];
 
 	static addNotice(code, message) {
-		//if (!QAManager.notices[code]) {
-			QAManager.notices[code] = message;
-			console.log(`Notice added with code ${code}: ${message}`);
-		//}
+		QAManager.notices[code] = message;
+		pcxDebug(`Notice added with code ${code}: ${message}`);
 	}
 
 	static removeNotice(code) {
 		if (QAManager.notices[code]) {
 			delete QAManager.notices[code];
-			console.log(`Notice removed with code ${code}`);
+			pcxDebug(`Notice removed with code ${code}`);
 		}
 	}
 
@@ -335,7 +337,7 @@ class QAManager {
 
 	static clearNotices() {
 		QAManager.notices = {};
-		console.log("All notices cleared.");
+		pcxDebug("All notices cleared.");
 	}
 	static getRandomPhrase() {
 		return QAManager.noticePhrases[Math.floor(Math.random() * QAManager.noticePhrases.length)];
@@ -375,7 +377,6 @@ class QAManager {
 			</div>
 		</div>`;
 				noticeItems += noticeItem;
-				console.log(key + ": " + QAManager.notices[key]);
 			}
 
 
@@ -401,9 +402,6 @@ class QAManager {
 		}
 	}
 }
-//QAManager.addNotice("DOB","Seems like your patient hasn't been born yet. Is this date right? 10/10/2055");
-//QAManager.addNotice("Policy","You have selected a Medicare Insurance but the Policy Number does not follow Medicare's syntax");
-//QAManager.showQAModalNotification();
 
 // Expose QAManager to the window
 window.QAManager = QAManager;

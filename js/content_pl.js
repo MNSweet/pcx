@@ -253,8 +253,14 @@ if (linkId == "2071") {
 		});
 	*/
 
-	let isDragging = false;
-	const dropArea = document.getElementById('uploadTable');
+/**
+ *
+ * File Drop
+ * 
+ */
+	let 	isDragging 	= false;
+	const 	dropArea	= document.getElementById('uploadTable').closest('*');
+	const 	acceptTypes = document.querySelector('#uploadTable input[type="file"]').getAttribute('accept').split(',');
 
 	dropArea.addEventListener("dragover", (e) => {
 		dropZoneKeepAlive(isDragging,e);
@@ -263,17 +269,6 @@ if (linkId == "2071") {
 	dropArea.addEventListener("dragleave", (e) => {
 		dropZoneTimeOut(isDragging,e);
 	});
-
-	dropArea.addEventListener("drop", (e) => {
-		isDragging = false;
-		if (document.body.classList.contains('dropZoneKeepAlive')) {
-			document.body.classList.remove('dropZoneKeepAlive');
-			if(document.querySelector('.upload span').textContent == "Drop File"){
-				document.querySelector('.upload span').textContent = "Choose File";
-			}
-		}
-	});
-
 	document.addEventListener("dragover", (e) => {
 		dropZoneKeepAlive(isDragging,e);
 	});
@@ -281,9 +276,47 @@ if (linkId == "2071") {
 		dropZoneTimeOut(isDragging,e);
 	});
 
+	dropArea.addEventListener("drop", (e) => {
+		isDragging = false;
+		if (document.body.classList.contains('dropZoneKeepAlive')) {
+			document.body.classList.remove('dropZoneKeepAlive');
+
+			if(document.querySelector('.upload span').textContent == "Drop File"){
+				document.querySelector('.upload span').textContent = "Choose File";
+			}
+		}
+		if(e.dataTransfer.files.length > 0) {
+			console.log("dropArea dataTransfer",e.dataTransfer.files);
+
+			for (const [i, file] of Object.entries(e.dataTransfer.files)) {
+				let fileExt = file.name.split('.').pop();
+				let fileName = file.name.replace('.'+fileExt,'');
+				if (acceptTypes.findIndex(function (a) { return a.toLowerCase() == ('.' + fileExt).toLowerCase() }) == -1) {
+					//return; // File not accepted
+				}
+
+				let acsNum 	= document.querySelector("#MainContent_ctl00_tbAccession").value; // LIMS ID
+				let acsID 	= document.querySelector("#tbAccessionId").value; // System ID (database)
+				let patient	= document.querySelector("#MainContent_ctl00_tbPatient_tbText").value.toUpperCase().split(', ');
+				let queries	= patient;
+					queries.push(acsNum, acsID);
+
+				let tokens	= fileName.toUpperCase()
+					.replace(/(\d{2})-(\d{2})-(\d{4})/gm, `$1$2$3`) // Condense Dates with dashes
+					.replace(/(\d{2})\.(\d{2})\.(\d{4})/gm, `$1$2$3`) // Condense Dates with periods
+					.split(/[\s-\._]/)	// Separate by whitespace, dashes, periods, underscores
+
+				if(!tokens.some(item => queries.includes(item))) {
+					QAManager.addNotice("FileUpload","<h4>Sorry to bother</h4>The file you just uploaded does not have the Patient's Name or Accession Number in it's name.<br/>Just wanted to double check you didn't upload the wrong file: <pre>" + file.name + "</pre>");
+					QAManager.showQAModalNotification();
+					QAManager.removeNotice("FileUpload");
+				}
+			};
+		}
+	});
+
 	function dropZoneKeepAlive(isDragging, e) {
 		isDragging = true;
-		console.log("Dragging");
 		if (!document.body.classList.contains('dropZoneKeepAlive')) {
 			document.body.classList.add('dropZoneKeepAlive');
 			document.querySelector('.upload span').textContent = "Drop File";
