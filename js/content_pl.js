@@ -90,7 +90,6 @@ if (linkId == "2011") {
 			elCategory.value != "" &&
 			elTestCodes.Output.querySelectorAll('.item').length <= 0
 		) {
-			console.log(elCategory.value);
 			elTestCodes.Input.value = testCategories[elCategory.value].Test;
 			await delay(1000);
 			pageElements['TestCodesInput']	= elTestCodes.Input = document.querySelector("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText")

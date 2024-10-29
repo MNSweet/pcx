@@ -55,7 +55,7 @@ if (linkId == "2024") {
 		}
 	});
 }
-if (linkId == "2011" && (typeof OrderId == undefined)) { //Create Order
+if (linkId == "2011") { //Create Order
 
 
 	/********************************************
