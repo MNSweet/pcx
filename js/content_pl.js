@@ -1,47 +1,55 @@
 console.log("This is PL specific content script.");
 
-///
-// Page IDs
-// Update Accession: LinkId=2071
-// Create Order: LinkId=2011
-///
-const linkId = PCX_CMSInteraction.getUrlParams()['LinkId'];
+/**
+ *
+ * PREP Variables/Constants
+ *
+ * @param INT					linkId
+ * @param EVENT KEYDOWN[END]	eventKeyEnd		Simulated keypress of "End"
+ * @param EVENT KEYDOWN[SPACE]	eventKeySpace	Simulated keypress of "Space"
+ * @param EVENT KEYDOWN[TAB]	eventKeyTab		Simulated keypress of "Tab"
+ * @param OBJ					pageElements	Object of DOM elements
+ * @param OBJ					labs			Lookup table for Labs by DB ID's
+ * @param OBJ					testCategories	Lookup table for Test Categories by DB ID's
+ * 
+ */
+	const linkId = PCX_CMSInteraction.getUrlParams()['LinkId'];
 
-// Event Keys
-const eventKeyEnd	= new KeyboardEvent('keydown', { bubbles: true, cancelable : true, key : "END",shiftKey : false, keyCode : 35 });
-const eventKeySpace = new KeyboardEvent('keydown', { key: ' ', bubbles: true });
-const eventKeyTab	= new KeyboardEvent('keydown', { bubbles: true, cancelable : true, key : "Tab",shiftKey : false, keyCode : 13 });
+	// Event Keys
+	const eventKeyEnd	= new KeyboardEvent('keydown', { bubbles: true, cancelable : true, key : "END",shiftKey : false, keyCode : 35 });
+	const eventKeySpace = new KeyboardEvent('keydown', { key: ' ', bubbles: true });
+	const eventKeyTab	= new KeyboardEvent('keydown', { bubbles: true, cancelable : true, key : "Tab",shiftKey : false, keyCode : 13 });
 
-// Page Element points to avoid multiple queries
-let pageElements = {};
+	// Page Element points to avoid multiple queries
+	let pageElements = {};
 
-// Lab Lookup Table
-const labs = {
-	   2: {Code:"IP",Label:"Ipseity Diagnostics LLC"},
-	1010: {Code:"SQ",Label:"SureQuest Diagnostics"},
-	1011: {Code:"RR",Label:"Reliable Result Labs"},
-	1012: {Code:"PL",Label:"Prince Laboratories"},
-	1013: {Code:"PD",Label:"Principle Diagnostics"}
-};
+	// Lab Lookup Table
+	const labs = {
+		   2: {Code:"IP",Label:"Ipseity Diagnostics LLC"},
+		1010: {Code:"SQ",Label:"SureQuest Diagnostics"},
+		1011: {Code:"RR",Label:"Reliable Result Labs"},
+		1012: {Code:"PL",Label:"Prince Laboratories"},
+		1013: {Code:"PD",Label:"Principle Diagnostics"}
+	};
 
-// Test Categories / Codes Lookup Table
-const testCategories = {
-	 1: {Code:"Toxicology",		Test:""},		// --
-	 3: {Code:"PGX",			Test:"PHARMA"},	// Panel - PHARMACOGENOMICSCOMPREHENSIVE
-	 4: {Code:"CGX",			Test:"CANCER"},	// Panel - COMPREHENSICE CANCER
-	 5: {Code:"STI",			Test:"STI"},	// Panel - STI Panel
-	 6: {Code:"UTI",			Test:"UTI"},	// Panel - UTI Panel
-	 7: {Code:"HPV",			Test:"HPV"},	// Panel - HPV Panel
-	 8: {Code:"Wound",			Test:"WOUND"},	// Panel - Wound Panel
-	 9: {Code:"COVID Flu RSV",	Test:"COVID"},	// Panel - COVIDFluRSV
-	11: {Code:"Immuno",			Test:"IMMUNO"},	// Panel - COMPREHENSICE PRIMARY IMMUNODEFICIENCY
-	12: {Code:"Neuro",			Test:"NEURO"},	// Panel - COMPREHENSIVE NEUROLOGY
-	13: {Code:"RPP",			Test:""},		// --
-	14: {Code:"Eyes Disorder",	Test:"EYE"},	// Panel - COMPREHENSIVE EYE DISORDER
-	15: {Code:"Thyroid",		Test:"THYROID"},// Panel - THYROID GENETIC DISEASE
-	16: {Code:"Diabetes",		Test:""},		// -- 
-	17: {Code:"Cardio",			Test:"CARDIO"}	// Panel - CARDIO-PULMONARY
-};
+	// Test Categories / Codes Lookup Table
+	const testCategories = {
+		 1: {Code:"Toxicology",		Test:""},		// --
+		 3: {Code:"PGX",			Test:"PHARMA"},	// Panel - PHARMACOGENOMICSCOMPREHENSIVE
+		 4: {Code:"CGX",			Test:"CANCER"},	// Panel - COMPREHENSICE CANCER
+		 5: {Code:"STI",			Test:"STI"},	// Panel - STI Panel
+		 6: {Code:"UTI",			Test:"UTI"},	// Panel - UTI Panel
+		 7: {Code:"HPV",			Test:"HPV"},	// Panel - HPV Panel
+		 8: {Code:"Wound",			Test:"WOUND"},	// Panel - Wound Panel
+		 9: {Code:"COVID Flu RSV",	Test:"COVID"},	// Panel - COVIDFluRSV
+		11: {Code:"Immuno",			Test:"IMMUNO"},	// Panel - COMPREHENSICE PRIMARY IMMUNODEFICIENCY
+		12: {Code:"Neuro",			Test:"NEURO"},	// Panel - COMPREHENSIVE NEUROLOGY
+		13: {Code:"RPP",			Test:""},		// --
+		14: {Code:"Eyes Disorder",	Test:"EYE"},	// Panel - COMPREHENSIVE EYE DISORDER
+		15: {Code:"Thyroid",		Test:"THYROID"},// Panel - THYROID GENETIC DISEASE
+		16: {Code:"Diabetes",		Test:""},		// -- 
+		17: {Code:"Cardio",			Test:"CARDIO"}	// Panel - CARDIO-PULMONARY
+	};
 
 // Accession List
 if (linkId == "2070") {
@@ -64,8 +72,27 @@ if (linkId == "2070") {
 	handleResults();
 }
 
-// Create Accession
+// Create Accession (type=acs) & Create Orders
 if (linkId == "2011") {
+
+/**
+ *
+ * Set Default Inputs
+ *
+ * @param	 INT		BillType	1			"Primary Insurance"
+ * @param	 STRING		Status		Received
+ *
+ * @state	 DISABLED	#btnAddEditPatient
+ *
+ * @listener CHANGE		#MainContent_ctl00_ctl00_upPanel
+ * @listener CLICK		#btnAddEditPatient
+ * @listener BLUR		#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbLocation_tbText
+ *
+ * @function async		checkTestCat()
+ * @function promise	delay()
+ * 
+ */
+
 	// Define Page Elements
 	pageElements['BillType']	= document.querySelector("#MainContent_ctl00_ctl00_ddBillType_ddControl");
 	if(PCX_CMSInteraction.getUrlParams()['type'] == "acs") {
@@ -76,32 +103,10 @@ if (linkId == "2011") {
 	pageElements['PhysicianOptions']= "#ddPhysician option";
 	pageElements['newPatientBtn']	= document.querySelector("#btnAddEditPatient");
 
-	document.querySelector('#MainContent_ctl00_ctl00_upPanel').addEventListener('change', (e) => {
-		// Ping reloaded Elements
-		pageElements['CategoryOpt']		= document.querySelector("#MainContent_ctl00_ctl00_ctrlOrderTestCategoryControl1_ddTestCategory option:checked");
-		pageElements['TestCodesInput']	= document.querySelector("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText");
-		pageElements['TestCodesOutput']	= document.querySelector("#dvSelectedItems");
-		if (e.target && e.target.id === 'MainContent_ctl00_ctl00_ctrlOrderTestCategoryControl1_ddTestCategory') {
-			checkTestCat(pageElements.CategoryOpt,{Input: pageElements.TestCodesInput,Output: pageElements.TestCodesOutput},testCategories);
-		}
-	});
-	async function checkTestCat(elCategory,elTestCodes,testCategories){
-		if(
-			elCategory.value != "" &&
-			elTestCodes.Output.querySelectorAll('.item').length <= 0
-		) {
-			console.log(elCategory.value);
-			elTestCodes.Input.value = testCategories[elCategory.value].Test;
-			await delay(1000);
-			pageElements['TestCodesInput']	= elTestCodes.Input = document.querySelector("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText")
-			elTestCodes.Input.dispatchEvent(eventKeyEnd);
-			await delay(500);
-			elTestCodes.Input.dispatchEvent(eventKeyTab);
-		}
-	}
-	function delay(ms) {
-		return new Promise(resolve => setTimeout(resolve, ms));
-	}
+	// Set Bill Type to Primary Insurance as default
+	pageElements.BillType.value = 1;
+	// Set Status to Received as default
+	pageElements.Status.value = "Received";
 
 	pageElements.newPatientBtn.addEventListener('click', async (e) => {
 		waitForElm(".fancybox-overlay.fancybox-overlay-fixed iframe").then( (elm) => {
@@ -133,10 +138,6 @@ if (linkId == "2011") {
 			});
 		});
 	});
-	// Set Bill Type to Primary Insurance as default
-	pageElements.BillType.value = 1;
-	// Set Status to Received as default
-	pageElements.Status.value = "Received";
 
 	// Disable Create Patient Button if no location is set
 	pageElements.newPatientBtn.classList.add("disabled");
@@ -154,10 +155,43 @@ if (linkId == "2011") {
 			pageElements.newPatientBtn.classList.add("disabled");
 		}
 	});
+
+	document.querySelector('#MainContent_ctl00_ctl00_upPanel').addEventListener('change', (e) => {
+		// Ping reloaded Elements
+		pageElements['CategoryOpt']		= document.querySelector("#MainContent_ctl00_ctl00_ctrlOrderTestCategoryControl1_ddTestCategory option:checked");
+		pageElements['TestCodesInput']	= document.querySelector("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText");
+		pageElements['TestCodesOutput']	= document.querySelector("#dvSelectedItems");
+		if (e.target && e.target.id === 'MainContent_ctl00_ctl00_ctrlOrderTestCategoryControl1_ddTestCategory') {
+			checkTestCat(pageElements.CategoryOpt,{Input: pageElements.TestCodesInput,Output: pageElements.TestCodesOutput},testCategories);
+		}
+	});
+	async function checkTestCat(elCategory,elTestCodes,testCategories){
+		if(
+			elCategory.value != "" &&
+			elTestCodes.Output.querySelectorAll('.item').length <= 0
+		) {
+			console.log(elCategory.value);
+			elTestCodes.Input.value = testCategories[elCategory.value].Test;
+			await delay(1000);
+			pageElements['TestCodesInput']	= elTestCodes.Input = document.querySelector("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText")
+			elTestCodes.Input.dispatchEvent(eventKeyEnd);
+			await delay(500);
+			elTestCodes.Input.dispatchEvent(eventKeyTab);
+		}
+	}
+	function delay(ms) {
+		return new Promise(resolve => setTimeout(resolve, ms));
+	}
 }
 
 // Update Accession
 if (linkId == "2071") {
+
+/**
+ * 
+ * Reference Lab Transfer Assist
+ * 
+ */
 	function capturePLData() {
 		// Temp Capture was already discussed with Dean and as long as 
 		// it never leaves the browser/local, it's HIPAA compliant.
@@ -181,33 +215,6 @@ if (linkId == "2071") {
 			Email: document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_AddressControl1_tbEmail').value
 		};
 
-		///
-		// Prep Data
-		///
-
-		/* 
-		* Category
-		*  Toxicology: 1,
-		*  PGX: 3,
-		*  CGX: 4,
-		*  STI: 5,
-		*  UTI: 6,
-		*  HPV: 7,
-		*  Wound: 8,
-		*  COVID Flu RSV: 9,
-		*  Immuno: 11,
-		*  Neuro: 12,
-		*  RPP: 13,
-		*  Eyes Disorder: 14,
-		*  Thyroid: 15,
-		*  Diabetes: 16,
-		*  Cardio: 17
-		**/ 
-
-		//patientData
-
-
-
 		// Store patient data in Chrome's storage
 		chrome.storage.local.set({ patientData }, () => {
 			console.log('PL Patient data saved');
@@ -217,10 +224,6 @@ if (linkId == "2071") {
 			chrome.runtime.sendMessage({ action: 'startCountdown', patientData });
 		});
 	}
-
-
-
-
 
 
 	chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -256,6 +259,8 @@ if (linkId == "2071") {
 /**
  *
  * File Drop
+ *
+ * Expands the Drop area of file upload and applies a QA Check
  * 
  */
 	let 	isDragging 	= false;
