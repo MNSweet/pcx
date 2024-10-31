@@ -195,7 +195,7 @@ if (linkId == "2071") {
 	function capturePLData() {
 		// Temp Capture was already discussed with Dean and as long as 
 		// it never leaves the browser/local, it's HIPAA compliant.
-		// Fn startCountdownBanner() immediately takes the data after 
+		// Fn initializeBanner() immediately takes the data after 
 		// being added to local storage and sets a deletion timer to purge
 		// the data from cache and local storage, never saving to hard disk
 		const patientData = {
@@ -218,10 +218,16 @@ if (linkId == "2071") {
 		// Store patient data in Chrome's storage
 		chrome.storage.local.set({ patientData }, () => {
 			console.log('PL Patient data saved');
-			startCountdownBanner(patientData);
 			chrome.storage.local.get(console.log)
 			// Send a message to the service worker to notify all relevant tabs
-			chrome.runtime.sendMessage({ action: 'startCountdown', patientData });
+			chrome.runtime.sendMessage({
+				action: 'startCountdown',
+				patientData: {
+					FirstName:	patientData.FirstName,
+					LastName:	patientData.LastName,
+					Category:	patientData.Category
+				}
+			});
 		});
 	}
 
@@ -238,23 +244,22 @@ if (linkId == "2071") {
 	// Site Assets
 
 	// Add BTN to copy PT data
-	/*
-		document.getElementById("lblAddPatientTitle").addEventListener('click', function(event) {
-			const siteAssets = document.createElement('div');
-			siteAssets.id = 'siteAssets';
-			siteAssets.style.cssText = 'position:fixed; top:70px; right:2px; z-index:10000;';
+	
+	document.getElementById("lblAddPatientTitle").addEventListener('click', function(event) {
+		const siteAssets = document.createElement('div');
+		siteAssets.id = 'siteAssets';
 		// Add a button to capture PL data
-			const plButton = document.createElement('button');
-			plButton.textContent = '⎘';
-			plButton.id = 'patientCopy';
-			plButton.titel = 'Capture Patient Record';
-			plButton.onclick = capturePLData;
-			siteAssets.appendChild(plButton);
-			waitForElm('.fancybox-iframe').then((elm) => {
-				document.querySelector('.fancybox-overlay').appendChild(siteAssets);
-			});
+		const plButton = document.createElement('span');
+		plButton.textContent = '⎘';
+		plButton.id = 'patientCopy';
+		plButton.titel = 'Capture Patient Record';
+		plButton.onclick = capturePLData;
+		siteAssets.appendChild(plButton);
+		waitForElm('.fancybox-iframe').then((elm) => {
+			document.querySelector('.fancybox-overlay').appendChild(siteAssets);
 		});
-	*/
+	});
+	
 
 /**
  *

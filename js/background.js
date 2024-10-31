@@ -11,7 +11,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   * startCountdown
   * 
   */
-  if (message.action === 'startCountdown') {
+  if (request.action === 'startCountdown') {
     // Get all tabs that match the host permissions (the 3 sites)
     const matchUrls = [
       '*://prince.iatserv.com/*',
@@ -22,7 +22,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     chrome.tabs.query({ url: matchUrls }, (tabs) => {
       tabs.forEach(tab => {
         // Send the message to each matching tab to start the countdown
-        chrome.tabs.sendMessage(tab.id, { action: 'startCountdownBanner', patientData: message.patientData });
+        chrome.tabs.sendMessage(tab.id, { action: 'startCountdownBanner', patientData: request.patientData });
       });
     });
   }
@@ -85,17 +85,26 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
+const extOptions={
+  'debug':true,
+  'domains':{
+    pl: "https://prince.iatserv.com/",
+    rr: "https://reliable.iatserv.com/",
+    pd: "https://pnc.dxresults.com/"
+  }
+};
+
 // Function to get the current site
 function getCurrentSite() {
   return new Promise((resolve, reject) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const url = tabs[0]?.url;
-      if (url.includes("pr.local")) {
-        resolve("PR.local");
-      } else if (url.includes("rr.local")) {
-        resolve("RR.local");
-      } else if (url.includes("pl.local")) {
-        resolve("PL.local");
+      if (url.includes(extOptions.domains.pl)) {
+        resolve("PL");
+      } else if (url.includes(extOptions.domains.rr)) {
+        resolve("RR");
+      } else if (url.includes(extOptions.domains.pd)) {
+        resolve("PD");
       } else {
         reject("Site not recognized.");
       }
@@ -115,24 +124,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-
-const extOptions={
-  'debug':true,
-  'domains':{
-    pr: "https://prince.iatserv.com/",
-    rr: "https://reliable.iatserv.com/",
-    pl: "https://pnc.dxresults.com/"
-  }
-};
-
 // Function to handle tab updates
 function handleTabUpdate(tabId, tabUrl) {
   if (
     !tabUrl || 
     (
-      !tabUrl.startsWith(extOptions.domains.pr) 
+      !tabUrl.startsWith(extOptions.domains.pl) 
       && !tabUrl.startsWith(extOptions.domains.rr) 
-      && !tabUrl.startsWith(extOptions.domains.pl)
+      && !tabUrl.startsWith(extOptions.domains.pd)
     )
   ) {
     //Tab URL does not match

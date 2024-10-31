@@ -1,8 +1,6 @@
 console.log("This is RR specific content script.");
 
 
-
-
 ///
 // Page IDs
 // Update Accession:  LinkId=2071
@@ -10,8 +8,126 @@ console.log("This is RR specific content script.");
 // Create Order:      LinkId=2011 && !OrderId=#
 ///
 
-const linkId = PCX_CMSInteraction.getUrlParams()['LinkId'];
-const OrderId = PCX_CMSInteraction.getUrlParams()['OrderId'];
+
+/**
+ *
+ * PREP Variables/Constants
+ *
+ * @param INT					linkId
+ * @param INT					orderId
+ * @param EVENT KEYDOWN[END]	eventKeyEnd			Simulated keypress of "End"
+ * @param EVENT KEYDOWN[SPACE]	eventKeySpace		Simulated keypress of "Space"
+ * @param EVENT KEYDOWN[TAB]	eventKeyTab			Simulated keypress of "Tab"
+ * @param OBJ					pageElements		Object of DOM elements
+ * @param OBJ					testCategories		Lookup table for Test Categories by DB ID's
+ * @param OBJ					categoryTranslation	Translation table for Test Categories by DB ID's PL>>RR 
+ * 
+ */
+	const linkId = PCX_CMSInteraction.getUrlParams()['LinkId'];
+	const orderId = PCX_CMSInteraction.getUrlParams()['OrderId'];
+
+	// Event Keys
+	const eventKeyEnd	= new KeyboardEvent('keydown', { bubbles: true, cancelable : true, key : "END",		shiftKey : false, keyCode : 35,	 code: "END"});
+	const eventKeySpace = new KeyboardEvent('keydown', { key: ' ', bubbles: true });
+	const eventKeyTab	= new KeyboardEvent('keydown', { bubbles: true, cancelable : true, key : "Tab",		shiftKey : false, keyCode : 9,	 code: "Tab"});
+	const eventKeyEnter	= new KeyboardEvent('keydown', { bubbles: true, cancelable : false, key: "Enter",
+ "keyCode": 13,
+ "which": 13,
+ "code": "Enter",
+ "location": 0,
+ "altKey": false,
+ "ctrlKey": false,
+ "metaKey": false,
+ "shiftKey": false,
+ "repeat": false
+});
+	const simClick = new CustomEvent("simClick");
+
+	// Page Element points to avoid multiple queries
+	let pageElements = {};
+
+	// Test Categories / Codes Lookup Table
+	const testCategories = {
+		16: {Code:"PGX",					Test:"COMP120"},		// Panel - COMP120
+		17: {Code:"CGX NGS",				Test:"COMPREHENSIVE"},	// Panel - IP-CGX Comprehensive Cancer
+		18: {Code:"Immuno NGS",				Test:"PANEL"},			// Panel - Comprehensive Immunodeficiency Panel
+		19: {Code:"Cardio NGS",				Test:"CARDIO"},			// Panel - CARDIO-PULMONARY
+		20: {Code:"Eye NGS",				Test:"EYE"},			// Panel - Comprehensive Eye Disorder Panel
+		21: {Code:"Neuro NGS",				Test:"PANEL"},			// Panel - Neuro-Degenerative Panel
+		22: {Code:"Thyroid NGS",			Test:"PANEL"},			// Panel - Thyroid Genetic Disease Panel
+		23: {Code:"Toxicology",				Test:"REFLEX"},			// Panel - Urine Drug Screen Profile w/ Reflex to Definitive | Urine Drug Screen ONLY
+		25: {Code:"STI",					Test:"PROFILE"},		// Panel - STI Profile
+		26: {Code:"UTI",					Test:"ABR PROFILE"},	// Panel - UTI w/ ABR Profile
+		27: {Code:"Wound",					Test:"ABR PROFILE"},	// Panel - Wound W/ ABR Profile
+		28: {Code:"Respiratory Pathogens",	Test:"PROFILE"},		// Panel - RPP - Respiratory Pathogen Profile w/ ABR
+		30: {Code:"COVID-19",				Test:"COVID"}			// Panel - COVID-19
+		//?: {Code:"Diabetes",				Test:""},				// -- 
+		//?: {Code:"HPV",					Test:"HPV"},			// Panel - HPV Panel
+	};
+	/**
+	 * PL | Category              | RR
+	 *  - | Core Laboratory       | 6
+	 *  - | Cultures              | 7
+	 *  - | Dermatology           | 10
+	 *  - | Cytology              | 11
+	 *  - | Histology             | 12
+	 *  - | Urology               | 13
+	 *  - | Nail Fungal           | 14
+	 *  - | Pathology             | 15
+	 *  3 | PGX                   | 16
+	 *  4 | CGX NGS               | 17
+	 * 11 | Immuno NGS            | 18
+	 * 17 | Cardio NGS            | 19
+	 * 14 | Eye NGS               | 20
+	 * 12 | Neuro NGS             | 21
+	 * 15 | Thyroid NGS           | 22
+	 *  1 | Toxicology            | 23
+	 *  - | Clinical              | 24
+	 *  5 | STI                   | 25
+	 *  6 | UTI                   | 26
+	 *  8 | Wound                 | 27
+	 * 13 | Respiratory Pathogens | 28
+	 *  - | GI                    | 29
+	 *  9 | COVID-19              | 30
+	 *  - | Hereditary Metabolic Disorder NGS | 31
+	 *  7 | HPV                   | -
+	 * 16 | Diabetes              | -
+	 */
+	
+	const categoryTranslation = {
+		3:16,  // PGX
+		4:17,  // CGX
+		11:18, // Immuno
+		17:19, // Cardio
+		14:20, // Eyes
+		12:21, // Neuro
+		15:22, // Thyroid
+		1:23,  // Toxicology
+		5:25,  // STI
+		6:26,  // UTI
+		8:27,  // Wound
+		13:28, // RPP
+		9:30,  // COVID
+		7:-1,  // HPV
+		16:-1  // Diabetes
+	};
+
+	const genderTranslate = {
+		Male: 1,
+		Female: 2
+	};
+
+	const raceTranslate = {
+		"African American": 1,
+		"Hispanic": 2,
+		"Caucasian": 3,
+		"Mixed Race": 4,
+		"Mixed": 4,
+		"Asian": 5,
+		"Native American": 6,
+		"Other": 7
+	};
+
 
 // Results List
 if (linkId == "2024") {
@@ -64,56 +180,6 @@ if (linkId == "2011") { //Create Order
 	*
 	*********************************************/
 
-	// content_rr.js
-	const fieldMappingRR = {
-		FirstName: '#rrFirstName',
-		LastName: '#rrLastName',
-		// Add more mappings as needed
-	};
-
-	function pasteRRPatientData() {
-		chrome.storage.local.get('patientData', ({ patientData }) => {
-
-			//Demo Data
-			patientData = {
-					"Address": "11 Demo dr ",
-					"Category": "11", //Immuno
-					"City": "DemoCity",
-					"DOB": [
-							"4",
-							"25",
-							"2000"
-					],
-					"DOC": "4/28/2023",
-					"Email": "",
-					"FirstName": "DemoFirst",
-					"Gender": "Male",
-					"LastName": "DemoLast",
-					"MiddleName": "",
-					"Phone": "5551234567",
-					"Race": "Caucasian",
-					"State": "GA",
-					"Zip": "30043"
-			}
-
-			if (patientData) {
-
-				// Clear the patient data after usage
-				chrome.storage.local.set({ patientData: {} }, () => {
-					console.log('RR Patient data cleared after use');
-				});
-			}
-		});
-	}
-
-	// Add a button to paste RR patient data
-	const rrButton = document.createElement('button');
-	rrButton.textContent = 'Paste Patient Data';
-	rrButton.style.cssText = 'position:fixed; bottom:10px; right:10px; z-index:1000;';
-	rrButton.onclick = pasteRRPatientData;
-	//document.body.appendChild(rrButton);
-
-
 	const patientDataKeys = {
 		Location: '#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbLocation_tbText',
 		LocationMenu: "#ui-id-1 .ui-menu-item",
@@ -126,86 +192,193 @@ if (linkId == "2011") { //Create Order
 		LastName: '#tbLastName',
 		MiddleName: '#MainContent_ctl00_tbMiddleName',
 		DOB: '#MainContent_ctl00_tbDOB_tbText',
-		Gender: '#MainContent_ctl00_ddGender_ddControl option:checked',
-		Race: '#MainContent_ctl00_ddGender_ddControl option:checked',
+		Gender: '#MainContent_ctl00_ddGender_ddControl',
+		Race: '#MainContent_ctl00_ddRace_ddControl',
 		Address: [
 			'#MainContent_ctl00_AddressControl1_tbAddress1',
 			'#MainContent_ctl00_AddressControl1_tbAddress2'
 		],
-		State: '#MainContent_ctl00_AddressControl1_CountryState_ddState option:checked',
+		State: '#MainContent_ctl00_AddressControl1_CountryState_ddState',
 		City: '#MainContent_ctl00_AddressControl1_tbCity',
 		Zip: '#MainContent_ctl00_AddressControl1_tbZipCode',
 		Phone: '#MainContent_ctl00_AddressControl1_tbPhone',
-		Email: '#MainContent_ctl00_AddressControl1_tbEmail'
+		Email: '#MainContent_ctl00_AddressControl1_tbEmail',
+		NewPatientBTN: '#btnAddEditPatient'
 	};
 
 	const patientDataValueDefaults = {
 		Location: "Prince",
 		Physician: '1896', //Prince, Laboratories
 		BillTo: '3' //Client
-
 	}
 
-	/**
-	 * PR | Category              | PL
-	 *  - | Core Laboratory       | 6
-	 *  - | Cultures              | 7
-	 *  - | Dermatology           | 10
-	 *  - | Cytology              | 11
-	 *  - | Histology             | 12
-	 *  - | Urology               | 13
-	 *  - | Nail Fungal           | 14
-	 *  - | Pathology             | 15
-	 *  3 | PGX                   | 16
-	 *  4 | CGX NGS               | 17
-	 * 11 | Immuno NGS            | 18
-	 * 17 | Cardio NGS            | 19
-	 * 14 | Eye NGS               | 20
-	 * 12 | Neuro NGS             | 21
-	 * 15 | Thyroid NGS           | 22
-	 *  1 | Toxicology            | 23
-	 *  - | Clinical              | 24
-	 *  5 | STI                   | 25
-	 *  6 | UTI                   | 26
-	 *  8 | Wound                 | 27
-	 * 13 | Respiratory Pathogens | 28
-	 *  - | GI                    | 29
-	 *  9 | COVID-19              | 30
-	 *  - | Hereditary Metabolic Disorder NGS | 31
-	 *  7 | HPV                   | -
-	 * 16 | Diabetes              | -
-	 */
-	
-	categoryTranslation = {
-		3:16,  // PGX
-		4:17,  // CGX
-		11:18, // Immuno
-		17:19, // Cardio
-		14:20, // Eyes
-		12:21, // Neuro
-		15:22, // Thyroid
-		1:23,  // Toxicology
-		5:25,  // STI
-		6:26,  // UTI
-		8:27,  // Wound
-		13:28, // RPP
-		9:30,  // COVID
-		7:-1,  // HPV
-		16:-1  // Diabetes
-	};
+	async function pasteRRPatientData() {
+		
+		//let patientData = {};
+		chrome.storage.local.get('patientData', ({ patientData }) => {
+			/*Demo Data
+			patientData = {
+				"Address": "11 Demo dr ",
+				"Category": "11", //Immuno
+				"City": "DemoCity",
+				"DOB": [
+					"4",
+					"25",
+					"2000"
+				],
+				"DOC": "4/28/2023",
+				"Email": "",
+				"FirstName": "DemoFirst",
+				"Gender": "Male",
+				"LastName": "DemoLast",
+				"MiddleName": "",
+				"Phone": "5551234567",
+				"Race": "Caucasian",
+				"State": "GA",
+				"Zip": "30043"
+			};*/
+
+		// Fill in data
+		document.querySelector(patientDataKeys.DOC).value		= patientData.DOC;
+		document.querySelector(patientDataKeys.Category).value	= categoryTranslation[patientData.Category];
+		
+		pageElements['CategoryOpt']		= document.querySelector(`${patientDataKeys.Category} option:checked`);
+		pageElements['TestCodesInput']	= document.querySelector("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText");
+		pageElements['TestCodesOutput']	= document.querySelector("#dvSelectedItems");
+		checkTestCat(pageElements.CategoryOpt,{Input: pageElements.TestCodesInput,Output: pageElements.TestCodesOutput},testCategories).then( (elm) => {
+
+			pageElements['NewPatientBTN'] = document.querySelector(patientDataKeys.NewPatientBTN);
+			pageElements.NewPatientBTN.setAttribute('onFocus',"newPatient()");
+			pageElements.NewPatientBTN.focus();
+			pageElements.NewPatientBTN.setAttribute('onFocus',"");
+
+			waitForElm(".fancybox-overlay.fancybox-overlay-fixed iframe").then( (elm) => {
+				document.querySelector(".fancybox-overlay.fancybox-overlay-fixed iframe").addEventListener('load', (el) => {
+					pageElements["FirstName"]	= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.FirstName);
+					pageElements["LastName"]	= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.LastName);
+					pageElements["MiddleName"]	= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.MiddleName);
+					pageElements["DOB"]			= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.DOB);
+					pageElements["Gender"]		= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.Gender);
+					pageElements["Race"]		= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.Race);
+					pageElements["Address"]		= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.Address);
+					pageElements["State"]		= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.State);
+					pageElements["City"]		= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.City);
+					pageElements["Zip"]			= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.Zip);
+					pageElements["Phone"]		= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.Phone);
+					pageElements["Email"]		= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.Email);
+					
+
+					pageElements.FirstName.value	= patientData.FirstName;
+					pageElements.LastName.value		= patientData.LastName;
+					pageElements.MiddleName.value	= patientData.MiddleName;
+					pageElements.DOB.value			= patientData.DOB.join('/');
+					pageElements.Gender.value		= genderTranslate[patientData.Gender];
+					pageElements.Race.value			= raceTranslate[patientData.Race];
+					pageElements.Address.value		= patientData.Address;
+					pageElements.State.value		= patientData.State;
+					pageElements.City.value			= patientData.City;
+					pageElements.Zip.value			= patientData.Zip;
+					pageElements.Phone.value		= patientData.Phone;
+					pageElements.Email.value		= patientData.Email;
+
+					pageElements.DOB.focus();
+					pageElements.DOB.dispatchEvent(eventKeyTab);
+				});
+				//document.querySelector(patientDataKeys.Category).dispatchEvent(new Event("change",{bubbles:true}));
+			});
+		});
+		if (patientData) {
+				// Clear the patient data after usage
+				chrome.storage.local.set({ patientData: {} }, () => {
+					console.log('RR Patient data cleared after use');
+					document.querySelector('#patientDataBanner').remove();
+				});
+			}
+		});
+	}
+
+
+	document.querySelector('#MainContent_ctl00_ctl00_upPanel').addEventListener('change', (e) => {
+		// Ping reloaded Elements
+		pageElements['CategoryOpt']		= document.querySelector(`${patientDataKeys.Category} option:checked`);
+		pageElements['TestCodesInput']	= document.querySelector("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText");
+		pageElements['TestCodesOutput']	= document.querySelector("#dvSelectedItems");
+		if (e.target && e.target.id === patientDataKeys.Category.replace('#','')) {
+			checkTestCat(pageElements.CategoryOpt,{Input: pageElements.TestCodesInput,Output: pageElements.TestCodesOutput},testCategories);
+		}
+	});
+
+	async function checkTestCat(elCategory,elTestCodes,testCategories){
+		if(
+			elCategory.value != "" &&
+			elTestCodes.Output.querySelectorAll('.item').length <= 0
+		) {
+			console.log(elCategory.value);
+			elTestCodes.Input.value = testCategories[elCategory.value].Test;
+			await delay(1000);
+			pageElements['TestCodesInput']	= elTestCodes.Input = document.querySelector("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText")
+			elTestCodes.Input.dispatchEvent(eventKeyEnd);
+			await delay(500);
+			elTestCodes.Input.dispatchEvent(eventKeyTab);
+		}
+	}
+	function delay(ms) {
+		return new Promise(resolve => setTimeout(resolve, ms));
+	}
 
 	chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		if (message.action === 'startCountdownBanner') {
 			// If the banner is already present, don't recreate it
-			if (!document.querySelector('#patientDataBanner')) {
-				initializeBanner(message.patientData);
+			if (document.querySelector('#patientDataBanner')) {
+				document.querySelector('#patientDataBanner').remove();
 			}
+				initializeBanner(
+					message.patientData,
+					90,
+					() => {
+						const rrButton = document.createElement('span');
+						rrButton.textContent	= 'Paste Patient Data';
+						rrButton.id 			= "patientDataClone";
+
+						const patientDataBanner = document.getElementById('patientDataBanner');
+
+						document.querySelector("#patientDataBanner").appendChild(rrButton);
+
+						document.querySelector("#patientDataClone").addEventListener('click', function(event) {
+							pasteRRPatientData();
+						});
+					}
+				);
 		}
 	});
+/*
+	let message = {patientData:{
+				"Category": "11",
+				"FirstName": "DemoFirst",
+				"LastName": "DemoLast",
+			}};
+	// If the banner is already present, don't recreate it
+	if (!document.querySelector('#patientDataBanner')) {
+		initializeBanner(
+			message.patientData,
+			600,
+			() => {
+				const rrButton = document.createElement('span');
+				rrButton.textContent	= 'Paste Patient Data';
+				rrButton.id 			= "patientDataClone";
 
-	// Prefill Location and Physician
-	const eventKeySpace = new KeyboardEvent('keydown', { key: ' ', bubbles: true });
-	const eventKeyTab = new KeyboardEvent('keydown', { bubbles: true, cancelable : true, key : "Tab",shiftKey : false, keyCode : 13 });
+				const patientDataBanner = document.getElementById('patientDataBanner');
+
+				document.querySelector("#patientDataBanner").appendChild(rrButton);
+
+				document.querySelector("#patientDataClone").addEventListener('click', function(event) {
+					pasteRRPatientData();
+				});
+			}
+		);
+	}
+*/
+// Prefill Location and Physician
 	waitForElm(patientDataKeys.Location).then((elm) => {
 		document.querySelector(patientDataKeys.Location).value = patientDataValueDefaults.Location;
 		document.querySelector(patientDataKeys.Location).dispatchEvent(eventKeySpace);
@@ -215,8 +388,6 @@ if (linkId == "2011") { //Create Order
 				document.querySelector(patientDataKeys.Physician).value = patientDataValueDefaults.Physician;
 				document.querySelector("#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianId").value = 1896;
 				document.querySelector("#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianName").value = "Prince, Laboratories";
-				 
-				 
 			})
 		});
 	});

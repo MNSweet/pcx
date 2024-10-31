@@ -9,3 +9,39 @@
 	box-sizing: border-box;
 	color:#ffffff;
 }
+#patientDataBanner {
+	position: fixed;
+	top: 0px;
+	width: 100%;
+	background-color: yellow;
+	z-index: 1000;
+	padding: 10px;
+	display: flex;
+	justify-content: space-between;
+}
+
+#patientInfo {
+	flex-grow: 1;
+}
+
+#patientDataClone {
+	text-align: right;
+	padding: 0 15px;
+	border: 1px solid;
+	margin: 0 10px;
+	background-color: #fdfdfd;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+#patientDataClone:hover {
+	background-color: #eeeeee;
+}
+
+#patientDataTimer {
+	background-color: #fff;
+	padding: 0 10px;
+	font-family: monospace;
+	font-size: 14px;
+	border: 1px solid #333;
+}

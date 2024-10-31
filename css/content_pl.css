@@ -2,10 +2,30 @@
 	background-color: #f9f6fe;
 	border-color: #c9abfc;
 }*/
-#patientCopy{
+#siteAssets{
+	height: 100%;
+	display: flex;
+	align-items: center;
+	width: 60px;
+	right: 0;
+	position: fixed;
+	justify-content: right;
+}
+
+#patientCopy {
 	padding: 0 8px 8px;
 	font-size: 50px;
 	line-height: 50px;
+	border-width: 2px;
+	border-style: outset;
+	border-color: buttonborder;
+	background-color: buttonface;
+	cursor: pointer;
+	opacity: 0;
+	transition: opacity .5s;
+}
+#siteAssets:hover #patientCopy {
+	opacity: 1;
 }
 
 /* class="dropZoneKeepAlive" */

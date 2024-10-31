@@ -426,18 +426,21 @@ function pcxDebug(message) {
 *
 *********************************************/
 
-function initializeBanner(patientData, timeLeft = 90) {
+function initializeBanner(patientData, timeLeft = 90, callback) {
 	const banner = document.createElement('div');
 	banner.id = 'patientDataBanner';
 	banner.style.cssText = 'position:fixed; top:0; width:100%; background-color:yellow; z-index:1000; padding:10px; display:flex; justify-content:space-between;';
 
 	// Left side: Patient details
 	const patientInfo = document.createElement('span');
+	patientInfo.id 			= "patientInfo";
 	patientInfo.textContent = `Patient: ${patientData.LastName}, ${patientData.FirstName} | ${patientData.Category}`;
 	banner.appendChild(patientInfo);
 
 	// Right side: Countdown timer
 	const timer = document.createElement('span');
+	timer.id 			= "patientDataTimer";
+	timer.textContent	= "-:--";
 	const countdown = setInterval(() => {
 		const minutes = Math.floor(timeLeft / 60);
 		const seconds = timeLeft % 60;
@@ -455,6 +458,7 @@ function initializeBanner(patientData, timeLeft = 90) {
 
 	banner.appendChild(timer);
 	document.body.appendChild(banner);
+	if (callback) {callback();}
 }
 
 function updateBanner(timeLeft) {
