@@ -23,8 +23,8 @@ console.log("This is RR specific content script.");
  * @param OBJ					categoryTranslation	Translation table for Test Categories by DB ID's PL>>RR 
  * 
  */
-	const linkId = PCX_CMSInteraction.getUrlParams()['LinkId'];
-	const orderId = PCX_CMSInteraction.getUrlParams()['OrderId'];
+	const linkId = PCX.getUrlParams()['LinkId'];
+	const orderId = PCX.getUrlParams()['OrderId'];
 
 	// Event Keys
 	const eventKeyEnd	= new KeyboardEvent('keydown', { bubbles: true, cancelable : true, key : "END",		shiftKey : false, keyCode : 35,	 code: "END"});
@@ -135,7 +135,7 @@ if (linkId == "2024") {
 	function handleDownloadClick(event) {
 		//event.preventDefault(); // Prevent the default link behavior [For testing, should be commented out]
 
-		const headings = document.getElementById('MainContent_ctl00_grid_DXHeadersRow0').textContent.replaceAll('\t','').replaceAll('\n','').split(" ");
+		const headings = PCX.findEl('#MainContent_ctl00_grid_DXHeadersRow0').textContent.replaceAll('\t','').replaceAll('\n','').split(" ");
 		// Check if the clicked element or one of its parents is the <a> with title "Download Result"
 		const clickedLink = event.target.closest('a[title="Download Result"]');
 
@@ -146,7 +146,6 @@ if (linkId == "2024") {
 
 			// Collect the text content of all <td> elements in the row into an array
 			const rowData = Array.from(row.querySelectorAll('td')).map(td => td.textContent.trim());
-			//console.log(row.querySelector('td:first-child'));
 			row.classList.add('dxgvSelectedRow_Metropolis');
 			const tdCheckBox = row.querySelector('td:first-child span');
 			tdCheckBox.classList.replace('dxWeb_edtCheckBoxUnchecked_Metropolis','dxWeb_edtCheckBoxChecked_Metropolis');
@@ -167,7 +166,7 @@ if (linkId == "2024") {
 	document.body.addEventListener('click', function(event) {
 		// Only process clicks inside the dynamically replaced div#MainContent_ctl00_updatePanel1
 		if (event.target.closest('#MainContent_ctl00_updatePanel1') && event.target.closest('a[title="Download Result"]')) {
-			PCX_CMSInteraction.copyToClipboard(handleDownloadClick(event));
+			PCX.copyToClipboard(handleDownloadClick(event));
 		}
 	});
 }
@@ -239,33 +238,33 @@ if (linkId == "2011") { //Create Order
 			};*/
 
 		// Fill in data
-		document.querySelector(patientDataKeys.DOC).value		= patientData.DOC;
-		document.querySelector(patientDataKeys.Category).value	= categoryTranslation[patientData.Category];
+		PCX.findEl(patientDataKeys.DOC).value		= patientData.DOC;
+		PCX.findEl(patientDataKeys.Category).value	= categoryTranslation[patientData.Category];
 		
-		pageElements['CategoryOpt']		= document.querySelector(`${patientDataKeys.Category} option:checked`);
-		pageElements['TestCodesInput']	= document.querySelector("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText");
-		pageElements['TestCodesOutput']	= document.querySelector("#dvSelectedItems");
+		pageElements['CategoryOpt']		= PCX.findEl(`${patientDataKeys.Category} option:checked`);
+		pageElements['TestCodesInput']	= PCX.findEl("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText");
+		pageElements['TestCodesOutput']	= PCX.findEl("#dvSelectedItems");
 		checkTestCat(pageElements.CategoryOpt,{Input: pageElements.TestCodesInput,Output: pageElements.TestCodesOutput},testCategories).then( (elm) => {
 
-			pageElements['NewPatientBTN'] = document.querySelector(patientDataKeys.NewPatientBTN);
+			pageElements['NewPatientBTN'] = PCX.findEl(patientDataKeys.NewPatientBTN);
 			pageElements.NewPatientBTN.setAttribute('onFocus',"newPatient()");
 			pageElements.NewPatientBTN.focus();
 			pageElements.NewPatientBTN.setAttribute('onFocus',"");
 
 			waitForElm(".fancybox-overlay.fancybox-overlay-fixed iframe").then( (elm) => {
-				document.querySelector(".fancybox-overlay.fancybox-overlay-fixed iframe").addEventListener('load', (el) => {
-					pageElements["FirstName"]	= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.FirstName);
-					pageElements["LastName"]	= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.LastName);
-					pageElements["MiddleName"]	= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.MiddleName);
-					pageElements["DOB"]			= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.DOB);
-					pageElements["Gender"]		= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.Gender);
-					pageElements["Race"]		= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.Race);
-					pageElements["Address"]		= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.Address);
-					pageElements["State"]		= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.State);
-					pageElements["City"]		= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.City);
-					pageElements["Zip"]			= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.Zip);
-					pageElements["Phone"]		= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.Phone);
-					pageElements["Email"]		= document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.Email);
+				PCX.findEl(".fancybox-overlay.fancybox-overlay-fixed iframe").addEventListener('load', (el) => {
+					pageElements["FirstName"]	= PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.FirstName);
+					pageElements["LastName"]	= PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.LastName);
+					pageElements["MiddleName"]	= PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.MiddleName);
+					pageElements["DOB"]			= PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.DOB);
+					pageElements["Gender"]		= PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.Gender);
+					pageElements["Race"]		= PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.Race);
+					pageElements["Address"]		= PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.Address);
+					pageElements["State"]		= PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.State);
+					pageElements["City"]		= PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.City);
+					pageElements["Zip"]			= PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.Zip);
+					pageElements["Phone"]		= PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.Phone);
+					pageElements["Email"]		= PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector(patientDataKeys.Email);
 					
 
 					pageElements.FirstName.value	= patientData.FirstName;
@@ -284,25 +283,24 @@ if (linkId == "2011") { //Create Order
 					pageElements.DOB.focus();
 					pageElements.DOB.dispatchEvent(eventKeyTab);
 				});
-				//document.querySelector(patientDataKeys.Category).dispatchEvent(new Event("change",{bubbles:true}));
 			});
 		});
 		if (patientData) {
 				// Clear the patient data after usage
 				chrome.storage.local.set({ patientData: {} }, () => {
 					console.log('RR Patient data cleared after use');
-					document.querySelector('#patientDataBanner').remove();
+					PCX.findEl('#patientDataBanner').remove();
 				});
 			}
 		});
 	}
 
 
-	document.querySelector('#MainContent_ctl00_ctl00_upPanel').addEventListener('change', (e) => {
+	PCX.findEl('#MainContent_ctl00_ctl00_upPanel').addEventListener('change', (e) => {
 		// Ping reloaded Elements
-		pageElements['CategoryOpt']		= document.querySelector(`${patientDataKeys.Category} option:checked`);
-		pageElements['TestCodesInput']	= document.querySelector("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText");
-		pageElements['TestCodesOutput']	= document.querySelector("#dvSelectedItems");
+		pageElements['CategoryOpt']		= PCX.findEl(`${patientDataKeys.Category} option:checked`);
+		pageElements['TestCodesInput']	= PCX.findEl("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText");
+		pageElements['TestCodesOutput']	= PCX.findEl("#dvSelectedItems");
 		if (e.target && e.target.id === patientDataKeys.Category.replace('#','')) {
 			checkTestCat(pageElements.CategoryOpt,{Input: pageElements.TestCodesInput,Output: pageElements.TestCodesOutput},testCategories);
 		}
@@ -316,7 +314,7 @@ if (linkId == "2011") { //Create Order
 			console.log(elCategory.value);
 			elTestCodes.Input.value = testCategories[elCategory.value].Test;
 			await delay(1000);
-			pageElements['TestCodesInput']	= elTestCodes.Input = document.querySelector("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText")
+			pageElements['TestCodesInput']	= elTestCodes.Input = PCX.findEl("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText")
 			elTestCodes.Input.dispatchEvent(eventKeyEnd);
 			await delay(500);
 			elTestCodes.Input.dispatchEvent(eventKeyTab);
@@ -329,8 +327,8 @@ if (linkId == "2011") { //Create Order
 	chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		if (message.action === 'startCountdownBanner') {
 			// If the banner is already present, don't recreate it
-			if (document.querySelector('#patientDataBanner')) {
-				document.querySelector('#patientDataBanner').remove();
+			if (PCX.findEl('#patientDataBanner')) {
+				PCX.findEl('#patientDataBanner').remove();
 			}
 				initializeBanner(
 					message.patientData,
@@ -340,57 +338,31 @@ if (linkId == "2011") { //Create Order
 						rrButton.textContent	= 'Paste Patient Data';
 						rrButton.id 			= "patientDataClone";
 
-						const patientDataBanner = document.getElementById('patientDataBanner');
+						const patientDataBanner = PCX.findEl('#patientDataBanner');
 
-						document.querySelector("#patientDataBanner").appendChild(rrButton);
+						PCX.findEl("#patientDataBanner").appendChild(rrButton);
 
-						document.querySelector("#patientDataClone").addEventListener('click', function(event) {
+						PCX.findEl("#patientDataClone").addEventListener('click', function(event) {
 							pasteRRPatientData();
 						});
 					}
 				);
 		}
 	});
-/*
-	let message = {patientData:{
-				"Category": "11",
-				"FirstName": "DemoFirst",
-				"LastName": "DemoLast",
-			}};
-	// If the banner is already present, don't recreate it
-	if (!document.querySelector('#patientDataBanner')) {
-		initializeBanner(
-			message.patientData,
-			600,
-			() => {
-				const rrButton = document.createElement('span');
-				rrButton.textContent	= 'Paste Patient Data';
-				rrButton.id 			= "patientDataClone";
 
-				const patientDataBanner = document.getElementById('patientDataBanner');
-
-				document.querySelector("#patientDataBanner").appendChild(rrButton);
-
-				document.querySelector("#patientDataClone").addEventListener('click', function(event) {
-					pasteRRPatientData();
-				});
-			}
-		);
-	}
-*/
 // Prefill Location and Physician
 	waitForElm(patientDataKeys.Location).then((elm) => {
-		document.querySelector(patientDataKeys.Location).value = patientDataValueDefaults.Location;
-		document.querySelector(patientDataKeys.Location).dispatchEvent(eventKeySpace);
+		PCX.findEl(patientDataKeys.Location).value = patientDataValueDefaults.Location;
+		PCX.findEl(patientDataKeys.Location).dispatchEvent(eventKeySpace);
 		waitForElm(patientDataKeys.LocationMenu).then((elm) => {
-			document.querySelector(patientDataKeys.Location).dispatchEvent(eventKeyTab);
+			PCX.findEl(patientDataKeys.Location).dispatchEvent(eventKeyTab);
 			waitForElm(patientDataKeys.PhysicianOptions).then((elm) => {
-				document.querySelector(patientDataKeys.Physician).value = patientDataValueDefaults.Physician;
-				document.querySelector("#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianId").value = 1896;
-				document.querySelector("#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianName").value = "Prince, Laboratories";
+				PCX.findEl(patientDataKeys.Physician).value = patientDataValueDefaults.Physician;
+				PCX.findEl("#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianId").value = 1896;
+				PCX.findEl("#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianName").value = "Prince, Laboratories";
 			})
 		});
 	});
-	document.querySelector(patientDataKeys.BillTo).value = patientDataValueDefaults.BillTo;
-	document.querySelector(patientDataKeys.Category).focus();
+	PCX.findEl(patientDataKeys.BillTo).value = patientDataValueDefaults.BillTo;
+	PCX.findEl(patientDataKeys.Category).focus();
 }

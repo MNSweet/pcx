@@ -13,23 +13,23 @@ console.log("This is PL specific content script.");
  * @param OBJ					testCategories	Lookup table for Test Categories by DB ID's
  * 
  */
-	const linkId = PCX_CMSInteraction.getUrlParams()['LinkId'];
+	const linkId = PCX.getUrlParams()['LinkId'];
 
 	// Event Keys
-	const eventKeyEnd	= new KeyboardEvent('keydown', { bubbles: true, cancelable : true, key : "END",shiftKey : false, keyCode : 35 });
-	const eventKeySpace = new KeyboardEvent('keydown', { key: ' ', bubbles: true });
-	const eventKeyTab	= new KeyboardEvent('keydown', { bubbles: true, cancelable : true, key : "Tab",shiftKey : false, keyCode : 13 });
+	const eventKeyEnd		= new KeyboardEvent('keydown', { bubbles: true, cancelable : true, key : "END",shiftKey : false, keyCode : 35 });
+	const eventKeySpace 	= new KeyboardEvent('keydown', { key: ' ', bubbles: true });
+	const eventKeyTab		= new KeyboardEvent('keydown', { bubbles: true, cancelable : true, key : "Tab",shiftKey : false, keyCode : 13 });
 
 	// Page Element points to avoid multiple queries
 	let pageElements = {};
 
 	// Lab Lookup Table
 	const labs = {
-		   2: {Code:"IP",Label:"Ipseity Diagnostics LLC"},
-		1010: {Code:"SQ",Label:"SureQuest Diagnostics"},
-		1011: {Code:"RR",Label:"Reliable Result Labs"},
-		1012: {Code:"PL",Label:"Prince Laboratories"},
-		1013: {Code:"PD",Label:"Principle Diagnostics"}
+		   2: {Code:"IP",Label:"Ipseity Diagnostics LLC", Stability:{NGS: 90}},
+		1010: {Code:"SQ",Label:"SureQuest Diagnostics", Stability:{NGS: 90}},
+		1011: {Code:"RR",Label:"Reliable Result Labs", Stability:{NGS: 30}},
+		1012: {Code:"PL",Label:"Prince Laboratories", Stability:{NGS: 30}},
+		1013: {Code:"PD",Label:"Principle Diagnostics", Stability:{NGS: 90}}
 	};
 
 	// Test Categories / Codes Lookup Table
@@ -56,7 +56,7 @@ if (linkId == "2070") {
 	const intervalID = setInterval(handleResults, 500);
 	// Function to handle the click event and get the row data
 	function handleResults(event) {
-		let headings = document.getElementById('MainContent_ctl00_grid_DXHeadersRow0').textContent.replaceAll('\t','').replaceAll('\n','').split(" ");
+		let headings = PCX.findEl('#MainContent_ctl00_grid_DXHeadersRow0').textContent.replaceAll('\t','').replaceAll('\n','').split(" ");
 		if (headings.includes('Alt ID 1') && typeof headings.includes('Accession')) {
 		  let rowData = document.querySelectorAll('.dxgvDataRow_Metropolis');
 
@@ -66,7 +66,7 @@ if (linkId == "2070") {
 
 				resultLinkTD.innerHTML = '<a href="https://prince.iatserv.com/?LinkId=2461&AccessionId='+accessionID+'" target="_blank">Results</a>'
 			});
-			document.querySelector('#MainContent_ctl00_grid_DXHeadersRow0 td:nth-child('+(headings.indexOf('Alt ID 1')+1)+ ')').textContent = "Results";
+			PCX.findEl('#MainContent_ctl00_grid_DXHeadersRow0 td:nth-child('+(headings.indexOf('Alt ID 1')+1)+ ')').textContent = "Results";
 		}
 	}
 	handleResults();
@@ -94,14 +94,15 @@ if (linkId == "2011") {
  */
 
 	// Define Page Elements
-	pageElements['BillType']	= document.querySelector("#MainContent_ctl00_ctl00_ddBillType_ddControl");
-	if(PCX_CMSInteraction.getUrlParams()['type'] == "acs") {
-		pageElements['Status']	= document.querySelector("#ddNewAccessionStatus");
+	pageElements['BillType']	= PCX.findEl("#MainContent_ctl00_ctl00_ddBillType_ddControl");
+	if(PCX.getUrlParams()['type'] == "acs") {
+		pageElements['Status']	= PCX.findEl("#ddNewAccessionStatus");
 	}
-	pageElements['locationInput']	= document.querySelector("#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbLocation_tbText");
+	pageElements['locationInput']	= PCX.findEl("#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbLocation_tbText");
 	pageElements['Physician']		= "#ddPhysician";
 	pageElements['PhysicianOptions']= "#ddPhysician option";
-	pageElements['newPatientBtn']	= document.querySelector("#btnAddEditPatient");
+	pageElements['newPatientBtn']	= PCX.findEl("#btnAddEditPatient");
+	pageElements['DOC']				= PCX.findEl("#MainContent_ctl00_ctl00_tbCollectionDateTime_tbDate_tbText");
 
 	// Set Bill Type to Primary Insurance as default
 	pageElements.BillType.value = 1;
@@ -110,14 +111,14 @@ if (linkId == "2011") {
 
 	pageElements.newPatientBtn.addEventListener('click', async (e) => {
 		waitForElm(".fancybox-overlay.fancybox-overlay-fixed iframe").then( (elm) => {
-			document.querySelector(".fancybox-overlay.fancybox-overlay-fixed iframe").addEventListener('load', (el) => {
+			PCX.findEl(".fancybox-overlay.fancybox-overlay-fixed iframe").addEventListener('load', (el) => {
 				
 				// Date of Birth Checks
-				let inputDOB = document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_tbDOB_tbText');
+				let inputDOB = PCX.findEl('[class="fancybox-iframe"').contentWindow.PCX.findEl('#MainContent_ctl00_tbDOB_tbText');
 				let minorDate = new Date();
 					minorDate.setFullYear(minorDate.getFullYear() - 18);
 				inputDOB.addEventListener('blur',  (elme) => {
-					let dob = document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_tbDOB_tbText').value;	
+					let dob = PCX.findEl('[class="fancybox-iframe"').contentWindow.PCX.findEl('#MainContent_ctl00_tbDOB_tbText').value;	
 					//console.log(dob,Date.parse(dob),Date.now(),Date.parse(dob) >= Date.now());
 					if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= Date.now()){
 						QAManager.addNotice("DOB","Seems like your patient hasn't been born yet. Is this birthday correct? " + dob);
@@ -145,9 +146,9 @@ if (linkId == "2011") {
 		if(event.target.value != "" && pageElements.newPatientBtn.classList.contains("disabled")) {
 			if(event.target.value.match("^(AM-|CTD-).*")){
 				waitForElm(pageElements.PhysicianOptions).then((elm) => {
-					document.querySelector(pageElements.Physician).innerHTML = `<option value="0" disabled selected hidden>Select a Physician</option>`+document.querySelector(pageElements.Physician).innerHTML;
-			        document.querySelector("#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianId").value = "";
-			        document.querySelector("#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianName").value = "";
+					PCX.findEl(pageElements.Physician).innerHTML = `<option value="0" disabled selected hidden>Select a Physician</option>`+PCX.findEl(pageElements.Physician).innerHTML;
+			        PCX.findEl("#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianId").value = "";
+			        PCX.findEl("#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianName").value = "";
 				});
 			}
 			pageElements.newPatientBtn.classList.remove("disabled");
@@ -156,27 +157,48 @@ if (linkId == "2011") {
 		}
 	});
 
-	document.querySelector('#MainContent_ctl00_ctl00_upPanel').addEventListener('change', (e) => {
+	// CHANGE
+	PCX.findEl('#MainContent_ctl00_ctl00_upPanel').addEventListener('change', (e) => {
 		// Ping reloaded Elements
-		pageElements['CategoryOpt']		= document.querySelector("#MainContent_ctl00_ctl00_ctrlOrderTestCategoryControl1_ddTestCategory option:checked");
-		pageElements['TestCodesInput']	= document.querySelector("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText");
-		pageElements['TestCodesOutput']	= document.querySelector("#dvSelectedItems");
+		pageElements['CategoryOpt']		= PCX.findEl("#MainContent_ctl00_ctl00_ctrlOrderTestCategoryControl1_ddTestCategory option:checked");
+		pageElements['TestCodesInput']	= PCX.findEl("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText");
+		pageElements['TestCodesOutput']	= PCX.findEl("#dvSelectedItems");
+		pageElements['DOC']				= PCX.findEl("#MainContent_ctl00_ctl00_tbCollectionDateTime_tbDate_tbText");
 		if (e.target && e.target.id === 'MainContent_ctl00_ctl00_ctrlOrderTestCategoryControl1_ddTestCategory') {
 			checkTestCat(pageElements.CategoryOpt,{Input: pageElements.TestCodesInput,Output: pageElements.TestCodesOutput},testCategories);
 		}
 	});
+
+	// BLUR
+	PCX.findEl('#MainContent_ctl00_ctl00_upPanel').addEventListener('blur', (e) => {
+		if (e.target && e.target.id === 'MainContent_ctl00_ctl00_tbCollectionDateTime_tbDate_tbText') {
+			let attempt = 0;
+			let lastValue = '';
+			const intervalId = setInterval(() => {
+				if (pageElements.DOC.value !== lastValue) {
+					setStablityNotice(pageElements.DOC.value)
+					lastValue = pageElements.DOC.value;
+					clearInterval(intervalId);
+				}
+				if (++attempt >= 5) {
+					clearInterval(intervalId);
+				}
+			}, 100);
+		}
+	},true);
+
 	async function checkTestCat(elCategory,elTestCodes,testCategories){
 		if(
 			elCategory.value != "" &&
 			elTestCodes.Output.querySelectorAll('.item').length <= 0
 		) {
-			console.log(elCategory.value);
 			elTestCodes.Input.value = testCategories[elCategory.value].Test;
 			await delay(1000);
-			pageElements['TestCodesInput']	= elTestCodes.Input = document.querySelector("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText")
+			pageElements['TestCodesInput']	= elTestCodes.Input = PCX.findEl("#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText")
 			elTestCodes.Input.dispatchEvent(eventKeyEnd);
 			await delay(500);
 			elTestCodes.Input.dispatchEvent(eventKeyTab);
+			setStablityNotice(pageElements.DOC.value);
 		}
 	}
 	function delay(ms) {
@@ -186,6 +208,7 @@ if (linkId == "2011") {
 
 // Update Accession
 if (linkId == "2071") {
+	setStablityNotice(PCX.findEl('#MainContent_ctl00_tbCollectionDateTime_tbDate_tbText').value, true);
 
 /**
  * 
@@ -199,20 +222,20 @@ if (linkId == "2071") {
 		// being added to local storage and sets a deletion timer to purge
 		// the data from cache and local storage, never saving to hard disk
 		const patientData = {
-			Category: document.querySelector('#MainContent_ctl00_ctrlOrderTestCategoryControl_ddTestCategory option:checked').value,
-			DOC: document.querySelector('#MainContent_ctl00_tbCollectionDateTime_tbDate_tbText').value,
-			FirstName: document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector('#tbFirstName').value,
-			LastName: document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector('#tbLastName').value,
-			MiddleName: document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_tbMiddleName').value,
-			DOB: document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_tbDOB_tbText').value.split('/'),
-			Gender: document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_ddGender_ddControl option:checked').textContent,
-			Race: document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_ddRace_ddControl option:checked').textContent,
-			Address: document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_AddressControl1_tbAddress1').value + ' ' + document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_AddressControl1_tbAddress2').value,
-			State: document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_AddressControl1_CountryState_ddState option:checked').value,
-			City: document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_AddressControl1_tbCity').value,
-			Zip: document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_AddressControl1_tbZipCode').value,
-			Phone: document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_AddressControl1_tbPhone').value,
-			Email: document.querySelector('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_AddressControl1_tbEmail').value
+			Category:	PCX.findEl('#MainContent_ctl00_ctrlOrderTestCategoryControl_ddTestCategory option:checked').value,
+			DOC:		PCX.findEl('#MainContent_ctl00_tbCollectionDateTime_tbDate_tbText').value,
+			FirstName:	PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector('#tbFirstName').value,
+			LastName:	PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector('#tbLastName').value,
+			MiddleName:	PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_tbMiddleName').value,
+			DOB:		PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_tbDOB_tbText').value.split('/'),
+			Gender:		PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_ddGender_ddControl option:checked').textContent,
+			Race:		PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_ddRace_ddControl option:checked').textContent,
+			Address:	PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_AddressControl1_tbAddress1').value + ' ' + PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_AddressControl1_tbAddress2').value,
+			State:		PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_AddressControl1_CountryState_ddState option:checked').value,
+			City:		PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_AddressControl1_tbCity').value,
+			Zip:		PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_AddressControl1_tbZipCode').value,
+			Phone:		PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_AddressControl1_tbPhone').value,
+			Email:		PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_AddressControl1_tbEmail').value
 		};
 
 		// Store patient data in Chrome's storage
@@ -235,7 +258,7 @@ if (linkId == "2071") {
 	chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		if (message.action === 'startCountdownBanner') {
 		// If the banner is already present, don't recreate it
-			if (!document.querySelector('#patientDataBanner')) {
+			if (!PCX.findEl('#patientDataBanner')) {
 				initializeBanner(message.patientData);
 			}
 		}
@@ -245,7 +268,7 @@ if (linkId == "2071") {
 
 	// Add BTN to copy PT data
 	
-	document.getElementById("lblAddPatientTitle").addEventListener('click', function(event) {
+	PCX.findEl("#lblAddPatientTitle").addEventListener('click', function(event) {
 		const siteAssets = document.createElement('div');
 		siteAssets.id = 'siteAssets';
 		// Add a button to capture PL data
@@ -256,7 +279,7 @@ if (linkId == "2071") {
 		plButton.onclick = capturePLData;
 		siteAssets.appendChild(plButton);
 		waitForElm('.fancybox-iframe').then((elm) => {
-			document.querySelector('.fancybox-overlay').appendChild(siteAssets);
+			PCX.findEl('.fancybox-overlay').appendChild(siteAssets);
 		});
 	});
 	
@@ -269,8 +292,8 @@ if (linkId == "2071") {
  * 
  */
 	let 	isDragging 	= false;
-	const 	dropArea	= document.getElementById('uploadTable').closest('*');
-	const 	acceptTypes = document.querySelector('#uploadTable input[type="file"]').getAttribute('accept').split(',');
+	const 	dropArea	= PCX.findEl('#uploadTable').closest('*');
+	const 	acceptTypes = PCX.findEl('#uploadTable input[type="file"]').getAttribute('accept').split(',');
 
 	dropArea.addEventListener("dragover", (e) => {
 		dropZoneKeepAlive(isDragging,e);
@@ -291,8 +314,8 @@ if (linkId == "2071") {
 		if (document.body.classList.contains('dropZoneKeepAlive')) {
 			document.body.classList.remove('dropZoneKeepAlive');
 
-			if(document.querySelector('.upload span').textContent == "Drop File"){
-				document.querySelector('.upload span').textContent = "Choose File";
+			if(PCX.findEl('.upload span').textContent == "Drop File"){
+				PCX.findEl('.upload span').textContent = "Choose File";
 			}
 		}
 		if(e.dataTransfer.files.length > 0) {
@@ -305,9 +328,9 @@ if (linkId == "2071") {
 					//return; // File not accepted
 				}
 
-				let acsNum 	= document.querySelector("#MainContent_ctl00_tbAccession").value; // LIMS ID
-				let acsID 	= document.querySelector("#tbAccessionId").value; // System ID (database)
-				let patient	= document.querySelector("#MainContent_ctl00_tbPatient_tbText").value.toUpperCase().split(', ');
+				let acsNum 	= PCX.findEl("#MainContent_ctl00_tbAccession").value; // LIMS ID
+				let acsID 	= PCX.findEl("#tbAccessionId").value; // System ID (database)
+				let patient	= PCX.findEl("#MainContent_ctl00_tbPatient_tbText").value.toUpperCase().split(', ');
 				let queries	= patient;
 					queries.push(acsNum, acsID);
 
@@ -329,7 +352,7 @@ if (linkId == "2071") {
 		isDragging = true;
 		if (!document.body.classList.contains('dropZoneKeepAlive')) {
 			document.body.classList.add('dropZoneKeepAlive');
-			document.querySelector('.upload span').textContent = "Drop File";
+			PCX.findEl('.upload span').textContent = "Drop File";
 		}
 	}
 	function dropZoneTimeOut(isDragging, e) {
@@ -337,8 +360,41 @@ if (linkId == "2071") {
 			isDragging = false;
 			if (document.body.classList.contains('dropZoneKeepAlive')) {
 				document.body.classList.remove('dropZoneKeepAlive');
-				document.querySelector('.upload span').textContent = "Choose File";
+				PCX.findEl('.upload span').textContent = "Choose File";
 			}
 		}
 	}
+}
+
+// Shared enhancments linkId: 2011 & 2071
+function setStablityNotice(stabilityDate,existingAcs = false) {
+	if(stabilityDate == "") {return;}
+	let stabilityAge = Math.floor(
+		(new Date() - new Date(stabilityDate)) / (1000 * 60 * 60 * 24)
+	);
+
+	let stabilityText	= "";
+	let stabilityPhase	= "";
+	if(stabilityAge >= 180){
+		stabilityText	= `Expired`;
+		stabilityPhase	= "phaseFour";
+	}else if(stabilityAge > 88){
+		stabilityText	= `${stabilityAge} Days Old`;
+		stabilityPhase	= "phaseThree";
+	}else if(stabilityAge > 27){
+		stabilityText	= `${stabilityAge} Days Old`;
+		stabilityPhase	= "phaseTwo";
+	}else{
+		stabilityText	= `${stabilityAge} Days Old`;
+		stabilityPhase	= "phaseOne";
+	}
+
+	if(!PCX.findEl('#stabilityNotice')) {
+		const stabilityNotice = document.createElement("div");
+			stabilityNotice.innerHTML = `<span class="QAManagerSubHeading">Sample Stability</span><span id="stabilityNoticeAge"></span>`;
+			stabilityNotice.id = "stabilityNotice";
+		PCX.findEl('.dos').appendChild(stabilityNotice);
+	}
+	PCX.findEl('#stabilityNoticeAge').textContent = stabilityText;
+	PCX.findEl('#stabilityNotice').classList = stabilityPhase + (existingAcs?" stabilityNoticeExistingACS":"");
 }

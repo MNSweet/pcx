@@ -1,5 +1,5 @@
-// Define the PCX_CMSInteraction class in content.js
-class PCX_CMSInteraction {
+// Define the PCX class in content.js
+class PCX {
 
 /**
  * 
@@ -69,11 +69,11 @@ class PCX_CMSInteraction {
  */
 
 	/**
-	 * locateElement
+	 * findEl
 	 * @param  {[type]} selector [description]
 	 * @return {[type]}          [description]
 	 */
-	static locateElement(selector) {
+	static findEl(selector) {
 		pcxDebug(`Locating element: ${selector}`);
 		return document.querySelector(selector);
 	}
@@ -99,7 +99,7 @@ class PCX_CMSInteraction {
 	}
 
 	static simulateUserEvent(selector, eventName, arg=false) {
-		let element = PCX_CMSInteraction.locateElement(selector);
+		let element = PCX.findEl(selector);
 		if (element) {
 			pcxDebug(element);
 			switch (eventName){
@@ -116,14 +116,14 @@ class PCX_CMSInteraction {
 					if(!arg || typeof arg != 'object') {
 						pcxDebug(`Value is not defined`);
 					}else{
-						PCX_CMSInteraction.simulateUserInputValue(element, arg)
+						PCX.simulateUserInputValue(element, arg)
 					}
 					break;
 				case "key":
 					if(!arg) {
 						pcxDebug(`Key is not defined`);
 					}else{
-						PCX_CMSInteraction.simulateUserKey(element, arg)
+						PCX.simulateUserKey(element, arg)
 					}
 					break;
 				default:
@@ -197,7 +197,7 @@ class PCX_CMSInteraction {
 	
 	static showGUIModalNotification(title, message, id, remindTime = 0) {
 		// Load external CSS file
-		if (!document.getElementById("pcx-modal-style")) {
+		if (!PCX.findEl("#pcx-modal-style")) {
 			const link = document.createElement("link");
 			link.id = "pcx-modal-style";
 			link.rel = "stylesheet";
@@ -205,7 +205,7 @@ class PCX_CMSInteraction {
 			document.head.appendChild(link);
 		}
 
-		if (!document.getElementById("pcx-modal-container")) {
+		if (!PCX.findEl("#pcx-modal-container")) {
 			const modalContainer = document.createElement("div");
 			modalContainer.id = "pcx-modal-container";
 
@@ -236,7 +236,7 @@ class PCX_CMSInteraction {
 				const remindButton = document.createElement("button");
 				remindButton.textContent = `Don't remind me for ${remindTime} hours`;
 				remindButton.onclick = () => {
-					PCX_CMSInteraction.setLocalStorage("pcxid_" + id, Date.now() + remindTime * 3600000);
+					PCX.setLocalStorage("pcxid_" + id, Date.now() + remindTime * 3600000);
 					document.body.removeChild(modalContainer);
 					pcxDebug(`User selected to not be reminded for ${remindTime} hours`);
 				};
@@ -274,8 +274,8 @@ class PCX_CMSInteraction {
 	}
 }
 
-// Expose PCX_CMSInteraction to the window
-window.PCX_CMSInteraction = PCX_CMSInteraction;
+// Expose PCX to the window
+window.PCX = PCX;
 
 
 
@@ -348,14 +348,14 @@ class QAManager {
 		let noticeItems = "";
 
 		// Load external CSS file
-		if (!document.getElementById("pcx-modal-style")) {
+		if (!PCX.findEl("#pcx-modal-style")) {
 			const link = document.createElement("link");
 			link.id = "pcx-modal-style";
 			link.rel = "stylesheet";
 			link.href = chrome.runtime.getURL("css/modal.css");
 			document.head.appendChild(link);
 		}
-		if (!document.getElementById("pcx-qa-modal-container")) {
+		if (!PCX.findEl("#pcx-qa-modal-container")) {
 			const modalContainer = document.createElement("div");
 			modalContainer.id = "pcx-qa-modal-container";
 
@@ -409,9 +409,9 @@ window.QAManager = QAManager;
 
 
 // Debugging function
-const DEBUG = true;
+const PCX_DEBUG = false;
 function pcxDebug(message) {
-	if (DEBUG) {
+	if (PCX_DEBUG) {
 		console.log(message);
 	}
 }
