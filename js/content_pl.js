@@ -152,7 +152,7 @@ if (linkId == "2011") {
 				});
 			}
 			pageElements.newPatientBtn.classList.remove("disabled");
-		}else if(!pageElements.newPatientBtn.classList.contains("disabled")){
+		}else if(event.target.value == "" && !pageElements.newPatientBtn.classList.contains("disabled")){
 			pageElements.newPatientBtn.classList.add("disabled");
 		}
 	});
