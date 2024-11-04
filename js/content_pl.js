@@ -366,6 +366,89 @@ if (linkId == "2071") {
 	}
 }
 
+if (linkId == "2461") {
+	/**
+ *
+ * File Drop
+ *
+ * Expands the Drop area of file upload and applies a QA Check
+ * 
+ */
+	let 	isDragging 	= false;
+	const 	dropArea	= PCX.findEl('#uploadTable').closest('*');
+	const 	acceptTypes = PCX.findEl('#uploadTable input[type="file"]').getAttribute('accept').split(',');
+
+	dropArea.addEventListener("dragover", (e) => {
+		dropZoneKeepAlive(isDragging,e);
+	});
+
+	dropArea.addEventListener("dragleave", (e) => {
+		dropZoneTimeOut(isDragging,e);
+	});
+	document.addEventListener("dragover", (e) => {
+		dropZoneKeepAlive(isDragging,e);
+	});
+	window.addEventListener("dragleave", (e) => {
+		dropZoneTimeOut(isDragging,e);
+	});
+
+	dropArea.addEventListener("drop", (e) => {
+		isDragging = false;
+		if (document.body.classList.contains('dropZoneKeepAlive')) {
+			document.body.classList.remove('dropZoneKeepAlive');
+
+			if(PCX.findEl('.upload span').textContent == "Drop File"){
+				PCX.findEl('.upload span').textContent = "Choose File";
+			}
+		}
+		if(e.dataTransfer.files.length > 0) {
+			console.log("dropArea dataTransfer",e.dataTransfer.files);
+
+			for (const [i, file] of Object.entries(e.dataTransfer.files)) {
+				let fileExt = file.name.split('.').pop();
+				let fileName = file.name.replace('.'+fileExt,'');
+				if (acceptTypes.findIndex(function (a) { return a.toLowerCase() == ('.' + fileExt).toLowerCase() }) == -1) {
+					//return; // File not accepted
+				}
+
+				let acsNum 	= PCX.findEl("#lblAccession a").textContent; // LIMS ID
+				let acsID 	= PCX.findEl("#lblAccession a").href.match(/(\d*)$/gm)[0]; // System ID (database)
+				let patient	= PCX.findEl("#lblPatient").textContent.toUpperCase().split(' ');
+				let queries	= patient;
+					queries.push(acsNum, acsID);
+
+				let tokens	= fileName.toUpperCase()
+					.replace(/(\d{2})-(\d{2})-(\d{4})/gm, `$1$2$3`) // Condense Dates with dashes
+					.replace(/(\d{2})\.(\d{2})\.(\d{4})/gm, `$1$2$3`) // Condense Dates with periods
+					.split(/[\s-\._]/)	// Separate by whitespace, dashes, periods, underscores
+
+				if(!tokens.some(item => queries.includes(item))) {
+					QAManager.addNotice("FileUpload","<h4>Sorry to bother</h4>The file you just uploaded does not have the Patient's Name or Accession Number in it's name.<br/>Just wanted to double check you didn't upload the wrong file: <pre>" + file.name + "</pre>");
+					QAManager.showQAModalNotification();
+					QAManager.removeNotice("FileUpload");
+				}
+			};
+		}
+	});
+
+	function dropZoneKeepAlive(isDragging, e) {
+		isDragging = true;
+		if (!document.body.classList.contains('dropZoneKeepAlive')) {
+			document.body.classList.add('dropZoneKeepAlive');
+			PCX.findEl('.upload span').textContent = "Drop File";
+		}
+	}
+	function dropZoneTimeOut(isDragging, e) {
+		if (e.target === window || (e.clientX === 0 && e.clientY === 0)) {
+			isDragging = false;
+			if (document.body.classList.contains('dropZoneKeepAlive')) {
+				document.body.classList.remove('dropZoneKeepAlive');
+				PCX.findEl('.upload span').textContent = "Choose File";
+			}
+		}
+	}
+}
+
 // Shared enhancments linkId: 2011 & 2071
 function setStablityNotice(stabilityDate,existingAcs = false) {
 	if(stabilityDate == "") {return;}
