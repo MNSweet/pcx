@@ -114,29 +114,50 @@ if (linkId == "2011") {
 			PCX.findEl(".fancybox-overlay.fancybox-overlay-fixed iframe").addEventListener('load', (el) => {
 				
 				// Date of Birth Checks
-				let inputDOB = PCX.findEl('[class="fancybox-iframe"').contentWindow.PCX.findEl('#MainContent_ctl00_tbDOB_tbText');
+				let inputDOB = PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector('#MainContent_ctl00_tbDOB_tbText');
 				let minorDate = new Date();
 					minorDate.setFullYear(minorDate.getFullYear() - 18);
-				inputDOB.addEventListener('blur',  (elme) => {
-					let dob = PCX.findEl('[class="fancybox-iframe"').contentWindow.PCX.findEl('#MainContent_ctl00_tbDOB_tbText').value;	
-					//console.log(dob,Date.parse(dob),Date.now(),Date.parse(dob) >= Date.now());
-					if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= Date.now()){
-						QAManager.addNotice("DOB","Seems like your patient hasn't been born yet. Is this birthday correct? " + dob);
-						//QAManager.showQAModalNotification();
-					}else if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= minorDate.getTime()){ // 18+ Minor check
-						//console.log(Date.parse(dob), minorDate.getTime());
-						QAManager.addNotice("DOB","Intesting your patient is a minor. Just a quick check. Is this birthday correct? " + dob);
-						//QAManager.showQAModalNotification();
-					}else if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= 946702800000){ //Jan 1 2000
-						//console.log(Date.parse(dob), 946702800000);
-						QAManager.addNotice("DOB","Just being vigilant, Is this birthday correct? " + dob);
-						//QAManager.showQAModalNotification();
-					}else {
-						QAManager.removeNotice("DOB");
-					}
+				let docAttempt 	 = 0;
+				let docLastValue = '';
+				inputDOB.addEventListener('blur', (e) => {
+					let docAttempt 	 = 0;
+					const docIntervalId = setInterval(() => { // Wait for date picker
+						if (e.target.value !== docLastValue) {
+							docLastValue = e.target.value;
+							clearInterval(docIntervalId);
+
+							let dob = e.target.value;
+							if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= Date.now()){
+								QAManager.addNotice("DOB","It seems that your patient hasn't been born yet. Is this birthday correct? " + dob);
+							}else if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= minorDate.getTime()){ // 18+ Minor check
+								QAManager.addNotice("DOB","Intesting, your patient is a minor. Just a quick check. Is this birthday correct? " + dob);
+							}else if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= 946702800000){ //Jan 1 2000
+								QAManager.addNotice("DOB","Just being vigilant, Though I may be wrong: Is this birthday correct? " + dob);
+							}else {
+								QAManager.removeNotice("DOB");
+							}
+						}
+						if (++docAttempt >= 5) {
+							clearInterval(docIntervalId);
+						}
+					}, 100);
 				});
-				//QAManager.showQAModalNotification();
+				PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector("#MainContent_ctl00_btnSave").addEventListener('click', (el) => {
+					if(QAManager.getNoticeCount() > 0) {
+						QAManager.showQAModalNotification();
+					}
+					console.log(QAManager.getNoticeCount(),QAManager.notices);
+				});
+				PCX.findEl('[class="fancybox-iframe"').contentWindow.document.querySelector("#form1").addEventListener('submit', (el) => {
+					e.preventDefault()
+					if(QAManager.getNoticeCount() > 0) {
+						QAManager.showQAModalNotification();
+					}
+					console.log(QAManager.getNoticeCount(),QAManager.notices);
+				});
+
 			});
+			
 		});
 	});
 
@@ -275,7 +296,7 @@ if (linkId == "2071") {
 		const plButton = document.createElement('span');
 		plButton.textContent = '⎘';
 		plButton.id = 'patientCopy';
-		plButton.titel = 'Capture Patient Record';
+		plButton.title = 'Capture Patient Record';
 		plButton.onclick = capturePLData;
 		siteAssets.appendChild(plButton);
 		waitForElm('.fancybox-iframe').then((elm) => {
