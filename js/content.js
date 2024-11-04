@@ -368,11 +368,11 @@ class QAManager {
 			modal.appendChild(modalTitle);
 
 			for (const key of QAManager.getAllNoticeCodes()) {
-			let noticeItem = `<div class="noticeItem">
+				let noticeItem = `<div class="noticeItem" id="noticeItem-${key}">
 			<div class="noticeDescription">${QAManager.notices[key]}
 			</div>
 			<div class="noticeActions">
-				<button class="noticeClear">It's correct: Clear notice.</button>
+				<button class="noticeClear" data-key="${key}">It's correct: Clear notice.</button>
 				<button class="noticeCancel">Good catch: Let’s fix it</button>
 			</div>
 		</div>`;
@@ -391,6 +391,7 @@ class QAManager {
 
 			const okButton = document.createElement("button");
 			okButton.textContent = "Close to fix errors";
+			okButton.id = "pcx-qa-modal-close";
 			okButton.onclick = () => {
 				document.body.removeChild(modalContainer);
 				pcxDebug("Modal dismissed");
@@ -399,6 +400,28 @@ class QAManager {
 
 			modalContainer.appendChild(modal);
 			document.body.appendChild(modalContainer);
+
+			document.querySelectorAll('.noticeClear').forEach(
+				(btn)=>{
+					btn.addEventListener('click',()=>{
+						QAManager.removeNotice(btn.getAttribute("data-key"));
+						document.querySelector(`#noticeItem-${btn.getAttribute("data-key")}`).remove();
+						if(document.querySelector(`#noticeContainer`).children.length < 1) {
+							document.querySelector(`#noticeContainer`).classList = "cleared";
+							document.querySelector(`#noticeContainer`).innerHTML = "<div>Cheers</div>";
+							document.querySelector(`#pcx-qa-modal-close`).textContent = "Close";
+						}
+					});
+					console.log(btn);
+				}
+			);
+			document.querySelectorAll('.noticeCancel').forEach(
+				(btn)=>{
+					btn.addEventListener('click',()=>{document.body.removeChild(modalContainer)})
+					console.log(btn);
+				}
+			);
+			
 		}
 	}
 }

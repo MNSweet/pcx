@@ -28,25 +28,6 @@ A suite of background checks to assist in the Validation and Quality Control of 
 	- Requires: PreauthorizationOrderId
 	- Template: default.aspx
 
-## PL LIMS Test Categories / ID's
-| ID | Test Category	| Test Code (Shorthand) | Test Code 																			|
-| -- | ---------------| --------------------- | ------------------------------------------------|
-|  1 | Toxicology			|	--										|	--																							|
-|  3 | PGX						| PHARMA								|	Panel - PHARMACOGENOMICSCOMPREHENSIVE						|
-|  4 | **CGX**				| CANCER								| Panel - COMPREHENSICE CANCER										|
-|  5 | STI						| STI										| Panel - STI Panel																|
-|  6 | UTI						| UTI										| Panel - UTI Panel																|
-|  7 | HPV						| HPV										| Panel - HPV Panel																|
-|  8 | **Wound**			| WOUND									| Panel - Wound Panel															|
-|  9 | COVID Flu RSV	| COVID									| Panel - COVIDFluRSV															|
-| 11 | **Immuno**			| IMMUNO								| Panel - COMPREHENSICE PRIMARY IMMUNODEFICIENCY	|
-| 12 | **Neuro**			| NEURO									| Panel - COMPREHENSIVE NEUROLOGY									|
-| 13 | RPP						|	--										|	--																							|
-| 14 | Eyes Disorder	| EYE										| Panel - COMPREHENSIVE EYE DISORDER							|
-| 15 | Thyroid				| THYROID								|	Panel - THYROID GENETIC DISEASE									|
-| 16 | Diabetes				| --										| --																							|
-| 17 | Cardio					| CARDIO								| Panel - CARDIO-PULMONARY												|
-
 ## PL LIMS Testing Labs
 | Codes | Lab Name                  | ID   |
 | ----- | --------------------------| ---- |
@@ -55,6 +36,54 @@ A suite of background checks to assist in the Validation and Quality Control of 
 | RR    | Reliable Result Labs      | 1011 |
 | PL    | Prince Laboratories       | 1012 |
 | PD    | Principle Diagnostics     | 1013 |
+
+## PL LIMS Test Categories / ID's
+| ID | Test Category	| Test Code (Shorthand) | Test Code 									|
+| -- | -----------------| --------------------- | ----------------------------------------------|
+|  1 | Toxicology		|	--					| --											|
+|  3 | PGX				| PHARMA				| Panel - PHARMACOGENOMICSCOMPREHENSIVE			|
+|  4 | **CGX**			| CANCER				| Panel - COMPREHENSICE CANCER					|
+|  5 | STI				| STI					| Panel - STI Panel								|
+|  6 | UTI				| UTI					| Panel - UTI Panel								|
+|  7 | HPV				| HPV					| Panel - HPV Panel								|
+|  8 | **Wound**		| WOUND					| Panel - Wound Panel							|
+|  9 | COVID Flu RSV	| COVID					| Panel - COVIDFluRSV							|
+| 11 | **Immuno**		| IMMUNO				| Panel - COMPREHENSICE PRIMARY IMMUNODEFICIENCY|
+| 12 | **Neuro**		| NEURO					| Panel - COMPREHENSIVE NEUROLOGY				|
+| 13 | RPP				|	--					| --											|
+| 14 | Eyes Disorder	| EYE					| Panel - COMPREHENSIVE EYE DISORDER			|
+| 15 | **Thyroid**		| THYROID				| Panel - THYROID GENETIC DISEASE				|
+| 16 | Diabetes			| --					| --											|
+| 17 | Cardio			| CARDIO				| Panel - CARDIO-PULMONARY						|
+
+## RR LIMS Test Categories / ID's
+| ID | Test Category			| Test Code (Shorthand) | Test Code 									|
+| -- | -------------------------| --------------------- | ----------------------------------------------|
+|  6 | Core Laboratory			| --					| --											|
+|  7 | Cultures					| --					| --											|
+| 10 | Dermatology				| --					| --											|
+| 11 | Cytology					| --					| --											|
+| 12 | Histology				| --					| --											|
+| 13 | Urology					| --					| --											|
+| 14 | Nail Fungal				| --					| --											|
+| 15 | Pathology				| --					| --											|
+| 16 | PGX						| --					| --											|
+| 17 | CGX NGS					| COMPREHENSIVE			| Panel - IP-CGX Comprehensive Cancer			|
+| 18 | **Immuno NGS**			| PANEL					| Panel - COMPREHENSICE PRIMARY IMMUNODEFICIENCY|
+| 19 | Cardio NGS				| CARDIO				| Panel - CARDIO-PULMONARY						|
+| 20 | Eyes NGS					| EYE					| Panel - Comprehensive Eye Disorder Panel		|
+| 21 | **Neuro NGS**			| PANEL					| Panel - COMPREHENSIVE NEUROLOGY				|
+| 22 | Thyroid NGS				| THYROID				| Panel - Comprehensive Eye Disorder Panel		|
+| 23 | Toxicology				| REFLEX				| Panel - Urine Drug Screen Profile w/ Reflex to Definitive | Urine Drug Screen ONLY|
+| 25 | STI						| PROFILE				| Panel - STI Profile							|
+| 26 | UTI						| ABR PROFILE			| Panel - UTI w/ ABR Profile					|
+| 27 | Wound					| ABR PROFILE			| Panel - Wound W/ ABR Profile					|
+| 28 | Respiratory Pathogens	| PROFILE				| Panel - RPP - Respiratory Pathogen			|
+| 30 | COVID-19					| COVID					| Panel - COVID-19								|
+| 31 | Hereditary Metabolic Disorder NGS| --			| --								|
+
+
+
 
 ## Auto QA
 ### File Name Check

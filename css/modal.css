@@ -192,3 +192,16 @@
 	background-color: #ffffff;
 	margin-top: 11px;
 }
+
+#noticeContainer.cleared {
+	display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#noticeContainer.cleared div {
+	font-size: 132px;
+	color: #444;
+	text-shadow: 1px 1px 5px #d3d3d3, -1px -1px 0px #000000;
+	opacity: 0.2;
+}
