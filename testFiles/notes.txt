@@ -20,6 +20,37 @@
 <label class="CreatePaCheckboxes"><input type="checkbox" id="CreatePaNewAccession" checked="">Start New Accession</label>    
 </div>
 
+CLIENT MANAGERMENT - WIZARD - NEW LOCATION
+https://prince.iatserv.com/?LinkId=2006&_ml=31&_mlp=12
+
+<div id="MainContent_ctl00_updatePanel">
+
+
+<div class="processsteps">
+    <ul class="breadcrumb">
+	    <li class=""><a>Acount Info</a></li>
+	    <li><a href="javascript:void(0);">Acount Locations</a></li>
+	    <li><a style="pointer-events: none">Location Users</a></li>
+	    <li><a>Review</a></li>
+    </ul>
+</div>
+
+  <table class="wizard" cellspacing="0" cellpadding="0" id="MainContent_ctl00_CreateWizard" style="border-collapse:collapse;">
+	<tbody><tr style="height:100%;">
+		<td>
+              
+              <div class="alert alert-success">
+                  The account has been created successfully.
+              </div>
+              <div>&nbsp;</div>
+              
+              
+              
+          </td>
+	</tr>
+</tbody></table>
+        
+    </div>
 
 
 
