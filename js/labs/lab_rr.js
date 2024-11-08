@@ -320,9 +320,6 @@ if (linkId == "2011") { //Create Order
 			elTestCodes.Input.dispatchEvent(eventKeyTab);
 		}
 	}
-	function delay(ms) {
-		return new Promise(resolve => setTimeout(resolve, ms));
-	}
 
 	chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		if (message.action === 'startCountdownBanner') {
@@ -330,23 +327,23 @@ if (linkId == "2011") { //Create Order
 			if (PCX.findEl('#patientDataBanner')) {
 				PCX.findEl('#patientDataBanner').remove();
 			}
-				initializeBanner(
-					message.patientData,
-					90,
-					() => {
-						const rrButton = document.createElement('span');
-						rrButton.textContent	= 'Paste Patient Data';
-						rrButton.id 			= "patientDataClone";
+			initializeBanner(
+				message.patientData,
+				90,
+				() => {
+					const rrButton = document.createElement('span');
+					rrButton.textContent	= 'Paste Patient Data';
+					rrButton.id 			= "patientDataClone";
 
-						const patientDataBanner = PCX.findEl('#patientDataBanner');
+					const patientDataBanner = PCX.findEl('#patientDataBanner');
 
-						PCX.findEl("#patientDataBanner").appendChild(rrButton);
+					PCX.findEl("#patientDataBanner").appendChild(rrButton);
 
-						PCX.findEl("#patientDataClone").addEventListener('click', function(event) {
-							pasteRRPatientData();
-						});
-					}
-				);
+					PCX.findEl("#patientDataClone").addEventListener('click', function(event) {
+						pasteRRPatientData();
+					});
+				}
+			);
 		}
 	});
 
@@ -365,4 +362,37 @@ if (linkId == "2011") { //Create Order
 	});
 	PCX.findEl(patientDataKeys.BillTo).value = patientDataValueDefaults.BillTo;
 	PCX.findEl(patientDataKeys.Category).focus();
+}
+
+// Shared enhancments linkId: 2011 & 2071
+function setStablityNotice(stabilityDate,existingAcs = false) {
+	if(stabilityDate == "") {return;}
+	let stabilityAge = Math.floor(
+		(new Date() - new Date(stabilityDate)) / (1000 * 60 * 60 * 24)
+	);
+
+	let stabilityText	= "";
+	let stabilityPhase	= "";
+	if(stabilityAge >= 180){
+		stabilityText	= `Expired`;
+		stabilityPhase	= "phaseFour";
+	}else if(stabilityAge > 88){
+		stabilityText	= `${stabilityAge} Days Old`;
+		stabilityPhase	= "phaseThree";
+	}else if(stabilityAge > 27){
+		stabilityText	= `${stabilityAge} Days Old`;
+		stabilityPhase	= "phaseTwo";
+	}else{
+		stabilityText	= `${stabilityAge} Days Old`;
+		stabilityPhase	= "phaseOne";
+	}
+
+	if(!PCX.findEl('#stabilityNotice')) {
+		const stabilityNotice = document.createElement("div");
+			stabilityNotice.innerHTML = `<span class="QAManagerSubHeading">Sample Stability</span><span id="stabilityNoticeAge"></span>`;
+			stabilityNotice.id = "stabilityNotice";
+		PCX.findEl('.dos').appendChild(stabilityNotice);
+	}
+	PCX.findEl('#stabilityNoticeAge').textContent = stabilityText;
+	PCX.findEl('#stabilityNotice').classList = stabilityPhase + (existingAcs?" stabilityNoticeExistingACS":"");
 }

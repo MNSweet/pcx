@@ -6,6 +6,10 @@ class PCX {
  * Local Storage Operations
  * 
  */
+	static events = {};
+
+	// Page Element points to avoid multiple queries
+	static pageElementsCache = {};
 	
 	/**
 	 * setLocalStorage 
@@ -16,7 +20,7 @@ class PCX {
 	 */
 	static setLocalStorage(key, value) {
 		chrome.storage.local.set({ [key]: value }, () => {
-			pcxDebug(`Stored ${key}: ${value}`);
+			PCX.log(`Stored ${key}: ${value}`);
 		});
 	}
 
@@ -31,7 +35,7 @@ class PCX {
 	 */
 	static getLocalStorage(key, callback) {
 		chrome.storage.local.get([key], (result) => {
-			pcxDebug(`Fetched ${key}: ${result[key]}`);
+			PCX.log(`Fetched ${key}: ${result[key]}`);
 			return callback(result[key]);
 		});
 	}
@@ -44,7 +48,7 @@ class PCX {
 	 */
 	static clearLocalStorage() {
 		chrome.storage.local.clear(() => {
-			pcxDebug("Local storage cleared");
+			PCX.log("Local storage cleared");
 		});
 	}
 
@@ -57,7 +61,7 @@ class PCX {
 	 */
 	static removeLocalStorage(key) {
 		chrome.storage.local.remove([key], () => {
-			pcxDebug(`Removed key: ${key}`);
+			PCX.log(`Removed key: ${key}`);
 		});
 	}
 
@@ -69,39 +73,82 @@ class PCX {
  */
 
 	/**
-	 * findEl
-	 * @param  {[type]} selector [description]
-	 * @return {[type]}          [description]
+	 * getEl
+	 * @param  STRING			selector	DOM Selector string
+	 * @param  BOOL				requery		Ignore Cache and PCX.findEl()
+	 * @return NODE|BOOL					Found: NODE | Missing: FALSE
+	 *
+	 * Wraps PCX.findEl() in a cache
+	 * 
 	 */
-	static findEl(selector) {
-		pcxDebug(`Locating element: ${selector}`);
-		return document.querySelector(selector);
-	}
-
-	static simulateUserKey(element, key) {
-		if (element) {
-			const eventKeyEnter = new KeyboardEvent('keydown', { key: key, bubbles: true });
-			element.dispatchEvent(eventKeyEnter);
-			pcxDebug(`Simulated Key Press '${key}' on element: ${element.id}`);
+	static getEl(selector,requery=false) {
+		if(!requery && PCX.pageElementsCache[selector]) {
+			PCX.log(`PCX.getEl(${selector}) Cached`);
+			return PCX.pageElementsCache[selector];
 		} else {
-			pcxDebug(`Element not found: ${element.id}`);
+			PCX.log(`PCX.getEl(${selector}) Requested`);
+			return PCX.pageElementsCache[selector] = PCX.findEl(selector);
 		}
 	}
 
-	static simulateUserInputValue(element, valueObj) {
-		if (element && typeof valueObj == 'object') {
-			const eventKeyEnter = new KeyboardEvent('keydown', { key: key, bubbles: true });
-			element.dispatchEvent(eventKeyEnter);
-			pcxDebug(`Simulated Key Press '${key}' on element: ${element.id}`);
+	/**
+	 * findEl
+	 * @param  STRING 		selector	DOM Selector string
+	 * @return NODE|BOOL				Found: NODE | Missing: FALSE
+	 *
+	 * Call a fresh version of the selector
+	 */
+	static findEl(selector) {
+		PCX.log(`PCX.findEl(${selector})`);
+		return document.querySelector(selector);
+	}
+
+	static simulateUserKey(element, opts) {
+		PCX.log(`PCX.simulateUserKey(${element})`);
+		if (element && typeof opts == 'object') {
+			let defaults = {bubbles: true, cancelable : false, key : "",shiftKey : false, keyCode: 0};
+			let options = [defaults,opts].reduce((result, item) => {
+				if (typeof item === 'object' && item !== null) {
+					result.push(Object.assign({}, ...result.filter(x => typeof x === 'object' && x !== null), item));
+				} else {
+					result.push(item);
+				}
+				return result;
+			}, []);
+
+			let simKey = new KeyboardEvent('keydown', {bubbles: options.bubbles, cancelable: options.cancelable, key: options.key, shiftKey: options.shiftKey, keyCode: options.keyCode});
+			element.dispatchEvent(simKey);
+			PCX.log(`Simulated Key Press '${options.key}' on element: ${element.id}`);
 		} else {
-			pcxDebug(`Element not found: ${element.id}`);
+			PCX.log(`Element not found: ${element.id}`);
+		}
+	}
+
+	static simulateUserInputValue(element, opts) {
+		PCX.log(`PCX.simulateUserInputValue(${element})`);
+		if (element && typeof opts == 'object') {
+			let defaults = {bubbles: true, cancelable : false, key : "",shiftKey : false, keyCode: 0};
+			let options = [defaults,opts].reduce((result, item) => {
+				if (typeof item === 'object' && item !== null) {
+					result.push(Object.assign({}, ...result.filter(x => typeof x === 'object' && x !== null), item));
+				} else {
+					result.push(item);
+				}
+				return result;
+			}, []);
+
+			let simKey = new KeyboardEvent('keydown', {bubbles: options.bubbles, cancelable: options.cancelable, key: options.key, shiftKey: options.shiftKey, keyCode: options.keyCode});
+			element.dispatchEvent(simKey);
+			PCX.log(`Simulated Key Press '${options.key}' on element: ${element.id}`);
+		} else {
+			PCX.log(`Element not found: ${element.id}`);
 		}
 	}
 
 	static simulateUserEvent(selector, eventName, arg=false) {
 		let element = PCX.findEl(selector);
 		if (element) {
-			pcxDebug(element);
+			PCX.log(element);
 			switch (eventName){
 				case "focus":
 					element.focus();
@@ -114,14 +161,14 @@ class PCX {
 					break;
 				case "value": //{value:'STRING',simInput:'BOOLEAN'} Value: Text to insert, simInput: Add KeyUp&Down
 					if(!arg || typeof arg != 'object') {
-						pcxDebug(`Value is not defined`);
+						PCX.log(`Value is not defined`);
 					}else{
 						PCX.simulateUserInputValue(element, arg)
 					}
 					break;
 				case "key":
 					if(!arg) {
-						pcxDebug(`Key is not defined`);
+						PCX.log(`Key is not defined`);
 					}else{
 						PCX.simulateUserKey(element, arg)
 					}
@@ -131,9 +178,9 @@ class PCX {
 					element.dispatchEvent(simEvent);
 					break;
 			}
-			pcxDebug(`Simulated event '${eventName}' on element: ${selector}`);
+			PCX.log(`PCX.simulateUserEvent(${selector},${eventName}) Simulated`);
 		} else {
-			pcxDebug(`Element not found: ${selector}`);
+			PCX.log(`PCX.simulateUserEvent(${selector}) Element not found`);
 		}
 	}
 
@@ -146,18 +193,18 @@ class PCX {
 
 	static copyToClipboard(text) {
 		navigator.clipboard.writeText(text).then(
-			() => pcxDebug("Text copied to clipboard"),
-			(err) => pcxDebug("Failed to copy text: " + err)
+			() => PCX.log(`PCX.copyToClipboard(${text}) Success`),
+			(err) => PCX.log(`PCX.copyToClipboard(${text}) Failed: ${err}`)
 		);
 	}
 
 	static async readFromClipboard() {
 		try {
 			let text = await navigator.clipboard.readText();
-			pcxDebug("Text read from clipboard: " + text);
+			PCX.log(`PCX.readFromClipboard() Success: ${text}`)
 			return text;
 		} catch (err) {
-			pcxDebug("Failed to read clipboard contents: " + err);
+			PCX.log(`PCX.readFromClipboard() Failed: ${err}`)
 		}
 	}
 
@@ -176,7 +223,7 @@ class PCX {
 			notifId: id,
 			remindTime: remindTime
 		}, (response) => {
-			pcxDebug("Chrome notification response: " + response.status);
+			PCX.log("Chrome notification response: " + response.status);
 		});
 	}
 
@@ -185,7 +232,7 @@ class PCX {
 			action: "clearReminder",
 			notifId: id
 		}, (response) => {
-			pcxDebug("Cleared reminder for Chrome notification ID: " + id);
+			PCX.log("Cleared reminder for Chrome notification ID: " + id);
 		});
 	}
 
@@ -228,7 +275,7 @@ class PCX {
 			okButton.textContent = "OK";
 			okButton.onclick = () => {
 				document.body.removeChild(modalContainer);
-				pcxDebug("Modal dismissed");
+				PCX.log("Modal dismissed");
 			};
 			buttonContainer.appendChild(okButton);
 
@@ -238,7 +285,7 @@ class PCX {
 				remindButton.onclick = () => {
 					PCX.setLocalStorage("pcxid_" + id, Date.now() + remindTime * 3600000);
 					document.body.removeChild(modalContainer);
-					pcxDebug(`User selected to not be reminded for ${remindTime} hours`);
+					PCX.log(`User selected to not be reminded for ${remindTime} hours`);
 				};
 				buttonContainer.appendChild(remindButton);
 			}
@@ -272,174 +319,43 @@ class PCX {
 	static checkSystemType(type,overrider = false) {
 
 	}
+
+
+/**
+ * 
+ * Tools
+ * 
+ */
+
+	/**
+	 * mergeOptsIntoDefaults
+	 * @param  OBJ	defaults	Preset Values
+	 * @param  OBJ	opts		Overrides
+	 * @return OBJ				Merged Object
+	 *
+	 * PCX.mergeOptsIntoDefaults(defaults,opts);
+	 */
+	static mergeOptsIntoDefaults(defaults,opts) {
+		return [defaults,opts].reduce((result, item) => {
+			if (typeof item === 'object' && item !== null) {
+				result.push(Object.assign({}, ...result.filter(x => typeof x === 'object' && x !== null), item));
+			} else {
+				result.push(item);
+			}
+			return result;
+		}, []);
+	}
+
+	static log(message) {
+	if (PCX.getUrlParams()['debug']) {
+		console.log(message);
+	}
+}
+	
 }
 
 // Expose PCX to the window
 window.PCX = PCX;
-
-
-
-/**
- * QA Warning System
- */
-class QAManager {
-	static notices = {};  // Shared object for all instances
-	static noticePhrases = [
-		"Right-o, seems a little fix is needed here!",
-		"Oops-a-daisy, looks like something went amiss.",
-		"No worries, we’ll have this sorted in a jiffy!",
-		"Steady on, just a small correction needed.",
-		"Good show so far, just a tweak here, please!",
-		"Blimey! Let’s double-check that bit, eh?",
-		"Sorry, love, seems we’ve hit a tiny bump!",
-		"Don’t fret, just a spot of bother, that’s all!",
-		"Well, that’s a tad unusual. Shall we try again?",
-		"Oops! Seems like we’ve gone a bit pear-shaped.",
-		"All’s well, just a quick change to carry on!",
-		"Nearly there! Just a smidgen off, that’s all.",
-		"Hold tight! Let’s have a little look here, shall we?",
-		"Whoops, bit of a hiccup there. Let's get it sorted!",
-		"Cheerio! Just a bit of fine-tuning needed here.",
-		"Right-o, a quick adjustment, and we’re golden!",
-		"Jolly good, but let’s tweak that, shall we?",
-		"Ah, almost had it! Just a wee nudge now.",
-		"Mind the gap! Seems we’ve a detail to fix.",
-		"Bit of a whoopsie there, nothing to worry about!"
-	];
-
-	static addNotice(code, message) {
-		QAManager.notices[code] = message;
-		pcxDebug(`Notice added with code ${code}: ${message}`);
-	}
-
-	static removeNotice(code) {
-		if (QAManager.notices[code]) {
-			delete QAManager.notices[code];
-			pcxDebug(`Notice removed with code ${code}`);
-		}
-	}
-
-	static hasNotice(code) {
-		return code in QAManager.notices;
-	}
-
-	static getAllNoticeCodes() {
-		return Object.keys(QAManager.notices);
-	}
-
-	static getNoticeCount() {
-		return Object.keys(QAManager.notices).length;
-	}
-
-	static getNoticeMessage(code) {
-		return QAManager.notices[code] || null;
-	}
-
-	static clearNotices() {
-		QAManager.notices = {};
-		pcxDebug("All notices cleared.");
-	}
-	static getRandomPhrase() {
-		return QAManager.noticePhrases[Math.floor(Math.random() * QAManager.noticePhrases.length)];
-	}
-
-
-	static showQAModalNotification() {
-		let noticeItems = "";
-
-		// Load external CSS file
-		if (!PCX.findEl("#pcx-modal-style")) {
-			const link = document.createElement("link");
-			link.id = "pcx-modal-style";
-			link.rel = "stylesheet";
-			link.href = chrome.runtime.getURL("css/modal.css");
-			document.head.appendChild(link);
-		}
-		if (!PCX.findEl("#pcx-qa-modal-container")) {
-			const modalContainer = document.createElement("div");
-			modalContainer.id = "pcx-qa-modal-container";
-
-			const modal = document.createElement("div");
-			modal.id = "pcx-qa-modal";
-
-			const modalTitle = document.createElement("div");
-			modalTitle.innerHTML = "<span>Prince Lab Manager</span>" + QAManager.getRandomPhrase();
-			modalTitle.id = "pcx-qa-modal-heading";
-			modal.appendChild(modalTitle);
-
-			for (const key of QAManager.getAllNoticeCodes()) {
-				let noticeItem = `<div class="noticeItem" id="noticeItem-${key}">
-			<div class="noticeDescription">${QAManager.notices[key]}
-			</div>
-			<div class="noticeActions">
-				<button class="noticeClear" data-key="${key}">It's correct: Clear notice.</button>
-				<button class="noticeCancel">Good catch: Let’s fix it</button>
-			</div>
-		</div>`;
-				noticeItems += noticeItem;
-			}
-
-
-			const modalMessage = document.createElement("div");
-			modalMessage.innerHTML = noticeItems;
-			modalMessage.id = "noticeContainer";
-			modal.appendChild(modalMessage);
-
-			const buttonContainer = document.createElement("div");
-			buttonContainer.id = "pcx-qa-modal-buttons";
-			modal.appendChild(buttonContainer);
-
-			const okButton = document.createElement("button");
-			okButton.textContent = "Close to fix errors";
-			okButton.id = "pcx-qa-modal-close";
-			okButton.onclick = () => {
-				document.body.removeChild(modalContainer);
-				pcxDebug("Modal dismissed");
-			};
-			buttonContainer.appendChild(okButton);
-
-			modalContainer.appendChild(modal);
-			document.body.appendChild(modalContainer);
-
-			document.querySelectorAll('.noticeClear').forEach(
-				(btn)=>{
-					btn.addEventListener('click',()=>{
-						QAManager.removeNotice(btn.getAttribute("data-key"));
-						document.querySelector(`#noticeItem-${btn.getAttribute("data-key")}`).remove();
-						if(document.querySelector(`#noticeContainer`).children.length < 1) {
-							document.querySelector(`#noticeContainer`).classList = "cleared";
-							document.querySelector(`#noticeContainer`).innerHTML = "<div>Cheers</div>";
-							document.querySelector(`#pcx-qa-modal-close`).textContent = "Close";
-						}
-					});
-					console.log(btn);
-				}
-			);
-			document.querySelectorAll('.noticeCancel').forEach(
-				(btn)=>{
-					btn.addEventListener('click',()=>{document.body.removeChild(modalContainer)})
-					console.log(btn);
-				}
-			);
-			
-		}
-	}
-}
-
-// Expose QAManager to the window
-window.QAManager = QAManager;
-
-
-
-// Debugging function
-const PCX_DEBUG = false;
-function pcxDebug(message) {
-	if (PCX_DEBUG) {
-		console.log(message);
-	}
-}
-
-
 
 /********************************************
 *
@@ -473,7 +389,7 @@ function initializeBanner(patientData, timeLeft = 90, callback) {
 		if (timeLeft < 0) {
 			clearInterval(countdown);
 			chrome.storage.local.set({ patientData: {} }, () => {
-				console.log('Patient data cleared after timeout');
+				PCX.log('Patient data cleared after timeout');
 				banner.remove();
 			});
 		}
@@ -493,6 +409,19 @@ function updateBanner(timeLeft) {
 	}
 }
 
+
+/********************************************
+*
+* Wait for DOM Elements to exist before
+* taking an action
+* 
+* DOM Observer
+*
+* Usage:
+* waitForElm(selector).then(()=>{})
+* waitForIframeElm(selector).then(()=>{})
+*
+*********************************************/
 function waitForElm(selector) {
 	return new Promise(resolve => {
 		if (document.querySelector(selector)) {
@@ -527,9 +456,17 @@ function waitForIframeElm(frame,selector) {
 		});
 
 		// If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
-		observer.observe(document.querySelector(frame).contentWindow.document.body, {
+		observer.observe(document.body, {
 			childList: true,
 			subtree: true
 		});
 	});
 }
+function delay(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Event Keys
+	const eventKeyEnd		= new KeyboardEvent('keydown', { bubbles: true, cancelable : true, key : "END",shiftKey : false, keyCode : 35 });
+	const eventKeySpace 	= new KeyboardEvent('keydown', { key: ' ', bubbles: true });
+	const eventKeyTab		= new KeyboardEvent('keydown', { bubbles: true, cancelable : true, key : "Tab",shiftKey : false, keyCode : 13 });
