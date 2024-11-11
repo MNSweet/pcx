@@ -5,26 +5,47 @@ class IATSERV {
  * PREP Variables/Constants
  *
  * @param INT					linkId
- * @param EVENT KEYDOWN[END]	eventKeyEnd		Simulated keypress of "End"
- * @param EVENT KEYDOWN[SPACE]	eventKeySpace	Simulated keypress of "Space"
- * @param EVENT KEYDOWN[TAB]	eventKeyTab		Simulated keypress of "Tab"
  * @param OBJ					labs			Lookup table for Labs by DB ID's
  * @param OBJ					testCategories	Lookup table for Test Categories by DB ID's
  * 
  */
  	static linkId = PCX.getUrlParams()['LinkId'];
+ 	static orderId = PCX.getUrlParams()['OrderId'];
 
 	// Lab Lookup Table
-	#labs = {};
+	static labs = {};
 
 	// Test Categories / Codes Lookup Table
-	#testCategories = {};
+	static testCategories = {};
+
+	// Translation Lookup Table for Prince Laboratories to Reference Lab
+	static categoryTranslation = {};
+	static genderTranslation = {};
+	static raceTranslation = {};
 
 	static selectors = {};
 
 	static setTestCategories(testCats){
 		if(typeof testCats == "object"){
 			this.testCategories = testCats;
+		}
+	}
+
+	static setCategoryTranslation(catTranslation){
+		if(typeof catTranslation == "object"){
+			this.categoryTranslation = catTranslation;
+		}
+	}
+
+	static setGenderTranslation(genderTranslation){
+		if(typeof genderTranslation == "object"){
+			this.genderTranslation = genderTranslation;
+		}
+	}
+
+	static setRaceTranslation(raceTranslation){
+		if(typeof raceTranslation == "object"){
+			this.raceTranslation = raceTranslation;
 		}
 	}
 
@@ -119,8 +140,6 @@ class IATSERV {
  * 
  * 
  *************************************************************************************/
-
-// Create Accession (type=acs) & Create Orders
 
 	/**
 	 * createAccession
@@ -248,20 +267,19 @@ class IATSERV {
 				elTestCodes.Input.value = testCategories[elCategory.value].Test;
 				await delay(1000);
 				elTestCodes.Input = PCX.getEl(el.TestCodesInput,true);
-				elTestCodes.Input.dispatchEvent(eventKeyEnd);
+				PCX.simulateUserKey(elTestCodes.Input,events.End);
 				await delay(500);
-				elTestCodes.Input.dispatchEvent(eventKeyTab);
+				PCX.simulateUserKey(elTestCodes.Input,events.Tab);
 				QAManager.setStablityNotice(PCX.getEl(el.DOC,true).value);
 			}
 		}
 	}
 
-
 	/**
- * 
- * Reference Lab Transfer Assist
- * 
- */
+	 * 
+	 * Reference Lab Transfer Assist
+	 * 
+	 */
 	static capturePTData() {
 
 		const el = IATSERV.selectors;
@@ -310,5 +328,132 @@ class IATSERV {
 				}
 			}
 		});
+
+	
+		PCX.getEl(el.newPatientBtn).addEventListener('click', function(event) {
+			const siteAssets = document.createElement('div');
+			siteAssets.id = 'siteAssets';
+			// Add a button to capture PL data
+			const plButton = document.createElement('span');
+			plButton.textContent = '⎘';
+			plButton.id = 'patientCopy';
+			plButton.title = 'Capture Patient Record';
+			plButton.onclick = capturePLData;
+			siteAssets.appendChild(plButton);
+			waitForElm('.fancybox-iframe').then((elm) => {
+				PCX.getEl('.fancybox-overlay',true).appendChild(siteAssets);
+			});
+		});
+	}
+
+
+	/**
+	 *
+	 * fileDrop
+	 *
+	 * Expands the Drop area of file upload and applies a QA Check
+	 *
+	 * @param		OBJECT 		qa			If Enabled, all other Keys are Required
+	 *  @param		BOOL 		enabled		Boolean to check file name against Patient's Name, Accession number & System ID
+	 *  @param		STRING 		acsNum		Accession number as used by the user 
+	 *  @param		STRING 		acsID		Accession number as used by the system 
+	 *  @param		ARRAY 		patient		Patient Name .split() into an array by spaces
+	 * @param		STRING 		target		The "upload" DOM Element that is expecting a file
+	 * @param		STRING 		targetSpan	The DOM Element that displays text related to file transfer status 
+	 *
+	 * @let			BOOL		isDragging	Boolean to hold the state if user is currently dragging a file over the viewport
+	 * @const		OBJECT		el			All the DOM Element Selectors to reference from
+	 * @const		NODE		dropArea	DOM element that is to receive the file upon drop
+	 * @const		ARRAY		acceptTypes	File types/extensions that the system will allow
+	 * 
+	 * @listener	DRAGOVER	dropArea
+	 * @listener	DRAGLEAVE	dropArea
+	 * @listener	DRAGOVER	document
+	 * @listener	DRAGLEAVE	window
+	 * @listener	DROP		dropArea
+	 *  @process	IF 			qa.enabled 	Check file name against Patient's Name, Accession number & System ID
+	 *  
+	 * @function	async		dropZoneKeepAlive() 	
+	 * @function	async		dropZoneTimeOut()		
+	 */
+	static fileDrop(qa={enabled:false,acsNum:null,acsID:null,patient:null},target=false,targetSpan=false){
+		let 	isDragging 	= false;
+		const	el			= IATSERV.selectors;
+				el.DropArea		= target ? target : el.UploadTable;
+				console.log(target,typeof target, el.UploadTable, el.DropArea);
+				el.AcceptTypes	= el.DropArea+' input[type="file"]';
+				el.TargetSpan	= targetSpan ? targetSpan : el.UploadSpan;
+		const 	dropArea	= PCX.getEl(el.DropArea).closest('*');
+		const 	acceptTypes = PCX.getEl(el.AcceptTypes).getAttribute('accept').split(',');
+
+
+		dropArea.addEventListener("dragover", (e) => {
+			dropZoneKeepAlive(isDragging,e);
+		});
+		dropArea.addEventListener("dragleave", (e) => {
+			dropZoneTimeOut(isDragging,e);
+		});
+		document.addEventListener("dragover", (e) => {
+			dropZoneKeepAlive(isDragging,e);
+		});
+		window.addEventListener("dragleave", (e) => {
+			dropZoneTimeOut(isDragging,e);
+		});
+
+		dropArea.addEventListener("drop", (e) => {
+			isDragging = false;
+			if (document.body.classList.contains('dropZoneKeepAlive')) {
+				document.body.classList.remove('dropZoneKeepAlive');
+
+				if(PCX.getEl(el.TargetSpan).textContent == "Drop File"){
+					PCX.getEl(el.TargetSpan).textContent = "Choose File";
+				}
+			}
+			if(e.dataTransfer.files.length > 0) {
+				for (const [i, file] of Object.entries(e.dataTransfer.files)) {
+					let fileExt = file.name.split('.').pop();
+					let fileName = file.name.replace('.'+fileExt,'');
+					dropArea.scrollIntoView({ behavior: "smooth"});
+					if (acceptTypes.findIndex(function (a) { return a.toLowerCase() == ('.' + fileExt).toLowerCase() }) == -1) {
+						return; // File not accepted
+					}
+
+					if(qa.enabled){
+						let queries	= qa.patient;
+							queries.push(qa.acsNum, qa.acsID);
+
+						let tokens	= fileName.toUpperCase()
+							.replace(/(\d{2})-(\d{2})-(\d{4})/gm, `$1$2$3`) // Condense Dates with dashes
+							.replace(/(\d{2})\.(\d{2})\.(\d{4})/gm, `$1$2$3`) // Condense Dates with periods
+							.split(/[\s-\._]/)	// Separate by whitespace, dashes, periods, underscores
+
+						if(!tokens.some(item => queries.includes(item))) {
+							QAManager.addNotice("FileUpload","<h4>Sorry to bother</h4>The file you just uploaded does not have the Patient's Name or Accession Number in it's name.<br/>Just wanted to double check you didn't upload the wrong file: <pre>" + file.name + "</pre>");
+							QAManager.showQAModalNotification();
+							QAManager.removeNotice("FileUpload");
+						}
+					}else{
+						PCX.log('Call to QAManager: Not Enabled')
+					}
+				};
+			}
+		});
+
+		function dropZoneKeepAlive(isDragging, e) {
+			isDragging = true;
+			if (!document.body.classList.contains('dropZoneKeepAlive')) {
+				document.body.classList.add('dropZoneKeepAlive');
+				PCX.getEl(el.TargetSpan).textContent = "Drop File";
+			}
+		}
+		function dropZoneTimeOut(isDragging, e) {
+			if (e.target === window || (e.clientX === 0 && e.clientY === 0)) {
+				isDragging = false;
+				if (document.body.classList.contains('dropZoneKeepAlive')) {
+					document.body.classList.remove('dropZoneKeepAlive');
+					PCX.getEl(el.TargetSpan).textContent = "Choose File";
+				}
+			}
+		}
 	}
 }

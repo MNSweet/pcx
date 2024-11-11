@@ -6,8 +6,13 @@ class PCX {
  * Local Storage Operations
  * 
  */
-	static events = {};
+	static events = {
+		Space	: {bubbles: true, cancelable: true,	key: ' '},
+		End		: {bubbles: true, cancelable: true,	shiftKey: false, keyCode: 35,	code: "END",	key: "END"},
+		Tab		: {bubbles: true, cancelable: true,	shiftKey: false, keyCode: 9,	code: "Tab",	key: "Tab"},
+		Enter	: {bubbles: true, cancelable: false,shiftKey: false, keyCode: 13,	code: "Enter",	key: "Enter"},
 
+	};
 	// Page Element points to avoid multiple queries
 	static pageElementsCache = {};
 	
@@ -466,7 +471,3 @@ function delay(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Event Keys
-	const eventKeyEnd		= new KeyboardEvent('keydown', { bubbles: true, cancelable : true, key : "END",shiftKey : false, keyCode : 35 });
-	const eventKeySpace 	= new KeyboardEvent('keydown', { key: ' ', bubbles: true });
-	const eventKeyTab		= new KeyboardEvent('keydown', { bubbles: true, cancelable : true, key : "Tab",shiftKey : false, keyCode : 13 });

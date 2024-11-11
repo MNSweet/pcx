@@ -1,11 +1,11 @@
-PCX.log("This is PL specific content script.");
+PCX.log("Prince Laboratories");
 
 IATSERV.setLabs({
-	   2: {Code:"IP",Label:"Ipseity Diagnostics LLC", Stability:{NGS: 90}},
-	1010: {Code:"SQ",Label:"SureQuest Diagnostics", Stability:{NGS: 90}},
-	1011: {Code:"RR",Label:"Reliable Result Labs", Stability:{NGS: 30}},
-	1012: {Code:"PL",Label:"Prince Laboratories", Stability:{NGS: 30}},
-	1013: {Code:"PD",Label:"Principle Diagnostics", Stability:{NGS: 90}}
+	   2: {Code:"IP",	Label:"Ipseity Diagnostics LLC",Stability:{NGS: 90}},
+	1010: {Code:"SQ",	Label:"SureQuest Diagnostics", 	Stability:{NGS: 90}},
+	1011: {Code:"RR",	Label:"Reliable Result Labs", 	Stability:{NGS: 30}},
+	1012: {Code:"PL",	Label:"Prince Laboratories", 	Stability:{NGS: 30}},
+	1013: {Code:"PD",	Label:"Principle Diagnostics", 	Stability:{NGS: 90}}
 });
 
 IATSERV.setTestCategories({
@@ -26,14 +26,13 @@ IATSERV.setTestCategories({
 	17: {Code:"Cardio",			Test:"CARDIO"}	// Panel - CARDIO-PULMONARY
 });
 
-
 // Accession List
 if (IATSERV.linkId == "2070") {
 	const intervalID = setInterval(IATSERV.columnParser, 500);
 }
+
 // Create Accession
 if (IATSERV.linkId == "2011") {
-
 	IATSERV.setSelectors({
 		DOS				: ".dos",
 		BillType		: "#MainContent_ctl00_ctl00_ddBillType_ddControl",
@@ -52,9 +51,15 @@ if (IATSERV.linkId == "2011") {
 		CategoryOpt		: "#MainContent_ctl00_ctl00_ctrlOrderTestCategoryControl1_ddTestCategory option:checked",
 		TestCodesInput	: "#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText",
 		TestCodesOutput	: "#dvSelectedItems",
-		UpPanel			: "#MainContent_ctl00_ctl00_upPanel"
+		UpPanel			: "#MainContent_ctl00_ctl00_upPanel",
+		UploadTable		: '#uploadTable',
+		UploadSpan		: '.upload span'
 	});
 	IATSERV.createAccession();
+
+	IATSERV.fileDrop({
+		enabled:false
+	});
 }
 
 // Update Accession
@@ -79,193 +84,38 @@ if (IATSERV.linkId == "2071") {
 		Phone			: '#MainContent_ctl00_AddressControl1_tbPhone',
 		Email			: '#MainContent_ctl00_AddressControl1_tbEmail',
 		UploadTable		: '#uploadTable',
-		UploadSpan		: '.upload span',
+		UploadSpan		: '.upload span'
 	});
-	QAManager.setStablityNotice(IATSERV.selectors.DOS,PCX.getEl(IATSERV.selectors.DOC).value, true);
-
-
-
-	// Site Assets
+	QAManager.setStablityNotice(
+		IATSERV.selectors.DOS,
+		PCX.getEl(IATSERV.selectors.DOC).value,
+		true
+	);
 
 	// Add BTN to copy PT data
 	function capturePTData() {
 		IATSERV.capturePTData();
 	}
 
-
-	PCX.getEl(IATSERV.selectors.newPatientBtn).addEventListener('click', function(event) {
-		const siteAssets = document.createElement('div');
-		siteAssets.id = 'siteAssets';
-		// Add a button to capture PL data
-		const plButton = document.createElement('span');
-		plButton.textContent = '⎘';
-		plButton.id = 'patientCopy';
-		plButton.title = 'Capture Patient Record';
-		plButton.onclick = capturePLData;
-		siteAssets.appendChild(plButton);
-		waitForElm('.fancybox-iframe').then((elm) => {
-			PCX.getEl('.fancybox-overlay').appendChild(siteAssets);
-		});
+	IATSERV.fileDrop({
+		enabled	: true,
+		acsNum	: PCX.getEl("#MainContent_ctl00_tbAccession").value,
+		acsID	: PCX.getEl("#tbAccessionId").value,
+		patient	: PCX.getEl("#MainContent_ctl00_tbPatient_tbText").value.toUpperCase().split(', ')
 	});
-	
-
-/**
- *
- * File Drop
- *
- * Expands the Drop area of file upload and applies a QA Check
- * 
- */
-	let 	isDragging 	= false;
-	const 	dropArea	= PCX.getEl(IATSERV.selectors.UploadTable).closest('*');
-	const 	acceptTypes = PCX.getEl(IATSERV.selectors.UploadTable+' input[type="file"]').getAttribute('accept').split(',');
-
-	dropArea.addEventListener("dragover", (e) => {
-		dropZoneKeepAlive(isDragging,e);
-	});
-	dropArea.addEventListener("dragleave", (e) => {
-		dropZoneTimeOut(isDragging,e);
-	});
-	document.addEventListener("dragover", (e) => {
-		dropZoneKeepAlive(isDragging,e);
-	});
-	window.addEventListener("dragleave", (e) => {
-		dropZoneTimeOut(isDragging,e);
-	});
-
-	dropArea.addEventListener("drop", (e) => {
-		isDragging = false;
-		if (document.body.classList.contains('dropZoneKeepAlive')) {
-			document.body.classList.remove('dropZoneKeepAlive');
-
-			if(PCX.getEl(IATSERV.selectors.UploadSpan).textContent == "Drop File"){
-				PCX.getEl(IATSERV.selectors.UploadSpan).textContent = "Choose File";
-			}
-		}
-		if(e.dataTransfer.files.length > 0) {
-			for (const [i, file] of Object.entries(e.dataTransfer.files)) {
-				let fileExt = file.name.split('.').pop();
-				let fileName = file.name.replace('.'+fileExt,'');
-				if (acceptTypes.findIndex(function (a) { return a.toLowerCase() == ('.' + fileExt).toLowerCase() }) == -1) {
-					//return; // File not accepted
-				}
-
-				let acsNum 	= PCX.getEl("#MainContent_ctl00_tbAccession").value; // LIMS ID
-				let acsID 	= PCX.getEl("#tbAccessionId").value; // System ID (database)
-				let patient	= PCX.getEl("#MainContent_ctl00_tbPatient_tbText").value.toUpperCase().split(', ');
-				let queries	= patient;
-					queries.push(acsNum, acsID);
-
-				let tokens	= fileName.toUpperCase()
-					.replace(/(\d{2})-(\d{2})-(\d{4})/gm, `$1$2$3`) // Condense Dates with dashes
-					.replace(/(\d{2})\.(\d{2})\.(\d{4})/gm, `$1$2$3`) // Condense Dates with periods
-					.split(/[\s-\._]/)	// Separate by whitespace, dashes, periods, underscores
-
-				if(!tokens.some(item => queries.includes(item))) {
-					QAManager.addNotice("FileUpload","<h4>Sorry to bother</h4>The file you just uploaded does not have the Patient's Name or Accession Number in it's name.<br/>Just wanted to double check you didn't upload the wrong file: <pre>" + file.name + "</pre>");
-					QAManager.showQAModalNotification();
-					QAManager.removeNotice("FileUpload");
-				}
-			};
-		}
-	});
-
-	function dropZoneKeepAlive(isDragging, e) {
-		isDragging = true;
-		if (!document.body.classList.contains('dropZoneKeepAlive')) {
-			document.body.classList.add('dropZoneKeepAlive');
-			PCX.getEl('.upload span').textContent = "Drop File";
-		}
-	}
-	function dropZoneTimeOut(isDragging, e) {
-		if (e.target === window || (e.clientX === 0 && e.clientY === 0)) {
-			isDragging = false;
-			if (document.body.classList.contains('dropZoneKeepAlive')) {
-				document.body.classList.remove('dropZoneKeepAlive');
-				PCX.getEl('.upload span').textContent = "Choose File";
-			}
-		}
-	}
 }
 
 if (IATSERV.linkId == "2461") {
-	/**
- *
- * File Drop
- *
- * Expands the Drop area of file upload and applies a QA Check
- * 
- */
-	let 	isDragging 	= false;
-	const 	dropArea	= PCX.getEl('#uploadTable').closest('*');
-	const 	acceptTypes = PCX.getEl('#uploadTable input[type="file"]').getAttribute('accept').split(',');
-
-	dropArea.addEventListener("dragover", (e) => {
-		dropZoneKeepAlive(isDragging,e);
+	IATSERV.setSelectors({
+		UploadTable	: '#uploadTable',
+		UploadSpan	: '.upload span'
 	});
 
-	dropArea.addEventListener("dragleave", (e) => {
-		dropZoneTimeOut(isDragging,e);
+	IATSERV.fileDrop({
+		enabled	: true,
+		acsNum	: PCX.getEl("#lblAccession a").textContent,
+		acsID	: PCX.getEl("#lblAccession a").href.match(/(\d*)$/gm)[0],
+		patient	: PCX.getEl("#lblPatient").textContent.toUpperCase().split(' ')
 	});
-	document.addEventListener("dragover", (e) => {
-		dropZoneKeepAlive(isDragging,e);
-	});
-	window.addEventListener("dragleave", (e) => {
-		dropZoneTimeOut(isDragging,e);
-	});
-
-	dropArea.addEventListener("drop", (e) => {
-		isDragging = false;
-		if (document.body.classList.contains('dropZoneKeepAlive')) {
-			document.body.classList.remove('dropZoneKeepAlive');
-
-			if(PCX.getEl('.upload span').textContent == "Drop File"){
-				PCX.getEl('.upload span').textContent = "Choose File";
-			}
-		}
-		if(e.dataTransfer.files.length > 0) {
-			for (const [i, file] of Object.entries(e.dataTransfer.files)) {
-				let fileExt = file.name.split('.').pop();
-				let fileName = file.name.replace('.'+fileExt,'');
-				if (acceptTypes.findIndex(function (a) { return a.toLowerCase() == ('.' + fileExt).toLowerCase() }) == -1) {
-					return; // File not accepted
-				}
-
-				let acsNum 	= PCX.getEl("#lblAccession a").textContent; // LIMS ID
-				let acsID 	= PCX.getEl("#lblAccession a").href.match(/(\d*)$/gm)[0]; // System ID (database)
-				let patient	= PCX.getEl("#lblPatient").textContent.toUpperCase().split(' ');
-				let queries	= patient;
-					queries.push(acsNum, acsID);
-
-				let tokens	= fileName.toUpperCase()
-					.replace(/(\d{2})-(\d{2})-(\d{4})/gm, `$1$2$3`) // Condense Dates with dashes
-					.replace(/(\d{2})\.(\d{2})\.(\d{4})/gm, `$1$2$3`) // Condense Dates with periods
-					.split(/[\s-\._]/)	// Separate by whitespace, dashes, periods, underscores
-
-				if(!tokens.some(item => queries.includes(item))) {
-					QAManager.addNotice("FileUpload","<h4>Sorry to bother</h4>The file you just uploaded does not have the Patient's Name or Accession Number in it's name.<br/>Just wanted to double check you didn't upload the wrong file: <pre>" + file.name + "</pre>");
-					QAManager.showQAModalNotification();
-					QAManager.removeNotice("FileUpload");
-				}
-			};
-		}
-	});
-
-	function dropZoneKeepAlive(isDragging, e) {
-		isDragging = true;
-		if (!document.body.classList.contains('dropZoneKeepAlive')) {
-			document.body.classList.add('dropZoneKeepAlive');
-			PCX.getEl('.upload span').textContent = "Drop File";
-		}
-	}
-	function dropZoneTimeOut(isDragging, e) {
-		if (e.target === window || (e.clientX === 0 && e.clientY === 0)) {
-			isDragging = false;
-			if (document.body.classList.contains('dropZoneKeepAlive')) {
-				document.body.classList.remove('dropZoneKeepAlive');
-				PCX.getEl('.upload span').textContent = "Choose File";
-			}
-		}
-	}
 }
 
