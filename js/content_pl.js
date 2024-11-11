@@ -437,16 +437,26 @@ if (linkId == "2461") {
 				let patient	= PCX.findEl("#lblPatient").textContent.toUpperCase().split(' ');
 				let queries	= patient;
 					queries.push(acsNum, acsID);
+				let showDialog = false;
 
 				let tokens	= fileName.toUpperCase()
 					.replace(/(\d{2})-(\d{2})-(\d{4})/gm, `$1$2$3`) // Condense Dates with dashes
 					.replace(/(\d{2})\.(\d{2})\.(\d{4})/gm, `$1$2$3`) // Condense Dates with periods
 					.split(/[\s-\._]/)	// Separate by whitespace, dashes, periods, underscores
 
+				if((tokens.includes('NEG') && tokens.includes('POS')) || (!tokens.includes('NEG') && !tokens.includes('POS'))) {
+					QAManager.addNotice("FileUpload1","<h4>Quick Note</h4>The file you just uploaded appear to not have it's result status set: <pre>" + file.name + "</pre>");
+					showDialog = true;
+				}
 				if(!tokens.some(item => queries.includes(item))) {
-					QAManager.addNotice("FileUpload","<h4>Sorry to bother</h4>The file you just uploaded does not have the Patient's Name or Accession Number in it's name.<br/>Just wanted to double check you didn't upload the wrong file: <pre>" + file.name + "</pre>");
+					QAManager.addNotice("FileUpload2","<h4>Sorry to bother</h4>The file you just uploaded does not have the Patient's Name or Accession Number in it's name.<br/>Just wanted to double check you didn't upload the wrong file: <pre>" + file.name + "</pre>");
+					showDialog = true;
+				}
+
+				if(showDialog){
 					QAManager.showQAModalNotification();
-					QAManager.removeNotice("FileUpload");
+					QAManager.removeNotice("FileUpload1");
+					QAManager.removeNotice("FileUpload2");
 				}
 			};
 		}
