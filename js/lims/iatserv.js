@@ -392,7 +392,7 @@ class IATSERV {
 	 * 
 	 */
 
-	static async pasteRRPatientData() {
+	static async pastePatientData() {
 		chrome.storage.local.get('patientData', ({ patientData }) => {
 
 			const el = IATSERV.selectors;
@@ -519,7 +519,7 @@ class IATSERV {
 	 * @function	async		dropZoneKeepAlive() 	
 	 * @function	async		dropZoneTimeOut()		
 	 */
-	static fileDrop(qa={enabled:false,acsNum:null,acsID:null,patient:null},target=false,targetSpan=false){
+	static fileDrop(qa={enabled:false,acsNum:null,acsID:null,patient:null,result:false},target=false,targetSpan=false){
 		let 	isDragging 	= false;
 		const	el			= IATSERV.selectors;
 				el.DropArea		= target ? target : el.UploadTable;
@@ -564,6 +564,7 @@ class IATSERV {
 					if(qa.enabled){
 						let queries	= qa.patient;
 							queries.push(qa.acsNum, qa.acsID);
+						let showDialog = false;
 
 						let tokens	= fileName.toUpperCase()
 							.replace(/(\d{2})-(\d{2})-(\d{4})/gm, `$1$2$3`) // Condense Dates with dashes
@@ -574,6 +575,23 @@ class IATSERV {
 							QAManager.addNotice("FileUpload","<h4>Sorry to bother</h4>The file you just uploaded does not have the Patient's Name or Accession Number in it's name.<br/>Just wanted to double check you didn't upload the wrong file: <pre>" + file.name + "</pre>");
 							QAManager.showQAModalNotification();
 							QAManager.removeNotice("FileUpload");
+						}
+						if(!tokens.some(item => queries.includes(item))) {
+							QAManager.addNotice("FileUpload2","<h4>Sorry to bother</h4>The file you just uploaded does not have the Patient's Name or Accession Number in it's name.<br/>Just wanted to double check you didn't upload the wrong file: <pre>" + file.name + "</pre>");
+							showDialog = true;
+						}
+
+						if(qa.result){
+							if((tokens.includes('NEG') && tokens.includes('POS')) || (!tokens.includes('NEG') && !tokens.includes('POS'))) {
+								QAManager.addNotice("FileUpload1","<h4>Quick Note</h4>The file you just uploaded appear to not have it's result status set: <pre>" + file.name + "</pre>");
+								showDialog = true;
+							}
+						}
+						if(showDialog){
+							QAManager.showQAModalNotification();
+							QAManager.removeNotice("FileUpload");
+							QAManager.removeNotice("FileUpload1");
+							QAManager.removeNotice("FileUpload2");
 						}
 					}else{
 						PCX.log('Call to QAManager: Not Enabled')

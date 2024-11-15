@@ -154,40 +154,7 @@ if (IATSERV.linkId == "2011") {
 		);
 
 		PCX.getEl("#patientDataClone").addEventListener('click', function(event) {
-			IATSERV.pasteRRPatientData();
+			IATSERV.pastePatientData();
 		});
 	}});
-}
-
-// Shared enhancments linkId: 2011 & 2071
-function setStablityNotice(stabilityDate,existingAcs = false) {
-	if(stabilityDate == "") {return;}
-	let stabilityAge = Math.floor(
-		(new Date() - new Date(stabilityDate)) / (1000 * 60 * 60 * 24)
-	);
-
-	let stabilityText	= "";
-	let stabilityPhase	= "";
-	if(stabilityAge >= 180){
-		stabilityText	= `Expired`;
-		stabilityPhase	= "phaseFour";
-	}else if(stabilityAge > 88){
-		stabilityText	= `${stabilityAge} Days Old`;
-		stabilityPhase	= "phaseThree";
-	}else if(stabilityAge > 27){
-		stabilityText	= `${stabilityAge} Days Old`;
-		stabilityPhase	= "phaseTwo";
-	}else{
-		stabilityText	= `${stabilityAge} Days Old`;
-		stabilityPhase	= "phaseOne";
-	}
-
-	if(!PCX.getEl('#stabilityNotice')) {
-		const stabilityNotice = document.createElement("div");
-			stabilityNotice.innerHTML = `<span class="QAManagerSubHeading">Sample Stability</span><span id="stabilityNoticeAge"></span>`;
-			stabilityNotice.id = "stabilityNotice";
-		PCX.getEl('.dos').appendChild(stabilityNotice);
-	}
-	PCX.getEl('#stabilityNoticeAge').textContent = stabilityText;
-	PCX.getEl('#stabilityNotice').classList = stabilityPhase + (existingAcs?" stabilityNoticeExistingACS":"");
 }

@@ -105,6 +105,7 @@ if (IATSERV.linkId == "2071") {
 	});
 }
 
+// Results
 if (IATSERV.linkId == "2461") {
 	IATSERV.setSelectors({
 		UploadTable	: '#uploadTable',
@@ -115,7 +116,8 @@ if (IATSERV.linkId == "2461") {
 		enabled	: true,
 		acsNum	: PCX.getEl("#lblAccession a").textContent,
 		acsID	: PCX.getEl("#lblAccession a").href.match(/(\d*)$/gm)[0],
-		patient	: PCX.getEl("#lblPatient").textContent.toUpperCase().split(' ')
+		patient	: PCX.getEl("#lblPatient").textContent.toUpperCase().split(' '),
+		result	: true
 	});
 }
 

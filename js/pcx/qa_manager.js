@@ -150,7 +150,10 @@ class QAManager {
 
 		let stabilityText	= "";
 		let stabilityPhase	= "";
-		if(stabilityAge >= 180){
+		if(stabilityAge < 0){
+			stabilityText	= `Future?`;
+			stabilityPhase	= "phaseFour";
+		}else if(stabilityAge >= 180){
 			stabilityText	= `Expired`;
 			stabilityPhase	= "phaseFour";
 		}else if(stabilityAge > 88){
