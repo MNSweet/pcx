@@ -300,68 +300,6 @@ class PCX {
 		}
 	}
 
-
-
-/**
- * 
- * State and Navigation
- * 
- */
-	static getUrlParams() {
-		const params = {};
-		const queryString = window.location.search;
-
-		if (queryString) {
-			const urlParams = new URLSearchParams(queryString);
-			urlParams.forEach((value, key) => {
-				params[key] = value;
-			});
-		}
-
-		return params;
-	}
-
-	static checkSystemType(type,overrider = false) {
-
-	}
-
-
-/**
- * 
- * Tools
- * 
- */
-
-	/**
-	 * mergeOptsIntoDefaults
-	 * @param  OBJ	defaults	Preset Values
-	 * @param  OBJ	opts		Overrides
-	 * @return OBJ				Merged Object
-	 *
-	 * PCX.mergeOptsIntoDefaults(defaults,opts);
-	 */
-	static mergeOptsIntoDefaults(defaults,opts) {
-		return [defaults,opts].reduce((result, item) => {
-			if (typeof item === 'object' && item !== null) {
-				result.push(Object.assign({}, ...result.filter(x => typeof x === 'object' && x !== null), item));
-			} else {
-				result.push(item);
-			}
-			return result;
-		}, []);
-	}
-
-	static log(message) {
-	if (PCX.getUrlParams()['debug']) {
-		console.log(message);
-	}
-}
-	
-}
-
-// Expose PCX to the window
-window.PCX = PCX;
-
 /********************************************
 *
 * Import Patient Data from Local Temp Cache.
@@ -370,7 +308,7 @@ window.PCX = PCX;
 *
 *********************************************/
 
-function initializeBanner(patientData, timeLeft = 90, callback) {
+static initializeBanner(patientData, timeLeft = 90, callback) {
 	const banner = document.createElement('div');
 	banner.id = 'patientDataBanner';
 	banner.style.cssText = 'position:fixed; top:0; width:100%; background-color:yellow; z-index:1000; padding:10px; display:flex; justify-content:space-between;';
@@ -413,6 +351,68 @@ function updateBanner(timeLeft) {
 		timer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 	}
 }
+
+
+
+/**
+ * 
+ * State and Navigation
+ * 
+ */
+	static getUrlParams() {
+		const params = {};
+		const queryString = window.location.search;
+
+		if (queryString) {
+			const urlParams = new URLSearchParams(queryString);
+			urlParams.forEach((value, key) => {
+				params[key] = value;
+			});
+		}
+
+		return params;
+	}
+
+	static processEnabled(processID,overrider = false) {
+		return PCX.getLocalStorage(processID, (result)=>{return result;});
+	}
+
+
+/**
+ * 
+ * Tools
+ * 
+ */
+
+	/**
+	 * mergeOptsIntoDefaults
+	 * @param  OBJ	defaults	Preset Values
+	 * @param  OBJ	opts		Overrides
+	 * @return OBJ				Merged Object
+	 *
+	 * PCX.mergeOptsIntoDefaults(defaults,opts);
+	 */
+	static mergeOptsIntoDefaults(defaults,opts) {
+		return [defaults,opts].reduce((result, item) => {
+			if (typeof item === 'object' && item !== null) {
+				result.push(Object.assign({}, ...result.filter(x => typeof x === 'object' && x !== null), item));
+			} else {
+				result.push(item);
+			}
+			return result;
+		}, []);
+	}
+
+	static log(message) {
+	if (PCX.getUrlParams()['debug']) {
+		console.log(message);
+	}
+}
+	
+}
+
+// Expose PCX to the window
+window.PCX = PCX;
 
 
 /********************************************

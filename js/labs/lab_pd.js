@@ -1,4 +1,4 @@
-console.log("This is PD specific content script.");
+console.log("Principle Diagnostics");
 
 /********************************************
 *
@@ -24,7 +24,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	if (message.action === 'startCountdownBanner') {
 		// If the banner is already present, don't recreate it
 		if (!document.querySelector('#patientDataBanner')) {
-			initializeBanner(message.patientData);
+			PCX.initializeBanner(message.patientData);
 		}
 	}
 });

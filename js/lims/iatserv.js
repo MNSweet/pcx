@@ -4,13 +4,15 @@ class IATSERV {
  *
  * PREP Variables/Constants
  *
- * @param INT					linkId
- * @param OBJ					labs			Lookup table for Labs by DB ID's
- * @param OBJ					testCategories	Lookup table for Test Categories by DB ID's
+ * @param INT	linkId
+ * @param OBJ	labs			Lookup table for Labs by DB ID's
+ * @param OBJ	testCategories	Lookup table for Test Categories by DB ID's
  * 
  */
  	static linkId = PCX.getUrlParams()['LinkId'];
  	static orderId = PCX.getUrlParams()['OrderId'];
+
+ 	static patientDataBanner = "#patientDataBanner";
 
 	// Lab Lookup Table
 	static labs = {};
@@ -22,7 +24,9 @@ class IATSERV {
 	static categoryTranslation = {};
 	static genderTranslation = {};
 	static raceTranslation = {};
+	static orderDefaults = {};
 
+	// Element DOM Selectors
 	static selectors = {};
 
 	static setTestCategories(testCats){
@@ -57,7 +61,13 @@ class IATSERV {
 
 	static setSelectors(selector){
 		if(typeof selector == "object"){
-			IATSERV.selectors = selector;
+			this.selectors = selector;
+		}
+	}
+
+	static setOrderDefaults(orderDefaults){
+		if(typeof orderDefaults == "object"){
+			this.orderDefaults = orderDefaults;
 		}
 	}
 
@@ -118,7 +128,7 @@ class IATSERV {
 						let accessionID = row.querySelector('td:nth-child('+(headings.indexOf('Accession')+1)+') a').getAttribute('onclick').replace(/ShowForm\((\d*),this\)/i,'$1');
 						let columnLinkTD = row.querySelector('td:nth-child('+(headings.indexOf(column.heading)+1)+')');
 
-						columnLinkTD.innerHTML = `<a href="https://prince.iatserv.com/?LinkId=${column.linkId}&AccessionId=${accessionID}" target="_blank">${column.text}</a>`
+						columnLinkTD.innerHTML = `<a href="/?LinkId=${column.linkId}&AccessionId=${accessionID}" target="_blank">${column.text}</a>`
 					});
 					PCX.getEl('#MainContent_ctl00_grid_DXHeadersRow0 td:nth-child('+(headings.indexOf(column.heading)+1)+ ')',true).textContent = column.text;
 				}
@@ -140,6 +150,27 @@ class IATSERV {
  * 
  * 
  *************************************************************************************/
+
+	/**
+	 * checkTestCat
+	 * @param  DOM	elCategory
+	 * @param  DOM	elTestCodes
+	 * @param  OBJ	testCategories
+	 */
+	static async checkTestCat(elCategory,elTestCodes,testCategories){
+		if(
+			elCategory.value != "" &&
+			elTestCodes.Output.querySelectorAll('.item').length <= 0
+		) {
+			elTestCodes.Input.value = testCategories[elCategory.value].Test;
+			await delay(1000);
+			elTestCodes.Input = PCX.getEl(el.TestCodesInput,true);
+			PCX.simulateUserKey(elTestCodes.Input,events.End);
+			await delay(800);
+			PCX.simulateUserKey(elTestCodes.Input,events.Tab);
+			QAManager.setStablityNotice(PCX.getEl(el.DOC,true).value);
+		}
+	}
 
 	/**
 	 * createAccession
@@ -248,7 +279,7 @@ class IATSERV {
 				let lastValue = '';
 				const intervalId = setInterval(() => {
 					if (PCX.getEl(el.DOC,true).value !== lastValue) {
-						setStablityNotice(el.DOS,PCX.getEl(el.DOC).value)
+						QAManager.setStablityNotice(PCX.getEl(el.DOC).value)
 						lastValue = PCX.getEl(el.DOC).value;
 						clearInterval(intervalId);
 					}
@@ -258,94 +289,206 @@ class IATSERV {
 				}, 100);
 			}
 		},true);
-
-		async function checkTestCat(elCategory,elTestCodes,testCategories){
-			if(
-				elCategory.value != "" &&
-				elTestCodes.Output.querySelectorAll('.item').length <= 0
-			) {
-				elTestCodes.Input.value = testCategories[elCategory.value].Test;
-				await delay(1000);
-				elTestCodes.Input = PCX.getEl(el.TestCodesInput,true);
-				PCX.simulateUserKey(elTestCodes.Input,events.End);
-				await delay(500);
-				PCX.simulateUserKey(elTestCodes.Input,events.Tab);
-				QAManager.setStablityNotice(PCX.getEl(el.DOC,true).value);
-			}
-		}
 	}
 
 	/**
 	 * 
-	 * Reference Lab Transfer Assist
+	 * Reference Lab Transfer Assist - Capture
 	 * 
 	 */
 	static capturePTData() {
 
 		const el = IATSERV.selectors;
 
-		// Temp Capture was already discussed with Dean and as long as 
-		// it never leaves the browser/local, it's HIPAA compliant.
-		// Fn initializeBanner() immediately takes the data after 
-		// being added to local storage and sets a deletion timer to purge
-		// the data from cache and local storage, never saving to hard disk
-		const patientData = {
-			Category:	PCX.getEl(el.CategoryOpt).value,
-			DOC:		PCX.getEl(el.DOC).value,
-			FirstName:	PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.FirstName).value,
-			LastName:	PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.LastName).value,
-			MiddleName:	PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.MiddleName).value,
-			DOB:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.DOB).value.split('/'),
-			Gender:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Gender).textContent,
-			Race:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Race).textContent,
-			Address:	PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Address1).value + ' ' + PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Address2).value,
-			State:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.State).value,
-			City:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.City).value,
-			Zip:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Zip).value,
-			Phone:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Phone).value,
-			Email:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Email).value
-		};
-
-		// Store patient data in Chrome's storage
-		chrome.storage.local.set({ patientData }, () => {
-			// Send a message to the service worker to notify all relevant tabs
-			chrome.runtime.sendMessage({
-				action: 'startCountdown',
-				patientData: {
-					FirstName:	patientData.FirstName,
-					LastName:	patientData.LastName,
-					Category:	patientData.Category
-				}
-			});
-		});
-
-
 		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			if (message.action === 'startCountdownBanner') {
 			// If the banner is already present, don't recreate it
-				if (!PCX.getEl('#patientDataBanner')) {
-					initializeBanner(message.patientData);
+				if (!PCX.getEl(IATSERV.patientDataBanner)) {
+					PCX.initializeBanner(message.patientData);
 				}
 			}
 		});
 
-	
 		PCX.getEl(el.newPatientBtn).addEventListener('click', function(event) {
 			const siteAssets = document.createElement('div');
 			siteAssets.id = 'siteAssets';
-			// Add a button to capture PL data
-			const plButton = document.createElement('span');
-			plButton.textContent = '⎘';
-			plButton.id = 'patientCopy';
-			plButton.title = 'Capture Patient Record';
-			plButton.onclick = capturePLData;
-			siteAssets.appendChild(plButton);
+			siteAssets.appendChild(
+				Object.assign(document.createElement('span'), {
+					textContent: '⎘',
+					id: 'patientCopy',
+					title: 'Capture Patient Record'
+				})
+			);
 			waitForElm('.fancybox-iframe').then((elm) => {
 				PCX.getEl('.fancybox-overlay',true).appendChild(siteAssets);
+				PCX.getEl("#patientCopy").addEventListener('click', function(event) {
+					
+					// Temp Capture was discussed with Dean. As long as 
+					// it never leaves the browser/local, it's HIPAA compliant.
+					// Fn PCX.initializeBanner() immediately takes the data after 
+					// being added to local storage and sets a deletion timer to purge
+					// the data from cache and local storage, never saving to hard disk
+					const patientData = {
+						Category:	PCX.getEl(el.CategoryOpt).value,
+						DOC:		PCX.getEl(el.DOC).value,
+						FirstName:	PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.FirstName).value,
+						LastName:	PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.LastName).value,
+						MiddleName:	PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.MiddleName).value,
+						DOB:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.DOB).value.split('/'),
+						Gender:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Gender).textContent,
+						Race:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Race).textContent,
+						Address:	PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Address1).value + ' ' + PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Address2).value,
+						State:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.State).value,
+						City:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.City).value,
+						Zip:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Zip).value,
+						Phone:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Phone).value,
+						Email:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Email).value
+					};
+
+					// Store patient data in Chrome's storage
+					chrome.storage.local.set({ patientData }, () => {
+						// Send a message to the service worker to notify all relevant tabs
+						chrome.runtime.sendMessage({
+							action: 'startCountdown',
+							patientData: {
+								FirstName:	patientData.FirstName,
+								LastName:	patientData.LastName,
+								Category:	patientData.Category
+							}
+						});
+					});
+
+				});
 			});
 		});
 	}
 
+
+	/**
+	 *
+	 * Reference Lab Transfer Assist - Fill
+	 * 
+	 * Demo Data
+	 * patientData = {
+	 * 	"Address": "11 Demo dr ",
+	 * 	"Category": "11", //Immuno
+	 * 	"City": "DemoCity",
+	 * 	"DOB": [
+	 * 		"4",
+	 * 		"25",
+	 * 		"2000"
+	 * 	],
+	 * 	"DOC": "4/28/2023",
+	 * 	"Email": "",
+	 * 	"FirstName": "DemoFirst",
+	 * 	"Gender": "Male",
+	 * 	"LastName": "DemoLast",
+	 * 	"MiddleName": "",
+	 * 	"Phone": "5551234567",
+	 * 	"Race": "Caucasian",
+	 * 	"State": "GA",
+	 * 	"Zip": "30043"
+	 * };
+	 * 
+	 */
+
+	static async pasteRRPatientData() {
+		chrome.storage.local.get('patientData', ({ patientData }) => {
+
+			const el = IATSERV.selectors;
+
+			// Fill in data
+			PCX.getEl(el.DOC).value			= patientData.DOC;
+			PCX.getEl(el.Category).value	= categoryTranslation[patientData.Category];
+			
+			IATSERV.checkTestCat(PCX.getEl(`${el.Category} option:checked`),{Input: PCX.getEl(el.TestCodesInput),Output: PCX.getEl(el.TestCodesOutput)},IATSERV.testCategories).then( (elm) => {
+				// Trigger inline OnClick Function via OnFocus
+				PCX.getEl(el.NewPatientBTN).setAttribute('onFocus',"newPatient()");
+				PCX.getEl(el.NewPatientBTN).focus();
+				PCX.getEl(el.NewPatientBTN).setAttribute('onFocus',"");
+
+				waitForElm(el.FancyBoxIframe).then( (elm) => {
+					PCX.getEl(el.FancyBoxIframe).addEventListener('load', (el) => {
+						iframeEl["FirstName"]	= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.FirstName);
+						iframeEl["LastName"]	= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.LastName);
+						iframeEl["MiddleName"]	= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.MiddleName);
+						iframeEl["DOB"]			= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.DOB);
+						iframeEl["Gender"]		= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.Gender);
+						iframeEl["Race"]		= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.Race);
+						iframeEl["Address"]		= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.Address);
+						iframeEl["State"]		= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.State);
+						iframeEl["City"]		= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.City);
+						iframeEl["Zip"]			= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.Zip);
+						iframeEl["Phone"]		= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.Phone);
+						iframeEl["Email"]		= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.Email);
+						
+
+						iframeEl.FirstName.value	= patientData.FirstName;
+						iframeEl.LastName.value		= patientData.LastName;
+						iframeEl.MiddleName.value	= patientData.MiddleName;
+						iframeEl.DOB.value			= patientData.DOB.join('/');
+						iframeEl.Gender.value		= genderTranslate[patientData.Gender];
+						iframeEl.Race.value			= raceTranslate[patientData.Race];
+						iframeEl.Address.value		= patientData.Address;
+						iframeEl.State.value		= patientData.State;
+						iframeEl.City.value			= patientData.City;
+						iframeEl.Zip.value			= patientData.Zip;
+						iframeEl.Phone.value		= patientData.Phone;
+						iframeEl.Email.value		= patientData.Email;
+
+						iframeEl.DOB.focus();
+						PCX.simulateUserKey(PCX.events.Tab,iframeEl.DOB);
+					});
+				});
+			});
+			if (patientData) {
+				// Clear the patient data after usage
+				chrome.storage.local.set({ patientData: {} }, () => {
+					PCX.log('Patient data cleared after use');
+					PCX.getEl(IATSERV.patientDataBanner).remove();
+				});
+			}
+		});
+
+
+		PCX.getEl(el.UpPanel).addEventListener('change', (e) => {
+			// Ping reloaded Elements
+			if (e.target && e.target.id === el.Category.replace('#','')) {
+				IATSERV.checkTestCat(PCX.getEl(`${el.Category} option:checked`),{Input: pageElements.TestCodesInput,Output: pageElements.TestCodesOutput},testCategories);
+			}
+		});
+	}
+
+	static createOrder(PTBanner={timer:90,callback:()=>{return;}}){
+		const el = IATSERV.selectors;
+		el.orderDefaults = orderDefaults;
+
+		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+			if (message.action === 'startCountdownBanner') {
+				// If the banner is already present, don't recreate it
+				if (PCX.getEl(IATSERV.patientDataBanner)) {
+					PCX.getEl(IATSERV.patientDataBanner).remove();
+				}
+				PCX.initializeBanner(message.patientData,timer,callback);
+			}
+		});
+
+		// Prefill Location and Physician
+		waitForElm(el.Location).then((elm) => {
+			PCX.getEl(el.Location).value = el.orderDefaults..Location;
+			PCX.getEl(el.Location).dispatchEvent(eventKeySpace);
+			waitForElm(el.LocationMenu).then((elm) => {
+				PCX.getEl(el.Location).dispatchEvent(eventKeyTab);
+				waitForElm(el.PhysicianOptions).then((elm) => {
+					PCX.getEl(el.Physician).value = el.orderDefaults.Physician;
+					PCX.getEl(el.PhysicianId).value = el.orderDefaults.Physician;
+					PCX.getEl(el.PhysicianName).value = el.orderDefaults.PhysicianName;
+				})
+			});
+		});
+		PCX.getEl(el.BillTo).value = el.orderDefaults.BillTo;
+		PCX.getEl(el.Category).focus();
+	}
 
 	/**
 	 *
@@ -456,4 +599,58 @@ class IATSERV {
 			}
 		}
 	}
+
+	/**
+	 *
+	 *	Result Download
+	 *
+	 * 	Prep file name for download
+	 * 
+	 */
+	
+	static resultsDownloader() {
+		const el = IATSERV.selectors;
+		document.body.addEventListener('click', (event) => {
+			const downloadLink = event.target.closest(`${el.UpdatePanel} a[title="Download Result"]`);
+			if (!downloadLink) {return};
+
+			event.preventDefault();
+			const headings = PCX.getEl(el.DXHeaderRow).textContent.replaceAll('\t','').replaceAll('\n','').split(" ");
+			// Check if the clicked element or one of its parents is the <a> with title "Download Result"
+			
+			// Find the parent <tr> for the clicked <a>
+			const row = downloadLink.closest('tr');
+
+			// Collect the text content of all <td> elements in the row into an array
+			const rowData = Array.from(row.querySelectorAll('td')).map(td => td.textContent.trim());
+			row.classList.add(el.TDCheckedClass);
+			const tdCheckBox = row.querySelector(el.TDCheckBox);
+			tdCheckBox.classList.replace(el.BoxUnchecked,el.BoxChecked);
+			const date = new Date();
+			const customFilename =  "Res "
+						+('0' + (date.getMonth()+1)).slice(-2)
+						+"."+('0' + (date.getDate())).slice(-2)
+						+"."+(date.getFullYear().toString().substr(-2))
+						+" "
+						+rowData[headings.indexOf('Last')]
+						+" "
+						+rowData[headings.indexOf('First')]
+						+".pdf"; // Output the row data as an array
+
+			fetch(downloadLink.href)
+				.then(response => response.blob().then(blob => {
+					// Extract filename from Content-Disposition or use custom/default filename
+					const filename = customFilename ||
+						(response.headers.get('Content-Disposition')?.match(/filename="?(.+?)"?$/)?.[1]) ||
+						'DownloadedFile.pdf';
+
+					// Trigger download with the determined filename
+					const url = window.URL.createObjectURL(blob);
+					Object.assign(document.createElement('a'), { href: url, download: filename }).click();
+					window.URL.revokeObjectURL(url);
+				}))
+				.catch(console.error);
+		});
+	}
+
 }
