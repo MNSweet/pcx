@@ -150,11 +150,11 @@ if (linkId == "2024") {
 			const tdCheckBox = row.querySelector('td:first-child span');
 			tdCheckBox.classList.replace('dxWeb_edtCheckBoxUnchecked_Metropolis','dxWeb_edtCheckBoxChecked_Metropolis');
 			const date = new Date();
-			return "Results "
+			return "Res "
 						+('0' + (date.getMonth()+1)).slice(-2)
 						+"."+('0' + (date.getDate())).slice(-2)
 						+"."+(date.getFullYear().toString().substr(-2))
-						+" "
+						+" "//" POS-NEG "
 						+rowData[headings.indexOf('Last')]
 						+" "
 						+rowData[headings.indexOf('First')]

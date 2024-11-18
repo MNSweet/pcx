@@ -460,6 +460,7 @@ if (linkId == "2461") {
 				}
 			};
 		}
+		PCX.findEl('#MainContent_ctl00_ctrlResultEntryList_btnRelease').scrollIntoView({ behavior: "smooth", block: "end"});;
 	});
 
 	function dropZoneKeepAlive(isDragging, e) {
@@ -498,7 +499,7 @@ function setStablityNotice(stabilityDate,existingAcs = false) {
 	}else if(stabilityAge > 88){
 		stabilityText	= `${stabilityAge} Days Old`;
 		stabilityPhase	= "phaseThree";
-	}else if(stabilityAge > 27){
+	}else if(stabilityAge > 57){
 		stabilityText	= `${stabilityAge} Days Old`;
 		stabilityPhase	= "phaseTwo";
 	}else{
