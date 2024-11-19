@@ -289,6 +289,14 @@ class IATSERV {
 				}, 100);
 			}
 		},true);
+
+		PCX.getEl("#MainContent_ctl00_ctl00_ctrlICDCodes_tbList_tbText~.body").insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
+		PCX.getEl("#MainContent_ctl00_ctl00_ctrlICDCodes_tbList_tbText").addEventListener('input', async (e) => {
+
+			await delay(1000);
+			let icdCodes = Array.from(document.querySelectorAll("#MainContent_ctl00_ctl00_ctrlICDCodes_tbList_tbText~.body #dvSelectedItems #xv_param"));
+			document.querySelector("#icdCodePreviewer").innerHTML = `<span class="icdCode">` + icdCodes.map((element)=>{return element.value;}).join(`</span><span class="icdCode">`) + `</span>`;
+		},true);
 	}
 
 	/**
@@ -299,7 +307,6 @@ class IATSERV {
 	static capturePTData() {
 
 		const el = IATSERV.selectors;
-console.log("capturePTData",el);
 		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			if (message.action === 'startCountdownBanner') {
 			// If the banner is already present, don't recreate it
