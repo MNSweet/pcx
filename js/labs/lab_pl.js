@@ -1,4 +1,5 @@
 PCX.log("Prince Laboratories");
+PCX.log(IATSERV.linkId);
 
 IATSERV.setLabs({
 	   2: {Code:"IP",	Label:"Ipseity Diagnostics LLC",Stability:{NGS: 90}},
@@ -64,10 +65,11 @@ if (IATSERV.linkId == "2011") {
 
 // Update Accession
 if (IATSERV.linkId == "2071") {
+console.log("Update Accession");
 	IATSERV.setSelectors({
 		DOS				: ".dos",
 		DOC				: "#MainContent_ctl00_tbCollectionDateTime_tbDate_tbText",
-		newPatientBtn	: "#btnAddEditPatient",
+		newPatientBtn	: "#lblAddPatientTitle",
 		CategoryOpt		: "#MainContent_ctl00_ctrlOrderTestCategoryControl_ddTestCategory option:checked",
 		Iframe			: '[class="fancybox-iframe"',
 		FirstName		: '#tbFirstName',
@@ -93,9 +95,7 @@ if (IATSERV.linkId == "2071") {
 	);
 
 	// Add BTN to copy PT data
-	function capturePTData() {
-		IATSERV.capturePTData();
-	}
+	IATSERV.capturePTData();
 
 	IATSERV.fileDrop({
 		enabled	: true,

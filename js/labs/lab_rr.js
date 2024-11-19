@@ -66,19 +66,20 @@ PCX.log("Reliable Results Labs");
 	});
 
 	IATSERV.setGenderTranslation({
-		Male: 1,
-		Female: 2
+		Male	: 1,
+		Female	: 2
 	});
 
 	IATSERV.setRaceTranslation({
-		"African American": 1,
-		"Hispanic": 2,
-		"Caucasian": 3,
-		"Mixed Race": 4,
-		"Mixed": 4,
-		"Asian": 5,
-		"Native American": 6,
-		"Other": 7
+		"African American"	: 1,
+		"Hispanic"			: 2,
+		"Caucasian"			: 3,
+		"Mixed Race"		: 4,
+		"Mixed"				: 4,
+		"Asian"				: 5,
+		"Native American"	: 6,
+		"Other"				: 7,
+		"Jewish (Ashkenazi)": 8
 	});
 
 	IATSERV.setOrderDefaults({
@@ -145,7 +146,7 @@ if (IATSERV.linkId == "2011") {
 	});
 
 
-	IATSERV.createOrder({timer:90,callback:() => {
+	IATSERV.createOrder(()=>{
 		PCX.getEl("#patientDataBanner").appendChild(
 			Object.assign(document.createElement('span'), {
 				textContent: 'Paste Patient Data',
@@ -156,5 +157,5 @@ if (IATSERV.linkId == "2011") {
 		PCX.getEl("#patientDataClone").addEventListener('click', function(event) {
 			IATSERV.pastePatientData();
 		});
-	}});
+	});
 }

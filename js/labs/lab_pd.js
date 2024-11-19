@@ -1,5 +1,43 @@
 console.log("Principle Diagnostics");
 
+console.log(DXRESULTS.location);
+
+
+	DXRESULTS.setCategoryTranslation({
+		 3:"PGx",						// PGX
+		 4:"CGX",						// CGX
+		11:"ImmunodeficiencyReq.aspx",	// Immuno
+		12:"Neurology",					// Neuro
+		 1:-1,	// Toxicology	- Prince only
+		 5:-1,	// STI			- Prince only
+		 6:-1,	// UTI			- Prince only
+		 7:-1,	// HPV			- Prince only
+		 8:-1,	// Wound		- Prince only
+		 9:-1,	// COVID		- Prince only
+		13:-1,	// RPP			- Prince only
+		14:-1,	// Eyes			- Prince only
+		15:-1,	// Thyroid		- Prince only
+		16:-1,	// Diabetes		- Prince only
+		17:-1,	// Cardio		- Prince only
+	});
+
+	IATSERV.setRaceTranslation({
+		"African American"	: {"Non-Hispanic/Latino",	"African American"},
+		"Hispanic"			: {"Hispanic/Latino",		"Other"},
+		"Caucasian"			: {"Non-Hispanic/Latino",	"Caucasian"},
+		"Mixed Race"		: {"Non-Hispanic/Latino",	"Other"},
+		"Mixed"				: {"Non-Hispanic/Latino",	"Other"},
+		"Asian"				: {"Non-Hispanic/Latino",	"Asian"},
+		"Native American"	: {"Non-Hispanic/Latino",	"Other"},
+		"Other"				: {"Not Specified",			"Other"},
+		"Jewish (Ashkenazi)": {"Non-Hispanic/Latino",	"Jewish (Ashkenzai)"}
+	});
+
+	IATSERV.setOrderDefaults({
+		Physician		: '99488', //Prince Laboratories LLC|          |8888888888
+		ICDCode			: 'Z00.00'
+	});
+
 /********************************************
 *
 * Import Patient Data from Local Temp Cache.

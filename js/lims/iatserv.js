@@ -299,7 +299,7 @@ class IATSERV {
 	static capturePTData() {
 
 		const el = IATSERV.selectors;
-
+console.log("capturePTData",el);
 		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			if (message.action === 'startCountdownBanner') {
 			// If the banner is already present, don't recreate it
@@ -309,7 +309,7 @@ class IATSERV {
 			}
 		});
 
-		PCX.getEl(el.newPatientBtn).addEventListener('click', function(event) {
+		PCX.getEl(el.newPatientBtn).parentNode.addEventListener('click', function(event) {
 			const siteAssets = document.createElement('div');
 			siteAssets.id = 'siteAssets';
 			siteAssets.appendChild(
@@ -459,7 +459,7 @@ class IATSERV {
 		});
 	}
 
-	static createOrder(PTBanner={timer:90,callback:()=>{return;}}){
+	static createOrder(callback=()=>{return;}) {
 		const el = IATSERV.selectors;
 		el.orderDefaults = orderDefaults;
 
@@ -469,13 +469,13 @@ class IATSERV {
 				if (PCX.getEl(IATSERV.patientDataBanner)) {
 					PCX.getEl(IATSERV.patientDataBanner).remove();
 				}
-				PCX.initializeBanner(message.patientData,timer,callback);
+				PCX.initializeBanner(message.patientData,message.timer,callback);
 			}
 		});
 
 		// Prefill Location and Physician
 		waitForElm(el.Location).then((elm) => {
-			PCX.getEl(el.Location).value = el.orderDefaults..Location;
+			PCX.getEl(el.Location).value = el.orderDefaults.Location;
 			PCX.getEl(el.Location).dispatchEvent(eventKeySpace);
 			waitForElm(el.LocationMenu).then((elm) => {
 				PCX.getEl(el.Location).dispatchEvent(eventKeyTab);
@@ -523,7 +523,6 @@ class IATSERV {
 		let 	isDragging 	= false;
 		const	el			= IATSERV.selectors;
 				el.DropArea		= target ? target : el.UploadTable;
-				console.log(target,typeof target, el.UploadTable, el.DropArea);
 				el.AcceptTypes	= el.DropArea+' input[type="file"]';
 				el.TargetSpan	= targetSpan ? targetSpan : el.UploadSpan;
 		const 	dropArea	= PCX.getEl(el.DropArea).closest('*');

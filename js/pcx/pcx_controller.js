@@ -308,49 +308,49 @@ class PCX {
 *
 *********************************************/
 
-static initializeBanner(patientData, timeLeft = 90, callback) {
-	const banner = document.createElement('div');
-	banner.id = 'patientDataBanner';
-	banner.style.cssText = 'position:fixed; top:0; width:100%; background-color:yellow; z-index:1000; padding:10px; display:flex; justify-content:space-between;';
+	static initializeBanner(patientData, timeLeft = 90, callback) {
+		const banner = document.createElement('div');
+		banner.id = 'patientDataBanner';
+		banner.style.cssText = 'position:fixed; top:0; width:100%; background-color:yellow; z-index:1000; padding:10px; display:flex; justify-content:space-between;';
 
-	// Left side: Patient details
-	const patientInfo = document.createElement('span');
-	patientInfo.id 			= "patientInfo";
-	patientInfo.textContent = `Patient: ${patientData.LastName}, ${patientData.FirstName} | ${patientData.Category}`;
-	banner.appendChild(patientInfo);
+		// Left side: Patient details
+		const patientInfo = document.createElement('span');
+		patientInfo.id 			= "patientInfo";
+		patientInfo.textContent = `Patient: ${patientData.LastName}, ${patientData.FirstName} | ${patientData.Category}`;
+		banner.appendChild(patientInfo);
 
-	// Right side: Countdown timer
-	const timer = document.createElement('span');
-	timer.id 			= "patientDataTimer";
-	timer.textContent	= "-:--";
-	const countdown = setInterval(() => {
-		const minutes = Math.floor(timeLeft / 60);
-		const seconds = timeLeft % 60;
-		timer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-		timeLeft--;
+		// Right side: Countdown timer
+		const timer = document.createElement('span');
+		timer.id 			= "patientDataTimer";
+		timer.textContent	= "-:--";
+		const countdown = setInterval(() => {
+			const minutes = Math.floor(timeLeft / 60);
+			const seconds = timeLeft % 60;
+			timer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+			timeLeft--;
 
-		if (timeLeft < 0) {
-			clearInterval(countdown);
-			chrome.storage.local.set({ patientData: {} }, () => {
-				PCX.log('Patient data cleared after timeout');
-				banner.remove();
-			});
-		}
-	}, 1000);
+			if (timeLeft < 0) {
+				clearInterval(countdown);
+				chrome.storage.local.set({ patientData: {} }, () => {
+					PCX.log('Patient data cleared after timeout');
+					banner.remove();
+				});
+			}
+		}, 1000);
 
-	banner.appendChild(timer);
-	document.body.appendChild(banner);
-	if (callback) {callback();}
-}
-
-function updateBanner(timeLeft) {
-	const timer = document.querySelector('#patientDataBanner span:nth-child(2)');
-	if (timer) {
-		const minutes = Math.floor(timeLeft / 60);
-		const seconds = timeLeft % 60;
-		timer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+		banner.appendChild(timer);
+		document.body.appendChild(banner);
+		if (callback) {callback();}
 	}
-}
+
+	static updateBanner(timeLeft) {
+		const timer = document.querySelector('#patientDataBanner span:nth-child(2)');
+		if (timer) {
+			const minutes = Math.floor(timeLeft / 60);
+			const seconds = timeLeft % 60;
+			timer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+		}
+	}
 
 
 
@@ -371,6 +371,10 @@ function updateBanner(timeLeft) {
 		}
 
 		return params;
+	}
+	static getUrlDirectory() {
+		const params = {};
+		return window.location.pathname.split('/');
 	}
 
 	static processEnabled(processID,overrider = false) {
