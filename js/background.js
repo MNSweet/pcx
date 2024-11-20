@@ -19,16 +19,30 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 			'*://pnc.dxresults.com/*'
 		];
 
-		let timer = 90;
-		let updateCountdownBanner = setInterval(()=>{
-			chrome.tabs.query({ url: matchUrls }, (tabs) => {
+		chrome.tabs.query({ url: matchUrls }, (tabs) => {
 			tabs.forEach(tab => {
 				// Send the message to each matching tab to start the countdown
 				chrome.tabs.sendMessage(tab.id, { action: 'startCountdownBanner', patientData: request.patientData, timer:timer});
 			});
-			timer = timer - 1;
-			if(timer <= 5) {clearInterval(updateCountdownBanner);}
-		})},1000);
+		});
+		let timer = 90;
+		let updateCountdownBanner = setInterval(()=>{
+			chrome.tabs.query({ url: matchUrls }, (tabs) => {
+				const minutes = Math.floor(timer / 60);
+				const seconds = timer % 60;
+				const timerText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+				timer--;
+				tabs.forEach(tab => {
+					// Send the message to each matching tab to start the countdown
+					chrome.tabs.sendMessage(tab.id, { action: 'pingCountdownBanner', timer:timerText});
+				});
+				if (timer <= 0) {
+					clearInterval(updateCountdownTimer);
+					chrome.storage.local.set({ patientData: {} }, () => {
+						PCX.log('Patient data cleared after timeout');
+					});
+				}
+		})}, 1000);
 		
 	}
 
@@ -163,13 +177,13 @@ chrome.tabs.onUpdated.addListener(function (tabId, change, tab) {
 
 // Function to change extension icon
 function changeExtensionIcon(change=false) {
-		var newIconPath = {};
+	var newIconPath = {};
 
-			var newIconPath = {
-					"16": change ? "../icons/alt-icon-16.png" : "../icons/default-icon-16.png",
-					"48": change ? "../icons/alt-icon-48.png" : "../icons/default-icon-48.png",
-					"128": change ? "../icons/alt-icon-128.png" : "../icons/default-icon-128.png"
-			};
-		// Change the extension icon
-		chrome.action.setIcon({ path: newIconPath });
+		var newIconPath = {
+				"16": change ? "../icons/alt-icon-16.png" : "../icons/default-icon-16.png",
+				"48": change ? "../icons/alt-icon-48.png" : "../icons/default-icon-48.png",
+				"128": change ? "../icons/alt-icon-128.png" : "../icons/default-icon-128.png"
+		};
+	// Change the extension icon
+	chrome.action.setIcon({ path: newIconPath });
 }

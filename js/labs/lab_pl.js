@@ -54,7 +54,8 @@ if (IATSERV.linkId == "2011") {
 		TestCodesOutput	: "#dvSelectedItems",
 		UpPanel			: "#MainContent_ctl00_ctl00_upPanel",
 		UploadTable		: '#uploadTable',
-		UploadSpan		: '.upload span'
+		UploadSpan		: '.upload span',
+		ICDCodesInput	: '#MainContent_ctl00_ctl00_ctrlICDCodes_tbList_tbText'
 	});
 	IATSERV.createAccession();
 
@@ -79,7 +80,7 @@ console.log("Update Accession");
 		Gender			: '#MainContent_ctl00_ddGender_ddControl option:checked',
 		Race			: '#MainContent_ctl00_ddRace_ddControl option:checked',
 		Address1		: '#MainContent_ctl00_AddressControl1_tbAddress1',
-		Address3		: '#MainContent_ctl00_AddressControl1_tbAddress2',
+		Address2		: '#MainContent_ctl00_AddressControl1_tbAddress2',
 		State			: '#MainContent_ctl00_AddressControl1_CountryState_ddState option:checked',
 		City			: '#MainContent_ctl00_AddressControl1_tbCity',
 		Zip				: '#MainContent_ctl00_AddressControl1_tbZipCode',

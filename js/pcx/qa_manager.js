@@ -159,7 +159,7 @@ class QAManager {
 		}else if(stabilityAge > 88){
 			stabilityText	= `${stabilityAge} Days Old`;
 			stabilityPhase	= "phaseThree";
-		}else if(stabilityAge > 27){
+		}else if(stabilityAge > 57){
 			stabilityText	= `${stabilityAge} Days Old`;
 			stabilityPhase	= "phaseTwo";
 		}else{

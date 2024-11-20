@@ -45,3 +45,15 @@
 	font-size: 14px;
 	border: 1px solid #333;
 }
+.icdCode {
+	font-size: 11px;
+	padding: 1px 3px;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	background-color: #fefefe;
+	margin: 5px 2px 0;
+	display: inline-block;
+	font-weight: bold;
+	letter-spacing: 1px;
+	font-family: "courier new", monospace;
+}

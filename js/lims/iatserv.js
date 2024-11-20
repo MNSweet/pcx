@@ -31,43 +31,43 @@ class IATSERV {
 
 	static setTestCategories(testCats){
 		if(typeof testCats == "object"){
-			this.testCategories = testCats;
+			IATSERV.testCategories = testCats;
 		}
 	}
 
 	static setCategoryTranslation(catTranslation){
 		if(typeof catTranslation == "object"){
-			this.categoryTranslation = catTranslation;
+			IATSERV.categoryTranslation = catTranslation;
 		}
 	}
 
 	static setGenderTranslation(genderTranslation){
 		if(typeof genderTranslation == "object"){
-			this.genderTranslation = genderTranslation;
+			IATSERV.genderTranslation = genderTranslation;
 		}
 	}
 
 	static setRaceTranslation(raceTranslation){
 		if(typeof raceTranslation == "object"){
-			this.raceTranslation = raceTranslation;
+			IATSERV.raceTranslation = raceTranslation;
 		}
 	}
 
 	static setLabs(labs){
 		if(typeof labs == "object"){
-			this.labs = labs;
+			IATSERV.labs = labs;
 		}
 	}
 
 	static setSelectors(selector){
 		if(typeof selector == "object"){
-			this.selectors = selector;
+			IATSERV.selectors = selector;
 		}
 	}
 
 	static setOrderDefaults(orderDefaults){
 		if(typeof orderDefaults == "object"){
-			this.orderDefaults = orderDefaults;
+			IATSERV.orderDefaults = orderDefaults;
 		}
 	}
 
@@ -165,9 +165,9 @@ class IATSERV {
 			elTestCodes.Input.value = testCategories[elCategory.value].Test;
 			await delay(1000);
 			elTestCodes.Input = PCX.getEl(el.TestCodesInput,true);
-			PCX.simulateUserKey(elTestCodes.Input,events.End);
+			PCX.simulateUserKey(elTestCodes.Input,PCX.events.End);
 			await delay(800);
-			PCX.simulateUserKey(elTestCodes.Input,events.Tab);
+			PCX.simulateUserKey(elTestCodes.Input,PCX.events.Tab);
 			QAManager.setStablityNotice(PCX.getEl(el.DOC,true).value);
 		}
 	}
@@ -290,12 +290,25 @@ class IATSERV {
 			}
 		},true);
 
-		PCX.getEl("#MainContent_ctl00_ctl00_ctrlICDCodes_tbList_tbText~.body").insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
-		PCX.getEl("#MainContent_ctl00_ctl00_ctrlICDCodes_tbList_tbText").addEventListener('input', async (e) => {
-
-			await delay(1000);
-			let icdCodes = Array.from(document.querySelectorAll("#MainContent_ctl00_ctl00_ctrlICDCodes_tbList_tbText~.body #dvSelectedItems #xv_param"));
-			document.querySelector("#icdCodePreviewer").innerHTML = `<span class="icdCode">` + icdCodes.map((element)=>{return element.value;}).join(`</span><span class="icdCode">`) + `</span>`;
+		PCX.getEl(el.ICDCodesInput+"~.body").insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
+		PCX.getEl(el.ICDCodesInput).addEventListener('keydown', async (e) => {
+			if (e.key == "Enter" || e.key == "Tab") {
+				let attempt = 0;
+				let icdCodesCount = 0;
+				let lastValue = '';
+				const intervalICDId = setInterval(() => {
+					icdCodesCount = PCX.getEls(el.ICDCodesInput+"~.body #dvSelectedItems #xv_param",true).length;
+					if (icdCodesCount !== lastValue) {
+						let icdCodes = Array.from(PCX.getEls(el.ICDCodesInput+"~.body #dvSelectedItems #xv_param",true)).reverse();
+						PCX.getEl("#icdCodePreviewer",true).innerHTML = `<span class="icdCode">` + icdCodes.map((element)=>{return element.value;}).join(`</span><span class="icdCode">`) + `</span>`;
+						lastValue = icdCodesCount;
+						clearInterval(intervalICDId);
+					}
+					if (++attempt >= 5) {
+						clearInterval(intervalICDId);
+					}
+				}, 100);
+			}
 		},true);
 	}
 
@@ -444,7 +457,7 @@ class IATSERV {
 						iframeEl.Email.value		= patientData.Email;
 
 						iframeEl.DOB.focus();
-						PCX.simulateUserKey(PCX.events.Tab,iframeEl.DOB);
+						PCX.simulateUserKey(iframeEl.DOB,PCX.events.Tab);
 					});
 				});
 			});
@@ -468,7 +481,7 @@ class IATSERV {
 
 	static createOrder(callback=()=>{return;}) {
 		const el = IATSERV.selectors;
-		el.orderDefaults = orderDefaults;
+		el.orderDefaults = IATSERV.orderDefaults;
 
 		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			if (message.action === 'startCountdownBanner') {
@@ -476,16 +489,16 @@ class IATSERV {
 				if (PCX.getEl(IATSERV.patientDataBanner)) {
 					PCX.getEl(IATSERV.patientDataBanner).remove();
 				}
-				PCX.initializeBanner(message.patientData,message.timer,callback);
+				PCX.updateBanner(message.patientData,message.timer,callback);
 			}
 		});
 
 		// Prefill Location and Physician
 		waitForElm(el.Location).then((elm) => {
 			PCX.getEl(el.Location).value = el.orderDefaults.Location;
-			PCX.getEl(el.Location).dispatchEvent(eventKeySpace);
+			PCX.simulateUserKey(PCX.getEl(el.Location),PCX.events.Space);
 			waitForElm(el.LocationMenu).then((elm) => {
-				PCX.getEl(el.Location).dispatchEvent(eventKeyTab);
+			PCX.simulateUserKey(PCX.getEl(el.Location),PCX.events.Tab);
 				waitForElm(el.PhysicianOptions).then((elm) => {
 					PCX.getEl(el.Physician).value = el.orderDefaults.Physician;
 					PCX.getEl(el.PhysicianId).value = el.orderDefaults.Physician;
@@ -562,7 +575,7 @@ class IATSERV {
 				for (const [i, file] of Object.entries(e.dataTransfer.files)) {
 					let fileExt = file.name.split('.').pop();
 					let fileName = file.name.replace('.'+fileExt,'');
-					dropArea.scrollIntoView({ behavior: "smooth"});
+					dropArea.scrollIntoView({ behavior: "smooth", block: "end"});
 					if (acceptTypes.findIndex(function (a) { return a.toLowerCase() == ('.' + fileExt).toLowerCase() }) == -1) {
 						return; // File not accepted
 					}

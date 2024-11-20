@@ -97,6 +97,25 @@ class PCX {
 	}
 
 	/**
+	 * getEls
+	 * @param  STRING			selector	DOM Selector string
+	 * @param  BOOL				requery		Ignore Cache and PCX.findEl()
+	 * @return NODE|BOOL					Found: NODE | Missing: FALSE
+	 *
+	 * Wraps PCX.findEls() in a cache
+	 * 
+	 */
+	static getEls(selector,requery=false) {
+		if(!requery && PCX.pageElementsCache[selector]) {
+			PCX.log(`PCX.getEls(${selector}) Cached`);
+			return PCX.pageElementsCache[selector];
+		} else {
+			PCX.log(`PCX.getEls(${selector}) Requested`);
+			return PCX.pageElementsCache[selector] = PCX.findEls(selector);
+		}
+	}
+
+	/**
 	 * findEl
 	 * @param  STRING 		selector	DOM Selector string
 	 * @return NODE|BOOL				Found: NODE | Missing: FALSE
@@ -108,18 +127,23 @@ class PCX {
 		return document.querySelector(selector);
 	}
 
+	/**
+	 * findEl
+	 * @param  STRING 		selector	DOM Selector string
+	 * @return NODE|BOOL				Found: NODE | Missing: FALSE
+	 *
+	 * Call a fresh version of the selectors
+	 */
+	static findEls(selector) {
+		PCX.log(`PCX.findEls(${selector})`);
+		return document.querySelectorAll(selector);
+	}
+
 	static simulateUserKey(element, opts) {
-		PCX.log(`PCX.simulateUserKey(${element})`);
+		PCX.log(`PCX.simulateUserKey:`,element);
 		if (element && typeof opts == 'object') {
 			let defaults = {bubbles: true, cancelable : false, key : "",shiftKey : false, keyCode: 0};
-			let options = [defaults,opts].reduce((result, item) => {
-				if (typeof item === 'object' && item !== null) {
-					result.push(Object.assign({}, ...result.filter(x => typeof x === 'object' && x !== null), item));
-				} else {
-					result.push(item);
-				}
-				return result;
-			}, []);
+			let options = {...defaults,...opts};
 
 			let simKey = new KeyboardEvent('keydown', {bubbles: options.bubbles, cancelable: options.cancelable, key: options.key, shiftKey: options.shiftKey, keyCode: options.keyCode});
 			element.dispatchEvent(simKey);
@@ -307,7 +331,6 @@ class PCX {
 * Banner Controller
 *
 *********************************************/
-
 	static initializeBanner(patientData, timeLeft = 90, callback) {
 		const banner = document.createElement('div');
 		banner.id = 'patientDataBanner';
@@ -317,39 +340,46 @@ class PCX {
 		const patientInfo = document.createElement('span');
 		patientInfo.id 			= "patientInfo";
 		patientInfo.textContent = `Patient: ${patientData.LastName}, ${patientData.FirstName} | ${patientData.Category}`;
+		patientInfo.dataset.hash= PCX.hashCode(`${patientData.LastName}${patientData.FirstName}${patientData.Category}`);
 		banner.appendChild(patientInfo);
 
 		// Right side: Countdown timer
 		const timer = document.createElement('span');
 		timer.id 			= "patientDataTimer";
 		timer.textContent	= "-:--";
-		const countdown = setInterval(() => {
-			const minutes = Math.floor(timeLeft / 60);
-			const seconds = timeLeft % 60;
-			timer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-			timeLeft--;
-
-			if (timeLeft < 0) {
-				clearInterval(countdown);
-				chrome.storage.local.set({ patientData: {} }, () => {
-					PCX.log('Patient data cleared after timeout');
-					banner.remove();
-				});
-			}
-		}, 1000);
-
 		banner.appendChild(timer);
 		document.body.appendChild(banner);
-		if (callback) {callback();}
 	}
 
-	static updateBanner(timeLeft) {
-		const timer = document.querySelector('#patientDataBanner span:nth-child(2)');
-		if (timer) {
-			const minutes = Math.floor(timeLeft / 60);
-			const seconds = timeLeft % 60;
-			timer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+	static updateBanner(patientData, timeLeft = 90) {
+		if(PCX.getEl('#patientDataBanner',true)) {
+			const hashCode = PCX.hashCode(`${patientData.LastName}${patientData.FirstName}${patientData.Category}`);
+			if (PCX.getEl('#patientInfo',true).dataset.hash == hashCode) {
+				return;
+			}
+			PCX.getEl('#patientInfo').dataset.hash = hashCode;
+		
+			PCX.getEl('#patientInfo').textContent = `Patient: ${patientData.LastName}, ${patientData.FirstName} | ${patientData.Category}`;
+
+			if (PCX.getEl('#patientDataTimer',true)) {
+				const minutes = Math.floor(timeLeft / 60);
+				const seconds = timeLeft % 60;
+				PCX.getEl('#patientDataTimer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+			}
+		}else{
+			PCX.initializeBanner(patientData, timeLeft, callback);
 		}
+
+		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+			if (message.action === 'pingCountdownBanner') {
+				if (timeLeft <= 0) {
+					PCX.getEl('#patientDataBanner',true).remove();
+				}else{
+					PCX.getEl('#patientDataTimer').textContent = message.timerText;
+				}
+			}
+		});
+		if (callback) {callback();}
 	}
 
 
@@ -408,10 +438,22 @@ class PCX {
 	}
 
 	static log(message) {
-	if (PCX.getUrlParams()['debug']) {
-		console.log(message);
+		if (PCX.getUrlParams()['debug']) {
+			console.log(message);
+		}
 	}
-}
+
+	static hashCode(string) {
+	  var hash = 0,
+	    i, chr;
+	  if (string.length === 0) return hash;
+	  for (i = 0; i < string.length; i++) {
+	    chr = string.charCodeAt(i);
+	    hash = ((hash << 5) - hash) + chr;
+	    hash |= 0; // Convert to 32bit integer
+	  }
+	  return hash;
+	}
 	
 }
 
@@ -474,4 +516,3 @@ function waitForIframeElm(frame,selector) {
 function delay(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
-
