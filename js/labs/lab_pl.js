@@ -71,6 +71,7 @@ console.log("Update Accession");
 		DOS				: ".dos",
 		DOC				: "#MainContent_ctl00_tbCollectionDateTime_tbDate_tbText",
 		newPatientBtn	: "#lblAddPatientTitle",
+		Category		: "#MainContent_ctl00_ctrlOrderTestCategoryControl_ddTestCategory",
 		CategoryOpt		: "#MainContent_ctl00_ctrlOrderTestCategoryControl_ddTestCategory option:checked",
 		Iframe			: '[class="fancybox-iframe"',
 		FirstName		: '#tbFirstName',

@@ -140,10 +140,11 @@ class PCX {
 	}
 
 	static simulateUserKey(element, opts) {
-		PCX.log(`PCX.simulateUserKey:`,element);
+		PCX.log(`PCX.simulateUserKey:`,element, opts);
 		if (element && typeof opts == 'object') {
 			let defaults = {bubbles: true, cancelable : false, key : "",shiftKey : false, keyCode: 0};
 			let options = {...defaults,...opts};
+			PCX.log(`PCX.simulateUserKey:`,options);
 
 			let simKey = new KeyboardEvent('keydown', {bubbles: options.bubbles, cancelable: options.cancelable, key: options.key, shiftKey: options.shiftKey, keyCode: options.keyCode});
 			element.dispatchEvent(simKey);
@@ -157,14 +158,7 @@ class PCX {
 		PCX.log(`PCX.simulateUserInputValue(${element})`);
 		if (element && typeof opts == 'object') {
 			let defaults = {bubbles: true, cancelable : false, key : "",shiftKey : false, keyCode: 0};
-			let options = [defaults,opts].reduce((result, item) => {
-				if (typeof item === 'object' && item !== null) {
-					result.push(Object.assign({}, ...result.filter(x => typeof x === 'object' && x !== null), item));
-				} else {
-					result.push(item);
-				}
-				return result;
-			}, []);
+			let options = {...defaults,...opts};
 
 			let simKey = new KeyboardEvent('keydown', {bubbles: options.bubbles, cancelable: options.cancelable, key: options.key, shiftKey: options.shiftKey, keyCode: options.keyCode});
 			element.dispatchEvent(simKey);

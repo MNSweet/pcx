@@ -158,6 +158,7 @@ class IATSERV {
 	 * @param  OBJ	testCategories
 	 */
 	static async checkTestCat(elCategory,elTestCodes,testCategories){
+		PCX.log("checkTestCat: ",elCategory,elTestCodes,testCategories);
 		if(
 			elCategory.value != "" &&
 			elTestCodes.Output.querySelectorAll('.item').length <= 0
@@ -165,10 +166,10 @@ class IATSERV {
 			elTestCodes.Input.value = testCategories[elCategory.value].Test;
 			await delay(1000);
 			elTestCodes.Input = PCX.getEl(el.TestCodesInput,true);
-			PCX.simulateUserKey(elTestCodes.Input,PCX.events.End);
+			PCX.simulateUserKey(PCX.getEl(elTestCodes.Input),PCX.events.End);
 			await delay(800);
-			PCX.simulateUserKey(elTestCodes.Input,PCX.events.Tab);
-			QAManager.setStablityNotice(PCX.getEl(el.DOC,true).value);
+			PCX.simulateUserKey(PCX.getEl(elTestCodes.Input),PCX.events.Tab);
+			QAManager.setStablityNotice(PCX.getEl(el.DOS),PCX.getEl(el.DOC,true).value);
 		}
 	}
 
@@ -267,19 +268,21 @@ class IATSERV {
 
 		// CHANGE
 		PCX.getEl(el.UpPanel).addEventListener('change', (e) => {
-			if (e.target && e.target.id === el.CategoryOpt) {
-				checkTestCat(PCX.getEl(el.CategoryOpt,true),{Input: PCX.getEl(el.TestCodesInput,true),Output: PCX.getEl(el.TestCodesOutput,true)},IATSERV.testCategories);
+			console.log("UpPanel change", e);
+			if (e.target && e.target.id === el.Category) {
+				checkTestCat(PCX.getEl(el.Category,true),{Input: PCX.getEl(el.TestCodesInput,true),Output: PCX.getEl(el.TestCodesOutput,true)},IATSERV.testCategories);
 			}
 		});
 
 		// BLUR
 		PCX.getEl(el.UpPanel).addEventListener('blur', (e) => {
+			console.log("UpPanel blur", e);
 			if (e.target && e.target.id === el.DOC) {
 				let attempt = 0;
 				let lastValue = '';
 				const intervalId = setInterval(() => {
 					if (PCX.getEl(el.DOC,true).value !== lastValue) {
-						QAManager.setStablityNotice(PCX.getEl(el.DOC).value)
+						QAManager.setStablityNotice(PCX.getEl(el.DOS),PCX.getEl(el.DOC).value)
 						lastValue = PCX.getEl(el.DOC).value;
 						clearInterval(intervalId);
 					}
@@ -291,8 +294,9 @@ class IATSERV {
 		},true);
 
 		PCX.getEl(el.ICDCodesInput+"~.body").insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
-		PCX.getEl(el.ICDCodesInput).addEventListener('keydown', async (e) => {
-			if (e.key == "Enter" || e.key == "Tab") {
+		PCX.getEl(el.UpPanel,true).addEventListener('keydown', async (e) => {
+			console.log("UpPanel blur", e);
+			if (e.target && e.target.id === el.ICDCodesInput && (e.key == "Enter" || e.key == "Tab")) {
 				let attempt = 0;
 				let icdCodesCount = 0;
 				let lastValue = '';

@@ -152,3 +152,5 @@
 	letter-spacing: 1px;
 	font-family: "courier new", monospace;
 }
+#MainContent_ctl00_ctl00_ctrlICDCodes_tbList_tbText~#dvCount{display: block !important;}
+#MainContent_ctl00_ctl00_ctrlICDCodes_tbList_tbText~#dvCount::before{content: "ICD Code Count: "; font-weight: bold;}
