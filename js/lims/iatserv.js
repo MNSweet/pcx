@@ -158,6 +158,7 @@ class IATSERV {
 	 * @param  OBJ	testCategories
 	 */
 	static async checkTestCat(elCategory,elTestCodes,testCategories){
+		const el = IATSERV.selectors;
 		PCX.log("checkTestCat: ",elCategory,elTestCodes,testCategories);
 		if(
 			elCategory.value != "" &&
@@ -165,11 +166,11 @@ class IATSERV {
 		) {
 			elTestCodes.Input.value = testCategories[elCategory.value].Test;
 			await delay(1000);
-			elTestCodes.Input = PCX.getEl(el.TestCodesInput,true);
-			PCX.simulateUserKey(PCX.getEl(elTestCodes.Input),PCX.events.End);
+			PCX.simulateUserKey(elTestCodes.Input,PCX.events.End);
 			await delay(800);
-			PCX.simulateUserKey(PCX.getEl(elTestCodes.Input),PCX.events.Tab);
-			QAManager.setStablityNotice(PCX.getEl(el.DOS),PCX.getEl(el.DOC,true).value);
+			PCX.simulateUserKey(elTestCodes.Input,PCX.events.Tab);
+			QAManager.setStablityNotice(el.DOS,PCX.getEl(el.DOC,true).value);
+			PCX.getEl(el.ICDCodesInput+"~.body",true).insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
 		}
 	}
 
@@ -268,21 +269,19 @@ class IATSERV {
 
 		// CHANGE
 		PCX.getEl(el.UpPanel).addEventListener('change', (e) => {
-			console.log("UpPanel change", e);
-			if (e.target && e.target.id === el.Category) {
-				checkTestCat(PCX.getEl(el.Category,true),{Input: PCX.getEl(el.TestCodesInput,true),Output: PCX.getEl(el.TestCodesOutput,true)},IATSERV.testCategories);
+			if (e.target && "#"+e.target.id === el.Category) {
+				IATSERV.checkTestCat(PCX.getEl(el.Category,true),{Input: PCX.getEl(el.TestCodesInput,true),Output: PCX.getEl(el.TestCodesOutput,true)},IATSERV.testCategories);
 			}
 		});
 
 		// BLUR
 		PCX.getEl(el.UpPanel).addEventListener('blur', (e) => {
-			console.log("UpPanel blur", e);
-			if (e.target && e.target.id === el.DOC) {
+			if (e.target && "#"+e.target.id === el.DOC) {
 				let attempt = 0;
 				let lastValue = '';
 				const intervalId = setInterval(() => {
 					if (PCX.getEl(el.DOC,true).value !== lastValue) {
-						QAManager.setStablityNotice(PCX.getEl(el.DOS),PCX.getEl(el.DOC).value)
+						QAManager.setStablityNotice(el.DOS,PCX.getEl(el.DOC).value)
 						lastValue = PCX.getEl(el.DOC).value;
 						clearInterval(intervalId);
 					}
@@ -294,24 +293,16 @@ class IATSERV {
 		},true);
 
 		PCX.getEl(el.ICDCodesInput+"~.body").insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
+		let observer = new MutationObserver(()=>{});
 		PCX.getEl(el.UpPanel,true).addEventListener('keydown', async (e) => {
-			console.log("UpPanel blur", e);
-			if (e.target && e.target.id === el.ICDCodesInput && (e.key == "Enter" || e.key == "Tab")) {
-				let attempt = 0;
-				let icdCodesCount = 0;
-				let lastValue = '';
-				const intervalICDId = setInterval(() => {
-					icdCodesCount = PCX.getEls(el.ICDCodesInput+"~.body #dvSelectedItems #xv_param",true).length;
-					if (icdCodesCount !== lastValue) {
-						let icdCodes = Array.from(PCX.getEls(el.ICDCodesInput+"~.body #dvSelectedItems #xv_param",true)).reverse();
-						PCX.getEl("#icdCodePreviewer",true).innerHTML = `<span class="icdCode">` + icdCodes.map((element)=>{return element.value;}).join(`</span><span class="icdCode">`) + `</span>`;
-						lastValue = icdCodesCount;
-						clearInterval(intervalICDId);
-					}
-					if (++attempt >= 5) {
-						clearInterval(intervalICDId);
-					}
-				}, 100);
+			if (e.target && "#"+e.target.id === el.ICDCodesInput && (e.key == "Enter" || e.key == "Tab")) {
+				const targetElement = PCX.getEl(el.ICDCodesInput+"~#dvCount #lblCount",true); // Select the element you want to monitor
+				observer.disconnect()
+				observer = new MutationObserver((mutations) => {
+					let icdCodes = Array.from(PCX.getEls(el.ICDCodesInput+"~.body #dvSelectedItems #xv_param",true)).reverse();
+					PCX.getEl("#icdCodePreviewer",true).innerHTML = `<span class="icdCode">` + icdCodes.map((element)=>{return element.value;}).join(`</span><span class="icdCode">`) + `</span>`;	
+				});
+				observer.observe(targetElement, { childList: true });
 			}
 		},true);
 	}
@@ -325,6 +316,7 @@ class IATSERV {
 
 		const el = IATSERV.selectors;
 		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+			if(chrome.runtime.id == undefined) return;
 			if (message.action === 'startCountdownBanner') {
 			// If the banner is already present, don't recreate it
 				if (!PCX.getEl(IATSERV.patientDataBanner)) {
@@ -372,6 +364,7 @@ class IATSERV {
 					// Store patient data in Chrome's storage
 					chrome.storage.local.set({ patientData }, () => {
 						// Send a message to the service worker to notify all relevant tabs
+						if(chrome.runtime.id == undefined) return;
 						chrome.runtime.sendMessage({
 							action: 'startCountdown',
 							patientData: {
@@ -425,7 +418,7 @@ class IATSERV {
 			PCX.getEl(el.DOC).value			= patientData.DOC;
 			PCX.getEl(el.Category).value	= categoryTranslation[patientData.Category];
 			
-			IATSERV.checkTestCat(PCX.getEl(`${el.Category} option:checked`),{Input: PCX.getEl(el.TestCodesInput),Output: PCX.getEl(el.TestCodesOutput)},IATSERV.testCategories).then( (elm) => {
+			IATSERV.checkTestCat(PCX.getEl(`${el.Category} option:checked`),{Input: PCX.getEl(el.TestCodesInput,true),Output: PCX.getEl(el.TestCodesOutput,true)},IATSERV.testCategories).then( (elm) => {
 				// Trigger inline OnClick Function via OnFocus
 				PCX.getEl(el.NewPatientBTN).setAttribute('onFocus',"newPatient()");
 				PCX.getEl(el.NewPatientBTN).focus();
@@ -488,6 +481,7 @@ class IATSERV {
 		el.orderDefaults = IATSERV.orderDefaults;
 
 		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+			if(chrome.runtime.id == undefined) return;
 			if (message.action === 'startCountdownBanner') {
 				// If the banner is already present, don't recreate it
 				if (PCX.getEl(IATSERV.patientDataBanner)) {

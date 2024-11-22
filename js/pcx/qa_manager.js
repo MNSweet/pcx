@@ -68,6 +68,7 @@ class QAManager {
 
 		// Load external CSS file
 		if (!PCX.findEl("#pcx-modal-style")) {
+			if(chrome.runtime.id == undefined) return;
 			const link = document.createElement("link");
 			link.id = "pcx-modal-style";
 			link.rel = "stylesheet";

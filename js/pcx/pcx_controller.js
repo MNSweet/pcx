@@ -239,6 +239,7 @@ class PCX {
  */
 
 	static ChromeNotification(title, message, id, remindTime = 0) {
+		if(chrome.runtime.id == undefined) return;
 		chrome.runtime.sendMessage({
 			action: "setNotification",
 			title: title,
@@ -251,6 +252,7 @@ class PCX {
 	}
 
 	static clearChromeNotificationReminder(id) {
+		if(chrome.runtime.id == undefined) return;
 		chrome.runtime.sendMessage({
 			action: "clearReminder",
 			notifId: id
@@ -268,6 +270,7 @@ class PCX {
 	static showGUIModalNotification(title, message, id, remindTime = 0) {
 		// Load external CSS file
 		if (!PCX.findEl("#pcx-modal-style")) {
+			if(chrome.runtime.id == undefined) return;
 			const link = document.createElement("link");
 			link.id = "pcx-modal-style";
 			link.rel = "stylesheet";
@@ -365,6 +368,7 @@ class PCX {
 		}
 
 		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+			if(chrome.runtime.id == undefined) return;
 			if (message.action === 'pingCountdownBanner') {
 				if (timeLeft <= 0) {
 					PCX.getEl('#patientDataBanner',true).remove();

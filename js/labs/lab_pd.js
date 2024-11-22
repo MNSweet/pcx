@@ -18,22 +18,22 @@ console.log(DXRESULTS.location);
 		14:-1,	// Eyes			- Prince only
 		15:-1,	// Thyroid		- Prince only
 		16:-1,	// Diabetes		- Prince only
-		17:-1,	// Cardio		- Prince only
+		17:-1	// Cardio		- Prince only
 	});
 
-	IATSERV.setRaceTranslation({
-		"African American"	: {"Non-Hispanic/Latino",	"African American"},
-		"Hispanic"			: {"Hispanic/Latino",		"Other"},
-		"Caucasian"			: {"Non-Hispanic/Latino",	"Caucasian"},
-		"Mixed Race"		: {"Non-Hispanic/Latino",	"Other"},
-		"Mixed"				: {"Non-Hispanic/Latino",	"Other"},
-		"Asian"				: {"Non-Hispanic/Latino",	"Asian"},
-		"Native American"	: {"Non-Hispanic/Latino",	"Other"},
-		"Other"				: {"Not Specified",			"Other"},
-		"Jewish (Ashkenazi)": {"Non-Hispanic/Latino",	"Jewish (Ashkenzai)"}
+	DXRESULTS.setRaceTranslation({
+		"African American"	: ["Non-Hispanic/Latino",	"African American"],
+		"Hispanic"			: ["Hispanic/Latino",		"Other"],
+		"Caucasian"			: ["Non-Hispanic/Latino",	"Caucasian"],
+		"Mixed Race"		: ["Non-Hispanic/Latino",	"Other"],
+		"Mixed"				: ["Non-Hispanic/Latino",	"Other"],
+		"Asian"				: ["Non-Hispanic/Latino",	"Asian"],
+		"Native American"	: ["Non-Hispanic/Latino",	"Other"],
+		"Other"				: ["Not Specified",			"Other"],
+		"Jewish (Ashkenazi)": ["Non-Hispanic/Latino",	"Jewish (Ashkenzai)"]
 	});
 
-	IATSERV.setOrderDefaults({
+	DXRESULTS.setOrderDefaults({
 		Physician		: '99488', //Prince Laboratories LLC|          |8888888888
 		ICDCode			: 'Z00.00'
 	});

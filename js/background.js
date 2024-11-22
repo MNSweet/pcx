@@ -6,6 +6,8 @@ function pcxDebug(message) {
 	}
 }
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+	if(chrome.runtime.id == undefined) return;
+
  /*
 	* 
 	* startCountdown
@@ -133,6 +135,8 @@ function getCurrentSite() {
 
 // Example usage of getCurrentSite function
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+	if(chrome.runtime.id == undefined) return;
+
 	if (message.action === "getSite") {
 		getCurrentSite().then((site) => {
 			sendResponse({ site: site });
