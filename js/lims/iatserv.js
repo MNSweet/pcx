@@ -206,9 +206,13 @@ class IATSERV {
 		// Set Status to Received as default
 		PCX.getEl(el.Status).value = "Received";
 
-		PCX.getEl(el.newPatientBtn).addEventListener('click', async (eventPtBtnClick) => {
+		PCX.getEl(el.newPatientBtn,true).addEventListener('click', newPatientBtn());
+		async function newPatientBtn(eventPtBtnClick) {
+			console.log(el.newPatientBtn, "click");
 			waitForElm(el.FancyBox).then( (elementLoaded) => {
+			console.log(el.FancyBox, "load");
 				waitForIframeElm(el.FancyBox,el.IframeDOB).then( (elementIframeLoaded) => {
+				console.log("load element");
 					// Date of Birth Checks
 					let inputDOB = PCX.getEl(el.FancyBox,true).contentWindow.document.querySelector(el.IframeDOB);
 					let minorDate = new Date();
@@ -238,6 +242,20 @@ class IATSERV {
 							}
 						}, 100);
 					});
+
+					const removeIframeTabIndexSelectors = [
+						el.SSN, el.LicenseState, el.LicenseNumber, el.CopyColumnBTN1, el.CopyColumnBTN2,
+						el.CopyColumnBTN3, el.CopyColumnBTN4, el.PrimeRelation, 
+						el.PrimeFirstName, el.PrimeLastName, el.PrimeMiddleName, el.PrimeDOB, el.PrimeSSN,
+						el.PrimeGender, el.PrimeGroupNo, el.PrimeCovStart, el.PrimeCovEnd, el.PrimeAddress1,
+						el.PrimeAddress2, el.PrimeState, el.PrimeCity, el.PrimeZip, el.PrimePhone, el.PrimeFax,
+						el.PrimeEmail, el.SeconRelation, el.SeconFirstName, el.SeconLastName, el.SeconMiddleName,
+						el.SeconDOB, el.SeconSSN, el.SeconGender, el.SeconGroupNo, el.SeconCovStart, el.SeconCovEnd, 
+						el.Seconddress1, el.Seconddress2, el.SeconState, el.SeconCity, el.SeconZip, el.SeconPhone, 
+						el.SeconFax, el.SeconEmail, el.Cancel
+					];
+					PCX.disableTabIndex(removeIframeTabIndexSelectors,el.FancyBox);
+
 					PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.IframeForm).addEventListener('submit', (eventSubmit) => {
 						if(QAManager.getNoticeCount() > 0) {
 							eventSubmit.preventDefault()
@@ -248,7 +266,7 @@ class IATSERV {
 				});
 				
 			});
-		});
+		};
 
 		// Disable Create Patient Button if no location is set
 		PCX.getEl(el.newPatientBtn).classList.add("disabled");
@@ -271,6 +289,7 @@ class IATSERV {
 		PCX.getEl(el.UpPanel).addEventListener('change', (e) => {
 			if (e.target && "#"+e.target.id === el.Category) {
 				IATSERV.checkTestCat(PCX.getEl(el.Category,true),{Input: PCX.getEl(el.TestCodesInput,true),Output: PCX.getEl(el.TestCodesOutput,true)},IATSERV.testCategories);
+				PCX.getEl(el.newPatientBtn,true).addEventListener('click', newPatientBtn());
 			}
 		});
 
@@ -305,6 +324,15 @@ class IATSERV {
 				observer.observe(targetElement, { childList: true });
 			}
 		},true);
+
+		const removeTabIndexSelectors = [
+			el.SearchPatient, el.PatientCode, el.PatientDOB, el.PatientAddress, el.PatientPhone, 
+			el.PatientEmail, el.PrimaryInsurance, el.PrimaryInsurancePolicy, el.PrimaryInsuranceGroup, 
+			el.SecondaryInsurance, el.SecondaryInsurancePolicy, el.SecondaryInsuranceGroup, el.SpecimenType, 
+			el.Quantity, el.Requisition, el.DOCTime, el.ReceivedDate, el.ReceivedTime, el.ClearBTN, el.Medication,
+			el.MedicationBTN, el.OtherMedication, el.PhySigCaptured, el.PTSigCaptured, el.SigSuccess, el.SigClear, el.SigToggle
+		];
+		PCX.disableTabIndex(removeTabIndexSelectors);
 	}
 
 	/**
@@ -424,20 +452,20 @@ class IATSERV {
 				PCX.getEl(el.NewPatientBTN).focus();
 				PCX.getEl(el.NewPatientBTN).setAttribute('onFocus',"");
 
-				waitForElm(el.FancyBoxIframe).then( (elm) => {
-					PCX.getEl(el.FancyBoxIframe).addEventListener('load', (el) => {
-						iframeEl["FirstName"]	= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.FirstName);
-						iframeEl["LastName"]	= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.LastName);
-						iframeEl["MiddleName"]	= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.MiddleName);
-						iframeEl["DOB"]			= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.DOB);
-						iframeEl["Gender"]		= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.Gender);
-						iframeEl["Race"]		= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.Race);
-						iframeEl["Address"]		= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.Address);
-						iframeEl["State"]		= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.State);
-						iframeEl["City"]		= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.City);
-						iframeEl["Zip"]			= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.Zip);
-						iframeEl["Phone"]		= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.Phone);
-						iframeEl["Email"]		= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.Email);
+				waitForElm(el.FancyBox).then( (elm) => {
+					PCX.getEl(el.FancyBox).addEventListener('load', (el) => {
+						iframeEl["FirstName"]	= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.FirstName);
+						iframeEl["LastName"]	= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.LastName);
+						iframeEl["MiddleName"]	= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.MiddleName);
+						iframeEl["DOB"]			= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.DOB);
+						iframeEl["Gender"]		= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.Gender);
+						iframeEl["Race"]		= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.Race);
+						iframeEl["Address"]		= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.Address);
+						iframeEl["State"]		= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.State);
+						iframeEl["City"]		= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.City);
+						iframeEl["Zip"]			= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.Zip);
+						iframeEl["Phone"]		= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.Phone);
+						iframeEl["Email"]		= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.Email);
 						
 
 						iframeEl.FirstName.value	= patientData.FirstName;

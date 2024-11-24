@@ -452,6 +452,17 @@ class PCX {
 	  }
 	  return hash;
 	}
+
+	static disableTabIndex(elements,iframe="") {
+		elements.forEach((selector) => {
+			console.log(selector);
+			if(iframe!="") {
+				PCX.getEl(iframe).contentWindow.document.querySelector(selector).setAttribute("tabindex","-1");
+			} else {
+				PCX.getEl(selector).setAttribute("tabindex","-1");
+			}
+		});
+	}
 	
 }
 

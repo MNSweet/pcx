@@ -141,7 +141,7 @@ if (IATSERV.linkId == "2011") {
 		NewPatientBTN	: '#btnAddEditPatient',
 		TestCodesInput	: '#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText',
 		TestCodesOutput	: '#dvSelectedItems',
-		FancyBoxIframe	: '.fancybox-overlay.fancybox-overlay-fixed iframe',
+		FancyBox		: '.fancybox-overlay.fancybox-overlay-fixed iframe',
 		UpPanel			: '#MainContent_ctl00_ctl00_upPanel'
 	});
 

@@ -38,6 +38,24 @@ console.log(DXRESULTS.location);
 		ICDCode			: 'Z00.00'
 	});
 
+ContentPlaceHolder1_ucDateSelector_ddlMonth
+
+if(DXRESULTS.location == "PGx") {
+	
+}
+
+if(DXRESULTS.location == "CGX") {
+	
+}
+
+if(DXRESULTS.location == "ImmunodeficiencyReq.aspx") {
+	
+}
+
+if(DXRESULTS.location == "Neurology") {
+	
+}
+
 /********************************************
 *
 * Import Patient Data from Local Temp Cache.

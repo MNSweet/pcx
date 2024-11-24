@@ -85,57 +85,32 @@ class DXRESULTS {
 	static async pastePatientData() {
 		chrome.storage.local.get('patientData', ({ patientData }) => {
 
-			const el = IATSERV.selectors;
+			const el = DXRESULTS.selectors;
 
 			// Fill in data
 			PCX.getEl(el.DOC).value			= patientData.DOC;
 			PCX.getEl(el.Category).value	= categoryTranslation[patientData.Category];
+			PCX.getEl(el.FirstName,true).value	= patientData.FirstName;
+			PCX.getEl(el.LastName,true).value	= patientData.LastName;
+			PCX.getEl(el.MiddleName,true).value	= patientData.MiddleName;
+//			PCX.getEl(el.DOB,true).value		= patientData.DOB.join('/');
 			
-			IATSERV.checkTestCat(PCX.getEl(`${el.Category} option:checked`),{Input: PCX.getEl(el.TestCodesInput),Output: PCX.getEl(el.TestCodesOutput)},IATSERV.testCategories).then( (elm) => {
-				// Trigger inline OnClick Function via OnFocus
-				PCX.getEl(el.NewPatientBTN).setAttribute('onFocus',"newPatient()");
-				PCX.getEl(el.NewPatientBTN).focus();
-				PCX.getEl(el.NewPatientBTN).setAttribute('onFocus',"");
-
-				waitForElm(el.FancyBoxIframe).then( (elm) => {
-					PCX.getEl(el.FancyBoxIframe).addEventListener('load', (el) => {
-						iframeEl["FirstName"]	= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.FirstName);
-						iframeEl["LastName"]	= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.LastName);
-						iframeEl["MiddleName"]	= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.MiddleName);
-						iframeEl["DOB"]			= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.DOB);
-						iframeEl["Gender"]		= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.Gender);
-						iframeEl["Race"]		= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.Race);
-						iframeEl["Address"]		= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.Address);
-						iframeEl["State"]		= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.State);
-						iframeEl["City"]		= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.City);
-						iframeEl["Zip"]			= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.Zip);
-						iframeEl["Phone"]		= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.Phone);
-						iframeEl["Email"]		= PCX.getEl(el.FancyBoxIframe).contentWindow.document.querySelector(el.Email);
+			
+			PCX.getEl(el.Gender,true).value		= genderTranslate[patientData.Gender];
+			PCX.getEl(el.Race,true).value		= raceTranslate[patientData.Race];
+			PCX.getEl(el.Address,true).value	= patientData.Address;
+			PCX.getEl(el.State,true).value		= patientData.State;
+			PCX.getEl(el.City,true).value		= patientData.City;
+			PCX.getEl(el.Zip,true).value		= patientData.Zip;
+			PCX.getEl(el.Phone,true).value		= patientData.Phone;
+			PCX.getEl(el.Email,true).value		= patientData.Email;
 						
-
-						iframeEl.FirstName.value	= patientData.FirstName;
-						iframeEl.LastName.value		= patientData.LastName;
-						iframeEl.MiddleName.value	= patientData.MiddleName;
-						iframeEl.DOB.value			= patientData.DOB.join('/');
-						iframeEl.Gender.value		= genderTranslate[patientData.Gender];
-						iframeEl.Race.value			= raceTranslate[patientData.Race];
-						iframeEl.Address.value		= patientData.Address;
-						iframeEl.State.value		= patientData.State;
-						iframeEl.City.value			= patientData.City;
-						iframeEl.Zip.value			= patientData.Zip;
-						iframeEl.Phone.value		= patientData.Phone;
-						iframeEl.Email.value		= patientData.Email;
-
-						iframeEl.DOB.focus();
-						PCX.simulateUserKey(PCX.events.Tab,iframeEl.DOB);
-					});
-				});
 			});
 			if (patientData) {
 				// Clear the patient data after usage
 				chrome.storage.local.set({ patientData: {} }, () => {
 					PCX.log('Patient data cleared after use');
-					PCX.getEl(IATSERV.patientDataBanner).remove();
+					PCX.getEl(DXRESULTS.patientDataBanner).remove();
 				});
 			}
 		});
