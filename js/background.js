@@ -6,13 +6,15 @@ function pcxDebug(message) {
 	}
 }
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-	if(chrome.runtime.id == undefined) return;
+	//if(chrome.runtime.id == undefined) return;
 
  /*
 	* 
 	* startCountdown
 	* 
 	*/
+	let updateCountdownBanner;
+	let timer = 30;
 	if (request.action === 'startCountdown') {
 		// Get all tabs that match the host permissions (the 3 sites)
 		const matchUrls = [
@@ -20,32 +22,38 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 			'*://reliable.iatserv.com/*',
 			'*://pnc.dxresults.com/*'
 		];
+		timer = 30;
 
 		chrome.tabs.query({ url: matchUrls }, (tabs) => {
 			tabs.forEach(tab => {
 				// Send the message to each matching tab to start the countdown
 				chrome.tabs.sendMessage(tab.id, { action: 'startCountdownBanner', patientData: request.patientData, timer:timer});
+
 			});
 		});
-		let timer = 90;
-		let updateCountdownBanner = setInterval(()=>{
+		clearInterval(updateCountdownBanner);
+		updateCountdownBanner = setInterval(()=>{
 			chrome.tabs.query({ url: matchUrls }, (tabs) => {
-				const minutes = Math.floor(timer / 60);
-				const seconds = timer % 60;
-				const timerText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+				console.log(timer,tabs);
 				timer--;
 				tabs.forEach(tab => {
 					// Send the message to each matching tab to start the countdown
-					chrome.tabs.sendMessage(tab.id, { action: 'pingCountdownBanner', timer:timerText});
+					chrome.tabs.sendMessage(tab.id, { action: 'pingCountdownBanner', patientData: request.patientData, timer:timer});
 				});
 				if (timer <= 0) {
-					clearInterval(updateCountdownTimer);
+					clearInterval(updateCountdownBanner);
 					chrome.storage.local.set({ patientData: {} }, () => {
-						PCX.log('Patient data cleared after timeout');
+						console.log('Patient data cleared after timeout');
 					});
 				}
 		})}, 1000);
 		
+	}
+	if (request.action === 'clearPTData') {
+		timer=0;
+		chrome.storage.local.set({ patientData: {} }, () => {
+			console.log('Patient data cleared after timeout');
+		});
 	}
 
 	/*
@@ -135,7 +143,7 @@ function getCurrentSite() {
 
 // Example usage of getCurrentSite function
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	if(chrome.runtime.id == undefined) return;
+	//if(chrome.runtime.id == undefined) return;
 
 	if (message.action === "getSite") {
 		getCurrentSite().then((site) => {

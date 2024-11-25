@@ -239,7 +239,7 @@ class PCX {
  */
 
 	static ChromeNotification(title, message, id, remindTime = 0) {
-		if(chrome.runtime.id == undefined) return;
+		//if(chrome.runtime.id == undefined) return;
 		chrome.runtime.sendMessage({
 			action: "setNotification",
 			title: title,
@@ -252,7 +252,7 @@ class PCX {
 	}
 
 	static clearChromeNotificationReminder(id) {
-		if(chrome.runtime.id == undefined) return;
+		//if(chrome.runtime.id == undefined) return;
 		chrome.runtime.sendMessage({
 			action: "clearReminder",
 			notifId: id
@@ -270,7 +270,7 @@ class PCX {
 	static showGUIModalNotification(title, message, id, remindTime = 0) {
 		// Load external CSS file
 		if (!PCX.findEl("#pcx-modal-style")) {
-			if(chrome.runtime.id == undefined) return;
+			//if(chrome.runtime.id == undefined) return;
 			const link = document.createElement("link");
 			link.id = "pcx-modal-style";
 			link.rel = "stylesheet";
@@ -328,52 +328,57 @@ class PCX {
 * Banner Controller
 *
 *********************************************/
-	static initializeBanner(patientData, timeLeft = 90, callback) {
+	static ptBanner = {
+		Banner	: "patientDataBanner",
+		Info	: "patientInfo",
+		Timer	: "patientDataTimer",
+	}
+	static initializeBanner(patientData, timeLeft = 90, callback=()=>{return;}) {
 		const banner = document.createElement('div');
-		banner.id = 'patientDataBanner';
+		banner.id = PCX.ptBanner.Banner;
 		banner.style.cssText = 'position:fixed; top:0; width:100%; background-color:yellow; z-index:1000; padding:10px; display:flex; justify-content:space-between;';
 
 		// Left side: Patient details
 		const patientInfo = document.createElement('span');
-		patientInfo.id 			= "patientInfo";
+		patientInfo.id 			= PCX.ptBanner.Info;
 		patientInfo.textContent = `Patient: ${patientData.LastName}, ${patientData.FirstName} | ${patientData.Category}`;
 		patientInfo.dataset.hash= PCX.hashCode(`${patientData.LastName}${patientData.FirstName}${patientData.Category}`);
 		banner.appendChild(patientInfo);
 
 		// Right side: Countdown timer
 		const timer = document.createElement('span');
-		timer.id 			= "patientDataTimer";
+		timer.id 			= PCX.ptBanner.Timer;
 		timer.textContent	= "-:--";
 		banner.appendChild(timer);
 		document.body.appendChild(banner);
 	}
 
-	static updateBanner(patientData, timeLeft = 90) {
-		if(PCX.getEl('#patientDataBanner',true)) {
+	static updateBanner(patientData, timeLeft = 90, callback=()=>{return;}) {
+		if(PCX.getEl(`#${PCX.ptBanner.Banner}`,true)) {
 			const hashCode = PCX.hashCode(`${patientData.LastName}${patientData.FirstName}${patientData.Category}`);
-			if (PCX.getEl('#patientInfo',true).dataset.hash == hashCode) {
+			if (PCX.getEl(`#${PCX.ptBanner.Info}`,true).dataset.hash == hashCode) {
 				return;
 			}
-			PCX.getEl('#patientInfo').dataset.hash = hashCode;
+			PCX.getEl(`#${PCX.ptBanner.Info}`).dataset.hash = hashCode;
 		
-			PCX.getEl('#patientInfo').textContent = `Patient: ${patientData.LastName}, ${patientData.FirstName} | ${patientData.Category}`;
+			PCX.getEl(`#${PCX.ptBanner.Info}`).textContent = `Patient: ${patientData.LastName}, ${patientData.FirstName} | ${patientData.Category}`;
 
-			if (PCX.getEl('#patientDataTimer',true)) {
+			if (PCX.getEl(`#${PCX.ptBanner.Timer}`,true)) {
 				const minutes = Math.floor(timeLeft / 60);
 				const seconds = timeLeft % 60;
-				PCX.getEl('#patientDataTimer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+				PCX.getEl(`#${PCX.ptBanner.Timer}`).textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 			}
 		}else{
 			PCX.initializeBanner(patientData, timeLeft, callback);
 		}
 
 		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-			if(chrome.runtime.id == undefined) return;
+			//if(chrome.runtime.id == undefined) return;
 			if (message.action === 'pingCountdownBanner') {
 				if (timeLeft <= 0) {
-					PCX.getEl('#patientDataBanner',true).remove();
+					PCX.getEl(`#${PCX.ptBanner.Banner}`,true).remove();
 				}else{
-					PCX.getEl('#patientDataTimer').textContent = message.timerText;
+					PCX.getEl(`#${PCX.ptBanner.Timer}`).textContent = message.timerText;
 				}
 			}
 		});

@@ -23,8 +23,8 @@ class DXRESULTS {
 
 
 	static getLocation() {
-		if(this.location == ""){return "Home";}
-		return this.location;
+		if(DXRESULTS.location == ""){return "Home";}
+		return DXRESULTS.location;
 	}
 
 	static validTestCatLocation(Category) {
@@ -33,27 +33,63 @@ class DXRESULTS {
 
 	static setCategoryTranslation(catTranslation){
 		if(typeof catTranslation == "object"){
-			this.categoryTranslation = catTranslation;
+			DXRESULTS.categoryTranslation = catTranslation;
 		}
 	}
 
 	static setRaceTranslation(raceTranslation){
 		if(typeof raceTranslation == "object"){
-			this.raceTranslation = raceTranslation;
+			DXRESULTS.raceTranslation = raceTranslation;
 		}
 	}
 
 	static setSelectors(selector){
 		if(typeof selector == "object"){
-			this.selectors = selector;
+			DXRESULTS.selectors = selector;
 		}
 	}
 
 	static setOrderDefaults(orderDefaults){
 		if(typeof orderDefaults == "object"){
-			this.orderDefaults = orderDefaults;
+			DXRESULTS.orderDefaults = orderDefaults;
 		}
 	}
+
+	static createOrder(callback=()=>{return;}) {
+		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+			//if(chrome.runtime.id == undefined) return;
+			if (message.action === 'startCountdownBanner') {
+				// If the banner is already present, don't recreate it
+				if (PCX.getEl(DXRESULTS.patientDataBanner)) {
+					PCX.getEl(DXRESULTS.patientDataBanner).remove();
+				}
+				message.patientData.Category = DXRESULTS.categoryTranslation[message.patientData.Category]
+				PCX.updateBanner(message.patientData,message.timer,callback);
+
+				if(message.patientData.Category == DXRESULTS.getLocation()){
+					PCX.getEl(DXRESULTS.patientDataBanner).appendChild(
+						Object.assign(document.createElement('span'), {
+							textContent: 'Paste Patient Data',
+							id: 'patientDataClone'
+						})
+					);
+
+					PCX.getEl("#patientDataClone").addEventListener('click', function(event) {
+						DXRESULTS.pastePatientData();
+
+						chrome.runtime.sendMessage({
+							action: 'clearPTData',
+						});
+					});
+				};
+			}
+			if (message.action === 'pingCountdownBanner') {
+				console.log(message);
+				message.patientData.Category = DXRESULTS.categoryTranslation[message.patientData.Category]
+				PCX.updateBanner(message.patientData,message.timer,callback);
+			}
+		});
+	};
 	/**
 	 *
 	 * Reference Lab Transfer Assist - Fill
@@ -87,25 +123,34 @@ class DXRESULTS {
 
 			const el = DXRESULTS.selectors;
 
+			const orderDefaults = DXRESULTS.orderDefaults;
+
 			// Fill in data
-			PCX.getEl(el.DOC).value			= patientData.DOC;
-			PCX.getEl(el.Category).value	= categoryTranslation[patientData.Category];
 			PCX.getEl(el.FirstName,true).value	= patientData.FirstName;
 			PCX.getEl(el.LastName,true).value	= patientData.LastName;
-			PCX.getEl(el.MiddleName,true).value	= patientData.MiddleName;
-//			PCX.getEl(el.DOB,true).value		= patientData.DOB.join('/');
-			
-			
-			PCX.getEl(el.Gender,true).value		= genderTranslate[patientData.Gender];
-			PCX.getEl(el.Race,true).value		= raceTranslate[patientData.Race];
+			PCX.getEl(el.DOBMonth,true).value	= patientData.DOB[0];
+			PCX.getEl(el.DOBDay,true).value		= patientData.DOB[1];
+			PCX.getEl(el.DOBYear,true).value	= patientData.DOB[2];
+			PCX.getEl(el.DOC).value				= patientData.DOC;
+
+			DXRESULTS.setRadioInput(el.Gender[patientData.Gender],true);
+
+			DXRESULTS.setRadioInput(el.Ethnicity[(DXRESULTS.raceTranslation[patientData.Race])[0]],true);
+			DXRESULTS.setRadioInput(el.Race[(DXRESULTS.raceTranslation[patientData.Race])[1]],true);
+
 			PCX.getEl(el.Address,true).value	= patientData.Address;
 			PCX.getEl(el.State,true).value		= patientData.State;
 			PCX.getEl(el.City,true).value		= patientData.City;
 			PCX.getEl(el.Zip,true).value		= patientData.Zip;
 			PCX.getEl(el.Phone,true).value		= patientData.Phone;
 			PCX.getEl(el.Email,true).value		= patientData.Email;
-						
-			});
+
+			DXRESULTS.setRadioInput(el.TestPanel,true);
+
+			PCX.getEl(el.Physician,true).value		= orderDefaults.Physician;
+			PCX.getEl(el.ICDCode,true).value		= orderDefaults.ICDCode;
+			PCX.getEl(el.ICDCodeAdd,true).click();
+	
 			if (patientData) {
 				// Clear the patient data after usage
 				chrome.storage.local.set({ patientData: {} }, () => {
@@ -114,13 +159,14 @@ class DXRESULTS {
 				});
 			}
 		});
+	}
 
-
-		PCX.getEl(el.UpPanel).addEventListener('change', (e) => {
-			// Ping reloaded Elements
-			if (e.target && e.target.id === el.Category.replace('#','')) {
-				IATSERV.checkTestCat(PCX.getEl(`${el.Category} option:checked`),{Input: pageElements.TestCodesInput,Output: pageElements.TestCodesOutput},testCategories);
-			}
-		});
+	static setRadioInput(selector, checked) {
+		PCX.getEl(selector).value = checked;
+		if(checked){
+			PCX.getEl(selector).parentElement.classList.add("checked");
+		}else{
+			PCX.getEl(selector).parentElement.classList.remove("checked");
+		}
 	}
 }

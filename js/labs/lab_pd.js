@@ -2,6 +2,7 @@ console.log("Principle Diagnostics");
 
 console.log(DXRESULTS.location);
 
+	const isOrderPage = ["PGx","CGX","ImmunodeficiencyReq.aspx","Neurology"].includes(DXRESULTS.location);
 
 	DXRESULTS.setCategoryTranslation({
 		 3:"PGx",						// PGX
@@ -22,15 +23,15 @@ console.log(DXRESULTS.location);
 	});
 
 	DXRESULTS.setRaceTranslation({
-		"African American"	: ["Non-Hispanic/Latino",	"African American"],
-		"Hispanic"			: ["Hispanic/Latino",		"Other"],
-		"Caucasian"			: ["Non-Hispanic/Latino",	"Caucasian"],
-		"Mixed Race"		: ["Non-Hispanic/Latino",	"Other"],
-		"Mixed"				: ["Non-Hispanic/Latino",	"Other"],
-		"Asian"				: ["Non-Hispanic/Latino",	"Asian"],
-		"Native American"	: ["Non-Hispanic/Latino",	"Other"],
-		"Other"				: ["Not Specified",			"Other"],
-		"Jewish (Ashkenazi)": ["Non-Hispanic/Latino",	"Jewish (Ashkenzai)"]
+		"African American"	: ["Not Specified",		"African American"],
+		"Hispanic"			: ["Hispanic/Latino",	"Other"],
+		"Caucasian"			: ["Not Specified",		"Caucasian"],
+		"Mixed Race"		: ["Not Specified",		"Other"],
+		"Mixed"				: ["Not Specified",		"Other"],
+		"Asian"				: ["Not Specified",		"Asian"],
+		"Native American"	: ["Not Specified",		"Other"],
+		"Other"				: ["Not Specified",		"Other"],
+		"Jewish (Ashkenazi)": ["Not Specified",		"Jewish (Ashkenzai)"]
 	});
 
 	DXRESULTS.setOrderDefaults({
@@ -38,108 +39,124 @@ console.log(DXRESULTS.location);
 		ICDCode			: 'Z00.00'
 	});
 
-ContentPlaceHolder1_ucDateSelector_ddlMonth
+if(isOrderPage) {
+	DXRESULTS.createOrder();
+	const selectors = {
+		FirstName		: '#ContentPlaceHolder1_txtFirstName',
+		LastName		: '#ContentPlaceHolder1_txtLastName',
+		DOBMonth		: '#ContentPlaceHolder1_ucDateSelector_ddlMonth',
+		DOBDay			: '#ContentPlaceHolder1_ucDateSelector_ddlDay',
+		DOBYear			: '#ContentPlaceHolder1_ucDateSelector_ddlYear',
+		Address			: '#ContentPlaceHolder1_txtAddress1',
+		City			: '#ContentPlaceHolder1_txtCity',
+		State			: '#ContentPlaceHolder1_ddlStates',
+		Zip				: '#ContentPlaceHolder1_txtZipCode',
+		Email			: '#ContentPlaceHolder1_txtEmail',
+		Phone			: '#ContentPlaceHolder1_txtphone',
+		Gender			: 	{
+			"Male"					:'#ContentPlaceHolder1_rblGender_0',
+			"Female"				:'#ContentPlaceHolder1_rblGender_1'},
+		Ethnicity		: 	{
+			"Hispanic/Latino"		: '#ContentPlaceHolder1_rdrace_1',
+			"Not Specified"			: '#ContentPlaceHolder1_rdrace_2'},
+		Race		: 	{
+			"African American"		: '#ContentPlaceHolder1_rdethnicity_0',
+			"Caucasian"				: '#ContentPlaceHolder1_rdethnicity_1',
+			"Jewish (Ashkenzai)"	: '#ContentPlaceHolder1_rdethnicity_2',
+			"Asian"					: '#ContentPlaceHolder1_rdethnicity_4',
+			"Other"					: '#ContentPlaceHolder1_rdethnicity_5'},
+		DOC				: "#ContentPlaceHolder1_txtdoc",
+		ICDCode			: "#ContentPlaceHolder1_txtcode",
+		ICDCodeAdd		: "#ContentPlaceHolder1_divicd10code .col-md-4 a.btn-default.btn.purple",
+		Physician		: "#ContentPlaceHolder1_ddlPhyName"
+	}
+/*
+	const pdButton = document.createElement('button');
+	pdButton.id = 'ptbtn';
+	pdButton.textContent = 'Paste Patient Data';
+	pdButton.style.cssText = 'position:fixed; bottom:10px; right:10px; z-index:1000;';
+	document.body.appendChild(pdButton);
 
-if(DXRESULTS.location == "PGx") {
-	
+	PCX.getEl("#ptbtn",true).addEventListener('click', ()=>{DXRESULTS.pastePatientData();});
+*/
+
+	if(DXRESULTS.location == "PGx") {
+
+	}
+
+	if(DXRESULTS.location == "CGX") {
+		selectors['TestPanel'] = "#cbpanel5889";
+		DXRESULTS.setSelectors(selectors);
+
+	}
+
+	if(DXRESULTS.location == "ImmunodeficiencyReq.aspx") {
+		
+	}
+
+	if(DXRESULTS.location == "Neurology") {
+		
+	}
 }
 
-if(DXRESULTS.location == "CGX") {
-	
-}
 
-if(DXRESULTS.location == "ImmunodeficiencyReq.aspx") {
-	
-}
-
-if(DXRESULTS.location == "Neurology") {
-	
-}
-
-/********************************************
-*
-* Import Patient Data from Local Temp Cache.
-*
-*********************************************/
-
-function pastePDPatientData() {
-	chrome.storage.local.get('patientData', ({ patientData }) => {
-		if (patientData) {
+if(DXRESULTS.location == "ViewRequisitionOrders") {
+	// Order filter - Show/Hide Read toggle
+	function initCheckboxes() {
+		const filterElement = document.getElementById('ViewActiveRequsitions_filter');
+		if (!filterElement) {
+				// If not found, check again after a short delay
+				setTimeout(initCheckboxes, 100); // Poll every 100ms
+				return;
 		}
-	});
-}
 
-// Add a button to paste PD patient data
-const pdButton = document.createElement('button');
-pdButton.textContent = 'Paste Patient Data';
-pdButton.style.cssText = 'position:fixed; bottom:10px; right:10px; z-index:1000;';
-pdButton.onclick = pastePDPatientData;
-//document.body.appendChild(pdButton);
+		// Create the form-group div
+		const formGroupDiv = document.createElement('div');
+		formGroupDiv.className = 'pull-right btn-group-toggle';
+		//formGroupDiv.setAttribute('data-toggle', 'buttons');
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	if (message.action === 'startCountdownBanner') {
-		// If the banner is already present, don't recreate it
-		if (!document.querySelector('#patientDataBanner')) {
-			PCX.initializeBanner(message.patientData);
+		// Create the checkbox for "Hide Read"
+		const viewedCheckbox = document.createElement('input');
+		viewedCheckbox.type = 'checkbox';
+		viewedCheckbox.id = 'toggleViewed';
+		viewedCheckbox.checked = false;
+		const viewedLabel = document.createElement('label');
+		viewedLabel.setAttribute('for', 'toggleViewed');
+		viewedLabel.className = 'btn btn-info btn-sm btn-secondary active';
+		viewedLabel.textContent = 'Show/Hide Read ';
+
+		// Append checkboxes and labels to the form-group div
+		viewedLabel.appendChild(viewedCheckbox);
+		formGroupDiv.appendChild(viewedLabel);
+
+		// Append the form-group div to the filter element
+		filterElement.appendChild(formGroupDiv);
+
+		// Function to toggle the display of .Viewed and .success
+		function toggleDisplay() {
+			const viewedElements = document.querySelectorAll('.Viewed');
+			const oddElements = document.querySelectorAll('.odd');
+			const evenElements = document.querySelectorAll('.even');
+
+			viewedElements.forEach(el => {
+				el.style.display = viewedCheckbox.checked ? 'none' : 'table-row';
+			});
+			oddElements.forEach(el => {
+				el.style.display = viewedCheckbox.checked ? 'none' : 'table-row';
+			});
+			evenElements.forEach(el => {
+				el.style.display = viewedCheckbox.checked ? 'none' : 'table-row';
+			});
 		}
-	}
-});
 
-// Order filter - Show/Hide Read toggle
-function initCheckboxes() {
-	const filterElement = document.getElementById('ViewActiveRequsitions_filter');
-	if (!filterElement) {
-			// If not found, check again after a short delay
-			setTimeout(initCheckboxes, 100); // Poll every 100ms
-			return;
+		// Initial toggle display based on default checkbox states
+		toggleDisplay();
+
+		// Add event listeners to checkboxes
+		//viewedCheckbox.addEventListener('change', toggleDisplay);
+		viewedLabel.addEventListener('change', toggleDisplay);
 	}
 
-	// Create the form-group div
-	const formGroupDiv = document.createElement('div');
-	formGroupDiv.className = 'pull-right btn-group-toggle';
-	//formGroupDiv.setAttribute('data-toggle', 'buttons');
-
-	// Create the checkbox for "Hide Read"
-	const viewedCheckbox = document.createElement('input');
-	viewedCheckbox.type = 'checkbox';
-	viewedCheckbox.id = 'toggleViewed';
-	viewedCheckbox.checked = false;
-	const viewedLabel = document.createElement('label');
-	viewedLabel.setAttribute('for', 'toggleViewed');
-	viewedLabel.className = 'btn btn-info btn-sm btn-secondary active';
-	viewedLabel.textContent = 'Show/Hide Read ';
-
-	// Append checkboxes and labels to the form-group div
-	viewedLabel.appendChild(viewedCheckbox);
-	formGroupDiv.appendChild(viewedLabel);
-
-	// Append the form-group div to the filter element
-	filterElement.appendChild(formGroupDiv);
-
-	// Function to toggle the display of .Viewed and .success
-	function toggleDisplay() {
-		const viewedElements = document.querySelectorAll('.Viewed');
-		const oddElements = document.querySelectorAll('.odd');
-		const evenElements = document.querySelectorAll('.even');
-
-		viewedElements.forEach(el => {
-			el.style.display = viewedCheckbox.checked ? 'none' : 'table-row';
-		});
-		oddElements.forEach(el => {
-			el.style.display = viewedCheckbox.checked ? 'none' : 'table-row';
-		});
-		evenElements.forEach(el => {
-			el.style.display = viewedCheckbox.checked ? 'none' : 'table-row';
-		});
-	}
-
-	// Initial toggle display based on default checkbox states
-	toggleDisplay();
-
-	// Add event listeners to checkboxes
-	//viewedCheckbox.addEventListener('change', toggleDisplay);
-	viewedLabel.addEventListener('change', toggleDisplay);
+	// Start checking for the element
+	initCheckboxes();
 }
-
-// Start checking for the element
-initCheckboxes();

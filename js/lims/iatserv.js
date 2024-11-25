@@ -1,4 +1,8 @@
 PCX.log("IATServ LIMS");
+
+// Fix Spelling Mistake
+document.querySelector("#mnu_8").innerHTML = document.querySelector("#mnu_8").innerHTML.replace("Bach","Batch");
+
 class IATSERV {
 /**
  *
@@ -9,8 +13,9 @@ class IATSERV {
  * @param OBJ	testCategories	Lookup table for Test Categories by DB ID's
  * 
  */
- 	static linkId = PCX.getUrlParams()['LinkId'];
- 	static orderId = PCX.getUrlParams()['OrderId'];
+ 	static linkId	= PCX.getUrlParams()['LinkId'];
+ 	static orderId	= PCX.getUrlParams()['OrderId'];
+ 	static type		= PCX.getUrlParams()['type'];
 
  	static patientDataBanner = "#patientDataBanner";
 
@@ -344,7 +349,7 @@ class IATSERV {
 
 		const el = IATSERV.selectors;
 		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-			if(chrome.runtime.id == undefined) return;
+			//if(chrome.runtime.id == undefined) return;
 			if (message.action === 'startCountdownBanner') {
 			// If the banner is already present, don't recreate it
 				if (!PCX.getEl(IATSERV.patientDataBanner)) {
@@ -392,7 +397,7 @@ class IATSERV {
 					// Store patient data in Chrome's storage
 					chrome.storage.local.set({ patientData }, () => {
 						// Send a message to the service worker to notify all relevant tabs
-						if(chrome.runtime.id == undefined) return;
+						//if(chrome.runtime.id == undefined) return;
 						chrome.runtime.sendMessage({
 							action: 'startCountdown',
 							patientData: {
@@ -509,7 +514,7 @@ class IATSERV {
 		el.orderDefaults = IATSERV.orderDefaults;
 
 		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-			if(chrome.runtime.id == undefined) return;
+			//if(chrome.runtime.id == undefined) return;
 			if (message.action === 'startCountdownBanner') {
 				// If the banner is already present, don't recreate it
 				if (PCX.getEl(IATSERV.patientDataBanner)) {

@@ -33,7 +33,7 @@ if (IATSERV.linkId == "2070") {
 }
 
 // Create Accession
-if (IATSERV.linkId == "2011") {
+if (IATSERV.linkId == "2011" && IATSERV.type == "acs") {
 	IATSERV.setSelectors({
 		DOS				: ".dos",
 		BillType		: "#MainContent_ctl00_ctl00_ddBillType_ddControl",
