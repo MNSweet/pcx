@@ -1,7 +1,9 @@
 PCX.log("IATServ LIMS");
 
 // Fix Spelling Mistake
-document.querySelector("#mnu_8").innerHTML = document.querySelector("#mnu_8").innerHTML.replace("Bach","Batch");
+if(document.querySelector("#mnu_8")){
+	document.querySelector("#mnu_8").innerHTML = document.querySelector("#mnu_8").innerHTML.replace("Bach","Batch");
+}
 
 class IATSERV {
 /**
@@ -17,7 +19,7 @@ class IATSERV {
  	static orderId	= PCX.getUrlParams()['OrderId'];
  	static type		= PCX.getUrlParams()['type'];
 
- 	static patientDataBanner = "#patientDataBanner";
+ 	static noticeDisplay = "#noticeDisplay";
 
 	// Lab Lookup Table
 	static labs = {};
@@ -350,19 +352,18 @@ class IATSERV {
 		const el = IATSERV.selectors;
 		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			//if(chrome.runtime.id == undefined) return;
-			if (message.action === 'startCountdownBanner') {
-			// If the banner is already present, don't recreate it
-				if (!PCX.getEl(IATSERV.patientDataBanner)) {
-					PCX.initializeBanner(message.patientData);
+			if (message.action === 'noticeDisplay') {
+			// If the notice is already present, don't recreate it
+				if (!PCX.getEl(IATSERV.noticeDisplay)) {
+					PCX.initializeNotice(message.patientData);
 				}
 			}
 		});
 
 		PCX.getEl(el.newPatientBtn).parentNode.addEventListener('click', function(event) {
-			const siteAssets = document.createElement('div');
-			siteAssets.id = 'siteAssets';
+			const siteAssets = PCX.createDOM('div', { id: 'siteAssets'});
 			siteAssets.appendChild(
-				Object.assign(document.createElement('span'), {
+				Object.assign(PCX.createDOM('span'), {
 					textContent: '⎘',
 					id: 'patientCopy',
 					title: 'Capture Patient Record'
@@ -374,7 +375,7 @@ class IATSERV {
 					
 					// Temp Capture was discussed with Dean. As long as 
 					// it never leaves the browser/local, it's HIPAA compliant.
-					// Fn PCX.initializeBanner() immediately takes the data after 
+					// Fn PCX.initializeNotice() immediately takes the data after 
 					// being added to local storage and sets a deletion timer to purge
 					// the data from cache and local storage, never saving to hard disk
 					const patientData = {
@@ -399,7 +400,7 @@ class IATSERV {
 						// Send a message to the service worker to notify all relevant tabs
 						//if(chrome.runtime.id == undefined) return;
 						chrome.runtime.sendMessage({
-							action: 'startCountdown',
+							action: 'initPatientTransfer',
 							patientData: {
 								FirstName:	patientData.FirstName,
 								LastName:	patientData.LastName,
@@ -495,7 +496,7 @@ class IATSERV {
 				// Clear the patient data after usage
 				chrome.storage.local.set({ patientData: {} }, () => {
 					PCX.log('Patient data cleared after use');
-					PCX.getEl(IATSERV.patientDataBanner).remove();
+					PCX.getEl(IATSERV.noticeDisplay).remove();
 				});
 			}
 		});
@@ -515,12 +516,12 @@ class IATSERV {
 
 		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			//if(chrome.runtime.id == undefined) return;
-			if (message.action === 'startCountdownBanner') {
-				// If the banner is already present, don't recreate it
-				if (PCX.getEl(IATSERV.patientDataBanner)) {
-					PCX.getEl(IATSERV.patientDataBanner).remove();
+			if (message.action === 'noticeDisplay') {
+				// If the notice is already present, don't recreate it
+				if (PCX.getEl(IATSERV.noticeDisplay)) {
+					PCX.getEl(IATSERV.noticeDisplay).remove();
 				}
-				PCX.updateBanner(message.patientData,message.timer,callback);
+				PCX.noticeUpdate(message.patientData,message.timer,callback);
 			}
 		});
 
@@ -714,7 +715,7 @@ class IATSERV {
 
 					// Trigger download with the determined filename
 					const url = window.URL.createObjectURL(blob);
-					Object.assign(document.createElement('a'), { href: url, download: filename }).click();
+					PCX.createDOM('a', { href: url, download: filename }).click();
 					window.URL.revokeObjectURL(url);
 				}))
 				.catch(console.error);

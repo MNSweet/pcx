@@ -147,8 +147,8 @@ if (IATSERV.linkId == "2011") {
 
 
 	IATSERV.createOrder(()=>{
-		PCX.getEl("#patientDataBanner").appendChild(
-			Object.assign(document.createElement('span'), {
+		PCX.getEl("#noticeDisplay").appendChild(
+			PCX.createDOM('span', {
 				textContent: 'Paste Patient Data',
 				id: 'patientDataClone'
 			})

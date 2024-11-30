@@ -1,67 +1,65 @@
-const PCX_DEBUG = true; // Toggle this to enable/disable debug logs
+console.log("ServiceWorker");
+class ServiceWorker {
+	static options = {
+		'debug':true,
+		'domains':{
+			pl: "https://prince.iatserv.com/",
+			rr: "https://reliable.iatserv.com/",
+			pd: "https://pnc.dxresults.com/"
+		}
+	};
 
-function pcxDebug(message) {
-	if (PCX_DEBUG) {
-		console.log(message);
+	static timer = 0;
+
+	static log(message) {
+		if (ServiceWorker.options.debug) {
+			console.log(message);
+		}
 	}
-}
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-	//if(chrome.runtime.id == undefined) return;
 
- /*
-	* 
-	* startCountdown
-	* 
-	*/
-	let updateCountdownBanner;
-	let timer = 30;
-	if (request.action === 'startCountdown') {
+	static initPatientTransfer() {
 		// Get all tabs that match the host permissions (the 3 sites)
 		const matchUrls = [
 			'*://prince.iatserv.com/*',
 			'*://reliable.iatserv.com/*',
 			'*://pnc.dxresults.com/*'
 		];
-		timer = 30;
+		ServiceWorker.timer = 30;
 
 		chrome.tabs.query({ url: matchUrls }, (tabs) => {
 			tabs.forEach(tab => {
 				// Send the message to each matching tab to start the countdown
-				chrome.tabs.sendMessage(tab.id, { action: 'startCountdownBanner', patientData: request.patientData, timer:timer});
+				chrome.tabs.sendMessage(tab.id, { action: 'noticeDisplay', patientData: request.patientData, timer:ServiceWorker.timer});
 
 			});
 		});
-		clearInterval(updateCountdownBanner);
-		updateCountdownBanner = setInterval(()=>{
+		clearInterval(chrome.updateCountdownNotice);
+		chrome.updateCountdownNotice = setInterval(()=>{
 			chrome.tabs.query({ url: matchUrls }, (tabs) => {
-				console.log(timer,tabs);
-				timer--;
+				ServiceWorker.log(ServiceWorker.timer,tabs);
+				ServiceWorker.timer--;
 				tabs.forEach(tab => {
 					// Send the message to each matching tab to start the countdown
-					chrome.tabs.sendMessage(tab.id, { action: 'pingCountdownBanner', patientData: request.patientData, timer:timer});
+					chrome.tabs.sendMessage(tab.id, { action: 'noticePing', patientData: request.patientData, timer:ServiceWorker.timer});
 				});
-				if (timer <= 0) {
-					clearInterval(updateCountdownBanner);
+				if (ServiceWorker.timer <= 0) {
+					clearInterval(chrome.updateCountdownNotice);
 					chrome.storage.local.set({ patientData: {} }, () => {
-						console.log('Patient data cleared after timeout');
+						ServiceWorker.log('Patient data cleared after timeout');
 					});
 				}
 		})}, 1000);
-		
 	}
-	if (request.action === 'clearPTData') {
-		timer=0;
+
+	static clearPTData() {
+		clearInterval(chrome.updateCountdownNotice);
+		ServiceWorker.timer=0;
 		chrome.storage.local.set({ patientData: {} }, () => {
-			console.log('Patient data cleared after timeout');
+			ServiceWorker.log('Patient data cleared after timeout');
 		});
 	}
 
-	/*
-	*
-	* setNotification
-	* 
-	*/
-	if (request.action === 'setNotification') {
+	static setNotification() {
 		const notifId = request.notifId;
 		const remindTime = request.remindTime;
 		const title = request.title;
@@ -81,71 +79,51 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 					message: message,
 					priority: 2
 				}, () => {
-					pcxDebug(`Chrome notification shown for ${notifId}`);
+					ServiceWorker.log(`Chrome notification shown for ${notifId}`);
 				});
 
 				// If the user selected a reminder time, save it
 				if (remindTime > 0) {
 					chrome.storage.local.set({ ["pcxid_" + notifId]: currentTime + remindTime * 3600000 }, () => {
-						pcxDebug(`Reminder set for ${notifId}, do not show again for ${remindTime} hours`);
+						ServiceWorker.log(`Reminder set for ${notifId}, do not show again for ${remindTime} hours`);
 					});
 				}
 			} else {
-				pcxDebug(`Notification for ${notifId} suppressed until reminder expires`);
+				ServiceWorker.log(`Notification for ${notifId} suppressed until reminder expires`);
 			}
 		});
 
 		sendResponse({ status: "notification handled" });
 	}
 
-	/*
-	* 
-	* clearReminder
-	* 
-	*/
-	if (request.action === 'clearReminder') {
+	static clearReminder() {
 		const notifId = request.notifId;
 
 		chrome.storage.local.remove("pcxid_" + notifId, () => {
-			pcxDebug(`Cleared reminder for ${notifId}`);
+			ServiceWorker.log(`Cleared reminder for ${notifId}`);
 		});
 
 		sendResponse({ status: "reminder cleared" });
 	}
-});
 
-const extOptions={
-	'debug':true,
-	'domains':{
-		pl: "https://prince.iatserv.com/",
-		rr: "https://reliable.iatserv.com/",
-		pd: "https://pnc.dxresults.com/"
-	}
-};
-
-// Function to get the current site
-function getCurrentSite() {
-	return new Promise((resolve, reject) => {
-		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-			const url = tabs[0]?.url;
-			if (url.includes(extOptions.domains.pl)) {
-				resolve("PL");
-			} else if (url.includes(extOptions.domains.rr)) {
-				resolve("RR");
-			} else if (url.includes(extOptions.domains.pd)) {
-				resolve("PD");
-			} else {
-				reject("Site not recognized.");
-			}
+	static getCurrentSite() {
+		return new Promise((resolve, reject) => {
+			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+				const url = tabs[0]?.url;
+				if (url.includes(ServiceWorker.options.domains.pl)) {
+					resolve("PL");
+				} else if (url.includes(ServiceWorker.options.domains.rr)) {
+					resolve("RR");
+				} else if (url.includes(ServiceWorker.options.domains.pd)) {
+					resolve("PD");
+				} else {
+					reject("Site not recognized.");
+				}
+			});
 		});
-	});
-}
+	}
 
-// Example usage of getCurrentSite function
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	//if(chrome.runtime.id == undefined) return;
-
-	if (message.action === "getSite") {
+	static getSite() {
 		getCurrentSite().then((site) => {
 			sendResponse({ site: site });
 		}).catch((error) => {
@@ -153,49 +131,62 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		});
 		return true; // Indicates the response will be sent asynchronously
 	}
-});
 
-// Function to handle tab updates
-function handleTabUpdate(tabId, tabUrl) {
-	if (
-		!tabUrl || 
-		(
-			!tabUrl.startsWith(extOptions.domains.pl) 
-			&& !tabUrl.startsWith(extOptions.domains.rr) 
-			&& !tabUrl.startsWith(extOptions.domains.pd)
-		)
-	) {
-		//Tab URL does not match
-		changeExtensionIcon(false);
-	} else {
-		//Tab URL matches
-		changeExtensionIcon(true);
+	static handleTabUpdate(tabId, tabUrl) {
+		if (
+			!tabUrl || 
+			(
+				!tabUrl.startsWith(ServiceWorker.options.domains.pl) 
+				&& !tabUrl.startsWith(ServiceWorker.options.domains.rr) 
+				&& !tabUrl.startsWith(ServiceWorker.options.domains.pd)
+			)
+		) {
+			//Tab URL does not match
+			ServiceWorker.changeExtensionIcon(false);
+		} else {
+			//Tab URL matches
+			ServiceWorker.changeExtensionIcon(true);
+		}
+	}
+
+	static changeExtensionIcon(change=false) {
+		chrome.action.setIcon({ path:{
+				"16"	: change ? "../icons/alt-icon-16.png"	: "../icons/default-icon-16.png",
+				"48"	: change ? "../icons/alt-icon-48.png"	: "../icons/default-icon-48.png",
+				"128"	: change ? "../icons/alt-icon-128.png"	: "../icons/default-icon-128.png"
+			}
+		});
 	}
 }
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+	if (request.action === 'initPatientTransfer') {
+		ServiceWorker.initPatientTransfer();
+	}
+	if (request.action === 'clearPTData') {
+		ServiceWorker.clearPTData();
+	}
+	if (request.action === 'setNotification') {
+		ServiceWorker.setNotification();
+	}
+	if (request.action === 'clearReminder') {
+		ServiceWorker.clearReminder();
+	}
+	if (message.action === "getSite") {
+		ServiceWorker.getSite();
+	}
+});
 
 // Listen for tab activations
 chrome.tabs.onActivated.addListener(function (info) {
 	chrome.tabs.get(info.tabId, function (tab) {
-		handleTabUpdate(tab.id, tab.url);
+		ServiceWorker.handleTabUpdate(tab.id, tab.url);
 	});
 });
 
 // Listen for tab updates
 chrome.tabs.onUpdated.addListener(function (tabId, change, tab) {
 	if (change.url) {
-		handleTabUpdate(tabId, change.url);
+		ServiceWorker.handleTabUpdate(tabId, change.url);
 	}
 });
-
-// Function to change extension icon
-function changeExtensionIcon(change=false) {
-	var newIconPath = {};
-
-		var newIconPath = {
-				"16": change ? "../icons/alt-icon-16.png" : "../icons/default-icon-16.png",
-				"48": change ? "../icons/alt-icon-48.png" : "../icons/default-icon-48.png",
-				"128": change ? "../icons/alt-icon-128.png" : "../icons/default-icon-128.png"
-		};
-	// Change the extension icon
-	chrome.action.setIcon({ path: newIconPath });
-}

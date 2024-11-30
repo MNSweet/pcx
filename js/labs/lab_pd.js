@@ -40,7 +40,6 @@ console.log(DXRESULTS.location);
 	});
 
 if(isOrderPage) {
-	DXRESULTS.createOrder();
 	const selectors = {
 		FirstName		: '#ContentPlaceHolder1_txtFirstName',
 		LastName		: '#ContentPlaceHolder1_txtLastName',
@@ -70,33 +69,24 @@ if(isOrderPage) {
 		ICDCodeAdd		: "#ContentPlaceHolder1_divicd10code .col-md-4 a.btn-default.btn.purple",
 		Physician		: "#ContentPlaceHolder1_ddlPhyName"
 	}
-/*
-	const pdButton = document.createElement('button');
-	pdButton.id = 'ptbtn';
-	pdButton.textContent = 'Paste Patient Data';
-	pdButton.style.cssText = 'position:fixed; bottom:10px; right:10px; z-index:1000;';
-	document.body.appendChild(pdButton);
-
-	PCX.getEl("#ptbtn",true).addEventListener('click', ()=>{DXRESULTS.pastePatientData();});
-*/
 
 	if(DXRESULTS.location == "PGx") {
-
+		selectors['TestPanel'] = "";
 	}
 
 	if(DXRESULTS.location == "CGX") {
 		selectors['TestPanel'] = "#cbpanel5889";
-		DXRESULTS.setSelectors(selectors);
-
 	}
 
 	if(DXRESULTS.location == "ImmunodeficiencyReq.aspx") {
-		
+		selectors['TestPanel'] = "#cbpanel5890";
 	}
 
 	if(DXRESULTS.location == "Neurology") {
-		
+		selectors['TestPanel'] = "#cbpanel5891";
 	}
+	DXRESULTS.setSelectors(selectors);
+	DXRESULTS.createOrder();
 }
 
 
@@ -111,19 +101,16 @@ if(DXRESULTS.location == "ViewRequisitionOrders") {
 		}
 
 		// Create the form-group div
-		const formGroupDiv = document.createElement('div');
-		formGroupDiv.className = 'pull-right btn-group-toggle';
-		//formGroupDiv.setAttribute('data-toggle', 'buttons');
+		const formGroupDiv = PCX.createDOM('div', { className: 'pull-right btn-group-toggle'});
 
 		// Create the checkbox for "Hide Read"
-		const viewedCheckbox = document.createElement('input');
-		viewedCheckbox.type = 'checkbox';
-		viewedCheckbox.id = 'toggleViewed';
-		viewedCheckbox.checked = false;
-		const viewedLabel = document.createElement('label');
+		const viewedCheckbox = PCX.createDOM('input', {
+			type:'checkbox',
+			id: 'toggleViewed',
+			checked: false
+		});
+		const viewedLabel = PCX.createDOM('label', {className:'btn btn-info btn-sm btn-secondary active',textContent: 'Show/Hide Read '});
 		viewedLabel.setAttribute('for', 'toggleViewed');
-		viewedLabel.className = 'btn btn-info btn-sm btn-secondary active';
-		viewedLabel.textContent = 'Show/Hide Read ';
 
 		// Append checkboxes and labels to the form-group div
 		viewedLabel.appendChild(viewedCheckbox);

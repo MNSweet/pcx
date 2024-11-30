@@ -68,23 +68,16 @@ class QAManager {
 
 		// Load external CSS file
 		if (!PCX.findEl("#pcx-modal-style")) {
-			if(chrome.runtime.id == undefined) return;
-			const link = document.createElement("link");
-			link.id = "pcx-modal-style";
-			link.rel = "stylesheet";
-			link.href = chrome.runtime.getURL("css/modal.css");
+			const link = PCX.createDOM("link", {id: "pcx-modal-style", rel: "stylesheet", href: chrome.runtime.getURL("css/modal.css")});
 			document.head.appendChild(link);
 		}
 		if (!PCX.findEl("#pcx-qa-modal-container")) {
-			const modalContainer = document.createElement("div");
-			modalContainer.id = "pcx-qa-modal-container";
-
-			const modal = document.createElement("div");
-			modal.id = "pcx-qa-modal";
-
-			const modalTitle = document.createElement("div");
-			modalTitle.innerHTML = "<span>Prince Lab Manager</span>" + QAManager.getRandomPhrase();
-			modalTitle.id = "pcx-qa-modal-heading";
+			const modalContainer = PCX.createDOM("div", {id: "pcx-qa-modal-container"});
+			  const modal = PCX.createDOM("div", {id: "pcx-qa-modal"});
+				const modalTitle = PCX.createDOM("div", {
+					innerHTML: "<span>Prince Lab Manager</span>" + QAManager.getRandomPhrase(),
+					id: "pcx-qa-modal-heading"
+				})
 			modal.appendChild(modalTitle);
 
 			for (const key of QAManager.getAllNoticeCodes()) {
@@ -99,25 +92,20 @@ class QAManager {
 				noticeItems += noticeItem;
 			}
 
-
-			const modalMessage = document.createElement("div");
-			modalMessage.innerHTML = noticeItems;
-			modalMessage.id = "noticeContainer";
+			const modalMessage = PCX.createDOM("div", {innerHTML: noticeItems, id: "noticeContainer"});
+			const buttonContainer = PCX.createDOM("div", {id: "pcx-qa-modal-buttons"});
 			modal.appendChild(modalMessage);
-
-			const buttonContainer = document.createElement("div");
-			buttonContainer.id = "pcx-qa-modal-buttons";
 			modal.appendChild(buttonContainer);
 
-			const okButton = document.createElement("button");
-			okButton.textContent = "Close to fix errors";
-			okButton.id = "pcx-qa-modal-close";
-			okButton.onclick = () => {
-				document.body.removeChild(modalContainer);
-				PCX.log("Modal dismissed");
-			};
+			const okButton = PCX.createDOM("button", {
+				textContent: "Close to fix errors",
+				id: "pcx-qa-modal-close",
+				onclick: ()=>{
+					document.body.removeChild(modalContainer);
+					PCX.log("Modal dismissed");
+				}
+			})
 			buttonContainer.appendChild(okButton);
-
 			modalContainer.appendChild(modal);
 			document.body.appendChild(modalContainer);
 
@@ -170,9 +158,10 @@ class QAManager {
 		}
 
 		if(!PCX.findEl('#stabilityNotice')) {
-			const stabilityNotice = document.createElement("div");
-				stabilityNotice.innerHTML = `<span class="QAManagerSubHeading">Sample Stability</span><span id="stabilityNoticeAge"></span>`;
-				stabilityNotice.id = "stabilityNotice";
+			const stabilityNotice = PCX.createDOM("div", {
+				innerHTML: `<span class="QAManagerSubHeading">Sample Stability</span><span id="stabilityNoticeAge"></span>`,
+				id: "stabilityNotice"
+			})
 			PCX.findEl(parentElement).appendChild(stabilityNotice);
 		}
 		PCX.findEl('#stabilityNoticeAge').textContent = stabilityText;

@@ -271,48 +271,33 @@ class PCX {
 		// Load external CSS file
 		if (!PCX.findEl("#pcx-modal-style")) {
 			//if(chrome.runtime.id == undefined) return;
-			const link = document.createElement("link");
-			link.id = "pcx-modal-style";
-			link.rel = "stylesheet";
-			link.href = chrome.runtime.getURL("css/modal.css");
+			const link = PCX.createDOM("link", {id: "pcx-modal-style", rel: "stylesheet", href: chrome.runtime.getURL("css/modal.css")});
 			document.head.appendChild(link);
 		}
 
 		if (!PCX.findEl("#pcx-modal-container")) {
-			const modalContainer = document.createElement("div");
-			modalContainer.id = "pcx-modal-container";
+			const modalContainer	= PCX.createDOM("div",	{ id: "pcx-modal-container"});
+			  const modal			= PCX.createDOM("div",	{ id: "pcx-modal"});
+				const modalTitle		= PCX.createDOM("h2",	{ textContent: title });
+				const modalMessage		= PCX.createDOM("p",	{ innerHTML: message });
+				const buttonContainer	= PCX.createDOM("div", 		{ id: "pcx-modal-buttons" });
+					const okButton		= PCX.createDOM("button",	{ textContent: "OK", onclick: ()=>{
+						document.body.removeChild(modalContainer);
+						PCX.log("Modal dismissed");
+					}});
 
-			const modal = document.createElement("div");
-			modal.id = "pcx-modal";
-
-			const modalTitle = document.createElement("h2");
-			modalTitle.textContent = title;
 			modal.appendChild(modalTitle);
-
-			const modalMessage = document.createElement("p");
-			modalMessage.innerHTML = message;
 			modal.appendChild(modalMessage);
-
-			const buttonContainer = document.createElement("div");
-			buttonContainer.id = "pcx-modal-buttons";
 			modal.appendChild(buttonContainer);
 
-			const okButton = document.createElement("button");
-			okButton.textContent = "OK";
-			okButton.onclick = () => {
-				document.body.removeChild(modalContainer);
-				PCX.log("Modal dismissed");
-			};
 			buttonContainer.appendChild(okButton);
 
 			if (remindTime > 0) {
-				const remindButton = document.createElement("button");
-				remindButton.textContent = `Don't remind me for ${remindTime} hours`;
-				remindButton.onclick = () => {
+				const remindButton = PCX.createDOM("button", {textContent: `Don't remind me for ${remindTime} hours`, onclick: ()=>{
 					PCX.setLocalStorage("pcxid_" + id, Date.now() + remindTime * 3600000);
 					document.body.removeChild(modalContainer);
 					PCX.log(`User selected to not be reminded for ${remindTime} hours`);
-				};
+				}});
 				buttonContainer.appendChild(remindButton);
 			}
 
@@ -325,60 +310,60 @@ class PCX {
 *
 * Import Patient Data from Local Temp Cache.
 *
-* Banner Controller
+* Notice Controller
 *
 *********************************************/
-	static ptBanner = {
-		Banner	: "patientDataBanner",
+	static patientTransfer = {
+		Notice	: "noticeDisplay",
 		Info	: "patientInfo",
 		Timer	: "patientDataTimer",
 	}
-	static initializeBanner(patientData, timeLeft = 90, callback=()=>{return;}) {
-		const banner = document.createElement('div');
-		banner.id = PCX.ptBanner.Banner;
-		banner.style.cssText = 'position:fixed; top:0; width:100%; background-color:yellow; z-index:1000; padding:10px; display:flex; justify-content:space-between;';
+	static initializeNotice(patientData, timeLeft = 90, callback=()=>{return;}) {
+		const notice = PCX.createDOM('div', {id: PCX.patientTransfer.Notice, style:{cssText:"position:fixed; top:0; width:100%; background-color:yellow; z-index:1000; padding:10px; display:flex; justify-content:space-between;"}});
 
 		// Left side: Patient details
-		const patientInfo = document.createElement('span');
-		patientInfo.id 			= PCX.ptBanner.Info;
-		patientInfo.textContent = `Patient: ${patientData.LastName}, ${patientData.FirstName} | ${patientData.Category}`;
-		patientInfo.dataset.hash= PCX.hashCode(`${patientData.LastName}${patientData.FirstName}${patientData.Category}`);
-		banner.appendChild(patientInfo);
+		const patientInfo = PCX.createDOM('span', {
+			id: 			PCX.patientTransfer.Info,
+			textContent: 	`Patient: ${patientData.LastName}, ${patientData.FirstName} | ${patientData.Category}`,
+			dataset: {
+				hash: PCX.hashCode(`${patientData.LastName}${patientData.FirstName}${patientData.Category}`)
+			}
+		});
 
 		// Right side: Countdown timer
-		const timer = document.createElement('span');
-		timer.id 			= PCX.ptBanner.Timer;
-		timer.textContent	= "-:--";
-		banner.appendChild(timer);
-		document.body.appendChild(banner);
+		const timer = PCX.createDOM('span', {id: PCX.patientTransfer.Timer, textContent: "-:--"})
+
+		notice.appendChild(patientInfo);
+		notice.appendChild(timer);
+		document.body.appendChild(notice);
 	}
 
-	static updateBanner(patientData, timeLeft = 90, callback=()=>{return;}) {
-		if(PCX.getEl(`#${PCX.ptBanner.Banner}`,true)) {
+	static noticeUpdate(patientData, timeLeft = 90, callback=()=>{return;}) {
+		if(PCX.getEl(`#${PCX.patientTransfer.Notice}`,true)) {
 			const hashCode = PCX.hashCode(`${patientData.LastName}${patientData.FirstName}${patientData.Category}`);
-			if (PCX.getEl(`#${PCX.ptBanner.Info}`,true).dataset.hash == hashCode) {
+			if (PCX.getEl(`#${PCX.patientTransfer.Info}`,true).dataset.hash == hashCode) {
 				return;
 			}
-			PCX.getEl(`#${PCX.ptBanner.Info}`).dataset.hash = hashCode;
+			PCX.getEl(`#${PCX.patientTransfer.Info}`).dataset.hash = hashCode;
 		
-			PCX.getEl(`#${PCX.ptBanner.Info}`).textContent = `Patient: ${patientData.LastName}, ${patientData.FirstName} | ${patientData.Category}`;
+			PCX.getEl(`#${PCX.patientTransfer.Info}`).textContent = `Patient: ${patientData.LastName}, ${patientData.FirstName} | ${patientData.Category}`;
 
-			if (PCX.getEl(`#${PCX.ptBanner.Timer}`,true)) {
+			if (PCX.getEl(`#${PCX.patientTransfer.Timer}`,true)) {
 				const minutes = Math.floor(timeLeft / 60);
 				const seconds = timeLeft % 60;
-				PCX.getEl(`#${PCX.ptBanner.Timer}`).textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+				PCX.getEl(`#${PCX.patientTransfer.Timer}`).textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 			}
 		}else{
-			PCX.initializeBanner(patientData, timeLeft, callback);
+			PCX.initializeNotice(patientData, timeLeft, callback);
 		}
 
 		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			//if(chrome.runtime.id == undefined) return;
-			if (message.action === 'pingCountdownBanner') {
+			if (message.action === 'noticePing') {
 				if (timeLeft <= 0) {
-					PCX.getEl(`#${PCX.ptBanner.Banner}`,true).remove();
+					PCX.getEl(`#${PCX.patientTransfer.Notice}`,true).remove();
 				}else{
-					PCX.getEl(`#${PCX.ptBanner.Timer}`).textContent = message.timerText;
+					PCX.getEl(`#${PCX.patientTransfer.Timer}`).textContent = message.timerText;
 				}
 			}
 		});
@@ -467,6 +452,10 @@ class PCX {
 				PCX.getEl(selector).setAttribute("tabindex","-1");
 			}
 		});
+	}
+
+	static createDOM(domType, properties={}) {
+		return Object.assign(document.createElement(domType), properties);
 	}
 	
 }

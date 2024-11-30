@@ -11,7 +11,7 @@ class DXRESULTS {
  */
  	static location = PCX.getUrlDirectory()[1];
 
- 	static patientDataBanner = "#patientDataBanner";
+ 	static noticeDisplay = "#noticeDisplay";
 
 	// Translation Lookup Table for Prince Laboratories to Reference Lab
 	static categoryTranslation = {};
@@ -58,17 +58,17 @@ class DXRESULTS {
 	static createOrder(callback=()=>{return;}) {
 		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			//if(chrome.runtime.id == undefined) return;
-			if (message.action === 'startCountdownBanner') {
-				// If the banner is already present, don't recreate it
-				if (PCX.getEl(DXRESULTS.patientDataBanner)) {
-					PCX.getEl(DXRESULTS.patientDataBanner).remove();
+			if (message.action === 'noticeDisplay') {
+				// If the notice is already present, don't recreate it
+				if (PCX.getEl(DXRESULTS.noticeDisplay)) {
+					PCX.getEl(DXRESULTS.noticeDisplay).remove();
 				}
 				message.patientData.Category = DXRESULTS.categoryTranslation[message.patientData.Category]
-				PCX.updateBanner(message.patientData,message.timer,callback);
+				PCX.noticeUpdate(message.patientData,message.timer,callback);
 
 				if(message.patientData.Category == DXRESULTS.getLocation()){
-					PCX.getEl(DXRESULTS.patientDataBanner).appendChild(
-						Object.assign(document.createElement('span'), {
+					PCX.getEl(DXRESULTS.noticeDisplay).appendChild(
+						Object.assign(PCX.createDOM('span', {
 							textContent: 'Paste Patient Data',
 							id: 'patientDataClone'
 						})
@@ -83,10 +83,10 @@ class DXRESULTS {
 					});
 				};
 			}
-			if (message.action === 'pingCountdownBanner') {
+			if (message.action === 'noticePing') {
 				console.log(message);
 				message.patientData.Category = DXRESULTS.categoryTranslation[message.patientData.Category]
-				PCX.updateBanner(message.patientData,message.timer,callback);
+				PCX.noticeUpdate(message.patientData,message.timer,callback);
 			}
 		});
 	};
@@ -133,10 +133,10 @@ class DXRESULTS {
 			PCX.getEl(el.DOBYear,true).value	= patientData.DOB[2];
 			PCX.getEl(el.DOC).value				= patientData.DOC;
 
-			DXRESULTS.setRadioInput(el.Gender[patientData.Gender],true);
+			PCX.getEl(el.Gender[patientData.Gender],true).click();
 
-			DXRESULTS.setRadioInput(el.Ethnicity[(DXRESULTS.raceTranslation[patientData.Race])[0]],true);
-			DXRESULTS.setRadioInput(el.Race[(DXRESULTS.raceTranslation[patientData.Race])[1]],true);
+			PCX.getEl(el.Ethnicity[(DXRESULTS.raceTranslation[patientData.Race])[0]]).click();
+			PCX.getEl(el.Race[(DXRESULTS.raceTranslation[patientData.Race])[1]]).click();
 
 			PCX.getEl(el.Address,true).value	= patientData.Address;
 			PCX.getEl(el.State,true).value		= patientData.State;
@@ -145,7 +145,7 @@ class DXRESULTS {
 			PCX.getEl(el.Phone,true).value		= patientData.Phone;
 			PCX.getEl(el.Email,true).value		= patientData.Email;
 
-			DXRESULTS.setRadioInput(el.TestPanel,true);
+			if(el.TestPanel != "") {PCX.getEl(el.TestPanel,true).click();}
 
 			PCX.getEl(el.Physician,true).value		= orderDefaults.Physician;
 			PCX.getEl(el.ICDCode,true).value		= orderDefaults.ICDCode;
@@ -155,18 +155,9 @@ class DXRESULTS {
 				// Clear the patient data after usage
 				chrome.storage.local.set({ patientData: {} }, () => {
 					PCX.log('Patient data cleared after use');
-					PCX.getEl(DXRESULTS.patientDataBanner).remove();
+					PCX.getEl(DXRESULTS.noticeDisplay).remove();
 				});
 			}
 		});
-	}
-
-	static setRadioInput(selector, checked) {
-		PCX.getEl(selector).value = checked;
-		if(checked){
-			PCX.getEl(selector).parentElement.classList.add("checked");
-		}else{
-			PCX.getEl(selector).parentElement.classList.remove("checked");
-		}
 	}
 }

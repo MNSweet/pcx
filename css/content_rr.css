@@ -9,7 +9,7 @@
 	box-sizing: border-box;
 	color:#ffffff;
 }
-#patientDataBanner {
+#noticeDisplay {
 	position: fixed;
 	top: 0px;
 	width: 100%;
