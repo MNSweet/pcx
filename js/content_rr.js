@@ -50,10 +50,10 @@ console.log("This is RR specific content script.");
 	const testCategories = {
 		16: {Code:"PGX",					Test:"COMP120"},		// Panel - COMP120
 		17: {Code:"CGX NGS",				Test:"COMPREHENSIVE"},	// Panel - IP-CGX Comprehensive Cancer
-		18: {Code:"Immuno NGS",				Test:"PANEL"},			// Panel - Comprehensive Immunodeficiency Panel
+		18: {Code:"Immuno NGS",				Test:"Comprehensive Immunodeficiency Panel"},			// Panel - Comprehensive Immunodeficiency Panel
 		19: {Code:"Cardio NGS",				Test:"CARDIO"},			// Panel - CARDIO-PULMONARY
 		20: {Code:"Eye NGS",				Test:"EYE"},			// Panel - Comprehensive Eye Disorder Panel
-		21: {Code:"Neuro NGS",				Test:"PANEL"},			// Panel - Neuro-Degenerative Panel
+		21: {Code:"Neuro NGS",				Test:"Neuro-Degenerative Panel"},			// Panel - Neuro-Degenerative Panel
 		22: {Code:"Thyroid NGS",			Test:"PANEL"},			// Panel - Thyroid Genetic Disease Panel
 		23: {Code:"Toxicology",				Test:"REFLEX"},			// Panel - Urine Drug Screen Profile w/ Reflex to Definitive | Urine Drug Screen ONLY
 		25: {Code:"STI",					Test:"PROFILE"},		// Panel - STI Profile
