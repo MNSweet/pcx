@@ -123,7 +123,7 @@ class IATSERV {
 		
 		const overrides = [
 			{heading:"Alt ID 1",linkId:2461,text:"Results"},
-			{heading:"Alt ID 2",linkId:7006,text:"PreAuth"},
+			{heading:"Alt ID 2",linkId:0,text:""},
 			{heading:"Alt ID 3",linkId:0,text:""} // Available
 		]
 
@@ -136,6 +136,71 @@ class IATSERV {
 						let columnLinkTD = row.querySelector('td:nth-child('+(headings.indexOf(column.heading)+1)+')');
 
 						columnLinkTD.innerHTML = `<a href="/?LinkId=${column.linkId}&AccessionId=${accessionID}" target="_blank">${column.text}</a>`
+					});
+					PCX.getEl('#MainContent_ctl00_grid_DXHeadersRow0 td:nth-child('+(headings.indexOf(column.heading)+1)+ ')',true).textContent = column.text;
+				}
+			}
+		}	
+	}
+
+
+
+
+/*************************************************************************************
+ *
+ * Page Templete: 	Location List
+ * linkId:			2004
+ *
+ * Search for Accession by
+ * 		Date [Received|Collected|Resulted|Created], Date Range, Status, Sub Status,
+ * 		Test Category, Accession, Requisition, Batch# , First / Last Name, DOB,
+ * 		Location, Physician, External ID, Source, Billing Status, Result Entry Status,
+ * 		Priority
+ *
+ * Column Headings available:
+ * 		Accession, AcsNo, Alt ID 1, Alt ID 2, Alt ID 3, Batch, Bill Type, Billing Status,
+ * 		Code, Collection Date, Created Date, Created Date Time, DOB, Entered First Reported,
+ * 		Gender, Pat Email, Pat Phone, Patient, Pending Test Count, Performing Lab,
+ * 		Performing Lab Count, Performing Lab Level, Physician, Primary Insurance, Priority,
+ * 		Process Date, Processing Days, Processing Hours, Location, Received, Released Date,
+ * 		Report Generation Status, Reported, Requisition, Result Status, Secondary Insurance,
+ * 		Source, Specimens, Status, Sub Status, Test Category, Tests
+ * 
+ *************************************************************************************/
+
+
+     
+	/**
+	 * columnLocationParser
+	 *
+	 * @param 			ARRAY	headings				List of all current headings displayed by the search listing
+	 * @requiredParam	STRING	headings['Accession']	Column contains the system ID needed to build all URLS
+	 *
+	 * @process			IF 		Results Link 			Locates 'Alt ID 1' if available and builds a Results link
+	 * @process			IF 		PreAuth Link 			Locates 'Alt ID 2' if available and builds a PreAuth link
+	 * @process			IF 		-- 		Link 			Locates 'Alt ID 3' if available and builds a -- link / Unused
+	 * 
+	 */
+	static columnLocationParser() {
+		let headingRow = PCX.getEl('#MainContent_ctl00_grid_DXHeadersRow0',true);
+		if(!headingRow){console.log('not found'); return;}
+		let headings = headingRow.textContent.replaceAll('\t','').replaceAll('\n','').split(" ");
+		
+		const overrides = [
+			{heading:"ID1",linkId:2005,text:"Delivery"},
+			{heading:"ID2",linkId:0,text:""},
+			{heading:"ID3",linkId:0,text:""} // Available
+		]
+
+		for (const [i,column] of Object.entries(overrides)) {
+			if (headings.includes(column.heading) && headings.includes('Code')) {
+				let rowData = document.querySelectorAll('.dxgvDataRow_Metropolis');
+				if(rowData.length){
+					rowData.forEach((row) => {
+						let locationID = row.querySelector('td:nth-child('+(headings.indexOf('Code')+1)+') a').getAttribute('onclick').replace(/ShowForm\((\d*)\)/i,'$1');
+						let columnLinkTD = row.querySelector('td:nth-child('+(headings.indexOf(column.heading)+1)+')');
+
+						columnLinkTD.innerHTML = `<a href="javascript:void(null)" onclick="ShowForm('${locationID}#delivery')">${column.text}</a>`
 					});
 					PCX.getEl('#MainContent_ctl00_grid_DXHeadersRow0 td:nth-child('+(headings.indexOf(column.heading)+1)+ ')',true).textContent = column.text;
 				}

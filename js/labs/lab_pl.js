@@ -29,7 +29,7 @@ IATSERV.setTestCategories({
 
 // Accession List
 if (IATSERV.linkId == "2070") {
-	const intervalID = setInterval(IATSERV.columnParser, 500);
+	const intervalACSID = setInterval(IATSERV.columnParser, 500);
 }
 
 // Create Accession
@@ -198,5 +198,10 @@ if (IATSERV.linkId == "2461") {
 		patient	: PCX.getEl("#lblPatient").textContent.toUpperCase().split(' '),
 		result	: true
 	});
+}
+
+// Locations
+if (IATSERV.linkId == "2004") {
+	const intervalLocationID = setInterval(IATSERV.columnLocationParser, 500);
 }
 
