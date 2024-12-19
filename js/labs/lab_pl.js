@@ -181,7 +181,7 @@ console.log("Update Accession");
 		acsNum	: PCX.getEl("#MainContent_ctl00_tbAccession").value,
 		acsID	: PCX.getEl("#tbAccessionId").value,
 		patient	: PCX.getEl("#MainContent_ctl00_tbPatient_tbText").value.toUpperCase().split(', ')
-	});
+	},false,false,"#dvFooter");
 }
 
 // Results
@@ -189,7 +189,7 @@ if (IATSERV.linkId == "2461") {
 	IATSERV.setSelectors({
 		UploadTable	: '#uploadTable',
 		UploadSpan	: '.upload span'
-	});
+	},false,false,"#dvFooter");
 
 	IATSERV.fileDrop({
 		enabled	: true,

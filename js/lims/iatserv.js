@@ -636,10 +636,11 @@ class IATSERV {
 	 * @function	async		dropZoneKeepAlive() 	
 	 * @function	async		dropZoneTimeOut()		
 	 */
-	static fileDrop(qa={enabled:false,acsNum:null,acsID:null,patient:null,result:false},target=false,targetSpan=false){
+	static fileDrop(qa={enabled:false,acsNum:null,acsID:null,patient:null,result:false},target=false,targetSpan=false,scrollTo=false){
 		let 	isDragging 	= false;
 		const	el			= IATSERV.selectors;
 				el.DropArea		= target ? target : el.UploadTable;
+				el.ScrollTo		= scrollTo ? scrollTo : el.DropArea;
 				el.AcceptTypes	= el.DropArea+' input[type="file"]';
 				el.TargetSpan	= targetSpan ? targetSpan : el.UploadSpan;
 		const 	dropArea	= PCX.getEl(el.DropArea).closest('*');
@@ -672,7 +673,7 @@ class IATSERV {
 				for (const [i, file] of Object.entries(e.dataTransfer.files)) {
 					let fileExt = file.name.split('.').pop();
 					let fileName = file.name.replace('.'+fileExt,'');
-					dropArea.scrollIntoView({ behavior: "smooth", block: "end"});
+					PCX.getEl(el.ScrollTo).scrollIntoView({ behavior: "smooth", block: "end"});
 					if (acceptTypes.findIndex(function (a) { return a.toLowerCase() == ('.' + fileExt).toLowerCase() }) == -1) {
 						return; // File not accepted
 					}
