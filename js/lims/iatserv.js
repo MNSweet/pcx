@@ -673,7 +673,7 @@ class IATSERV {
 				for (const [i, file] of Object.entries(e.dataTransfer.files)) {
 					let fileExt = file.name.split('.').pop();
 					let fileName = file.name.replace('.'+fileExt,'');
-					PCX.getEl(el.ScrollTo).scrollIntoView({ behavior: "smooth", block: "end"});
+					PCX.getEl(el.ScrollTo).scrollIntoView({ behavior: "instant", block: "end"});
 					if (acceptTypes.findIndex(function (a) { return a.toLowerCase() == ('.' + fileExt).toLowerCase() }) == -1) {
 						return; // File not accepted
 					}
