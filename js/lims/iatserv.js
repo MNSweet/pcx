@@ -280,11 +280,8 @@ class IATSERV {
 
 		PCX.getEl(el.newPatientBtn,true).addEventListener('click', newPatientBtn());
 		async function newPatientBtn(eventPtBtnClick) {
-			console.log(el.newPatientBtn, "click");
 			waitForElm(el.FancyBox).then( (elementLoaded) => {
-			console.log(el.FancyBox, "load");
 				waitForIframeElm(el.FancyBox,el.IframeDOB).then( (elementIframeLoaded) => {
-				console.log("load element");
 					// Date of Birth Checks
 					let inputDOB = PCX.getEl(el.FancyBox,true).contentWindow.document.querySelector(el.IframeDOB);
 					let minorDate = new Date();

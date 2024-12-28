@@ -1,6 +1,10 @@
 // Define the PCX class in content.js
 class PCX {
 
+	static preferedUserMode(){
+		return PCX.currentUser() == "Max";
+	}
+
 /**
  * 
  * Local Storage Operations
@@ -405,6 +409,13 @@ class PCX {
  * Tools
  * 
  */
+	/**
+	 * currentUser
+	 * @return STRING/BOOL
+	 */
+	static currentUser() {
+		return PCX.getEl('.userName').textContent.replace('Welcome ','').replace(' ','');
+	}
 
 	/**
 	 * mergeOptsIntoDefaults
@@ -426,7 +437,7 @@ class PCX {
 	}
 
 	static log(message) {
-		if (PCX.getUrlParams()['debug']) {
+		if (PCX.getUrlParams()['debug']==true) {
 			console.log(message);
 		}
 	}
@@ -445,7 +456,6 @@ class PCX {
 
 	static disableTabIndex(elements,iframe="") {
 		elements.forEach((selector) => {
-			console.log(selector);
 			if(iframe!="") {
 				PCX.getEl(iframe).contentWindow.document.querySelector(selector).setAttribute("tabindex","-1");
 			} else {

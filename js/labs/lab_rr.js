@@ -1,5 +1,6 @@
 PCX.log("Reliable Results Labs");
 
+if(PCX.preferedUserMode()) {
 /**
  *
  * PREP Variables/Constants
@@ -90,72 +91,73 @@ PCX.log("Reliable Results Labs");
 	});
 
 
-// Results List
-if (IATSERV.linkId == "2024") {
-	IATSERV.setSelectors({
-		UpdatePanel		: "#MainContent_ctl00_updatePanel1",
-		DXHeaderRow		: "#MainContent_ctl00_grid_DXHeadersRow0",
-		TDCheckedClass	: "dxgvSelectedRow_Metropolis",
-		TDCheckBox		: "td:first-child span",
-		BoxUnchecked	: "dxWeb_edtCheckBoxUnchecked_Metropolis",
-		BoxChecked		: "dxWeb_edtCheckBoxChecked_Metropolis"
-	});
-	IATSERV.resultsDownloader();
-}
-
-//Create Order
-if (IATSERV.linkId == "2011") { 
-
-
-	/********************************************
-	*
-	* Import Patient Data from Local Temp Cache.
-	*
-	*********************************************/
-
-	IATSERV.setSelectors({
-		Location		: '#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbLocation_tbText',
-		LocationMenu	: "#ui-id-1 .ui-menu-item",
-		Physician		: '#ddPhysician',
-		PhysicianOptions: '#ddPhysician option',
-		PhysicianId		: '#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianId',
-		PhysicianName	: '#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianName',
-		BillTo			: '#MainContent_ctl00_ctl00_ddBillType_ddControl',
-		Category		: "#MainContent_ctl00_ctl00_ctrlOrderTestCategoryControl1_ddTestCategory",
-		DOC				: "#MainContent_ctl00_ctl00_tbCollectionDateTime_tbDate_tbText",
-		FirstName		: '#tbFirstName',
-		LastName		: '#tbLastName',
-		MiddleName		: '#MainContent_ctl00_tbMiddleName',
-		DOB				: '#MainContent_ctl00_tbDOB_tbText',
-		Gender			: '#MainContent_ctl00_ddGender_ddControl',
-		Race			: '#MainContent_ctl00_ddRace_ddControl',
-		Address			: [
-							'#MainContent_ctl00_AddressControl1_tbAddress1',
-							'#MainContent_ctl00_AddressControl1_tbAddress2'
-						  ],
-		State			: '#MainContent_ctl00_AddressControl1_CountryState_ddState',
-		City			: '#MainContent_ctl00_AddressControl1_tbCity',
-		Zip				: '#MainContent_ctl00_AddressControl1_tbZipCode',
-		Phone			: '#MainContent_ctl00_AddressControl1_tbPhone',
-		Email			: '#MainContent_ctl00_AddressControl1_tbEmail',
-		NewPatientBTN	: '#btnAddEditPatient',
-		TestCodesInput	: '#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText',
-		TestCodesOutput	: '#dvSelectedItems',
-		FancyBox		: '.fancybox-overlay.fancybox-overlay-fixed iframe',
-		UpPanel			: '#MainContent_ctl00_ctl00_upPanel'
-	});
-
-
-	IATSERV.createOrder(()=>{
-		PCX.getEl("#noticeDisplay").appendChild(
-			PCX.createDOM('span', {
-				textContent: 'Paste Patient Data',
-				id: 'patientDataClone'
-			})
-		);
-
-		PCX.getEl("#patientDataClone").addEventListener('click', function(event) {
-			IATSERV.pastePatientData();
+	// Results List
+	if (IATSERV.linkId == "2024") {
+		IATSERV.setSelectors({
+			UpdatePanel		: "#MainContent_ctl00_updatePanel1",
+			DXHeaderRow		: "#MainContent_ctl00_grid_DXHeadersRow0",
+			TDCheckedClass	: "dxgvSelectedRow_Metropolis",
+			TDCheckBox		: "td:first-child span",
+			BoxUnchecked	: "dxWeb_edtCheckBoxUnchecked_Metropolis",
+			BoxChecked		: "dxWeb_edtCheckBoxChecked_Metropolis"
 		});
-	});
+		IATSERV.resultsDownloader();
+	}
+
+	//Create Order
+	if (IATSERV.linkId == "2011") { 
+
+
+		/********************************************
+		*
+		* Import Patient Data from Local Temp Cache.
+		*
+		*********************************************/
+
+		IATSERV.setSelectors({
+			Location		: '#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbLocation_tbText',
+			LocationMenu	: "#ui-id-1 .ui-menu-item",
+			Physician		: '#ddPhysician',
+			PhysicianOptions: '#ddPhysician option',
+			PhysicianId		: '#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianId',
+			PhysicianName	: '#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianName',
+			BillTo			: '#MainContent_ctl00_ctl00_ddBillType_ddControl',
+			Category		: "#MainContent_ctl00_ctl00_ctrlOrderTestCategoryControl1_ddTestCategory",
+			DOC				: "#MainContent_ctl00_ctl00_tbCollectionDateTime_tbDate_tbText",
+			FirstName		: '#tbFirstName',
+			LastName		: '#tbLastName',
+			MiddleName		: '#MainContent_ctl00_tbMiddleName',
+			DOB				: '#MainContent_ctl00_tbDOB_tbText',
+			Gender			: '#MainContent_ctl00_ddGender_ddControl',
+			Race			: '#MainContent_ctl00_ddRace_ddControl',
+			Address			: [
+								'#MainContent_ctl00_AddressControl1_tbAddress1',
+								'#MainContent_ctl00_AddressControl1_tbAddress2'
+							  ],
+			State			: '#MainContent_ctl00_AddressControl1_CountryState_ddState',
+			City			: '#MainContent_ctl00_AddressControl1_tbCity',
+			Zip				: '#MainContent_ctl00_AddressControl1_tbZipCode',
+			Phone			: '#MainContent_ctl00_AddressControl1_tbPhone',
+			Email			: '#MainContent_ctl00_AddressControl1_tbEmail',
+			NewPatientBTN	: '#btnAddEditPatient',
+			TestCodesInput	: '#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText',
+			TestCodesOutput	: '#dvSelectedItems',
+			FancyBox		: '.fancybox-overlay.fancybox-overlay-fixed iframe',
+			UpPanel			: '#MainContent_ctl00_ctl00_upPanel'
+		});
+
+
+		IATSERV.createOrder(()=>{
+			PCX.getEl("#noticeDisplay").appendChild(
+				PCX.createDOM('span', {
+					textContent: 'Paste Patient Data',
+					id: 'patientDataClone'
+				})
+			);
+
+			PCX.getEl("#patientDataClone").addEventListener('click', function(event) {
+				IATSERV.pastePatientData();
+			});
+		});
+	}
 }

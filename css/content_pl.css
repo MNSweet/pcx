@@ -163,6 +163,12 @@
 	font-weight: bold;
 }
 
+#easterEgg {
+	position: fixed;
+	bottom: 0;
+	right: 0;
+}
+
 /*#page-wrapper .container-fluid {
 	padding-bottom: 70px;
 	position: relative;
