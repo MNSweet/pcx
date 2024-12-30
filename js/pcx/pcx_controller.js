@@ -395,7 +395,6 @@ class PCX {
 		return params;
 	}
 	static getUrlDirectory() {
-		const params = {};
 		return window.location.pathname.split('/');
 	}
 

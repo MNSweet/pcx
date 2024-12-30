@@ -71,7 +71,7 @@ class DXRESULTS {
 						Object.assign(PCX.createDOM('span', {
 							textContent: 'Paste Patient Data',
 							id: 'patientDataClone'
-						})
+						}))
 					);
 
 					PCX.getEl("#patientDataClone").addEventListener('click', function(event) {
