@@ -10,6 +10,7 @@ class ServiceWorker {
 	};
 
 	static timer = 0;
+	static timerState = false;
 
 	static log(message) {
 		if (ServiceWorker.options.debug) {
@@ -17,7 +18,8 @@ class ServiceWorker {
 		}
 	}
 
-	static initPatientTransfer() {
+	static initPatientTransfer(request) {
+		console.log("> initPatientTransfer", request);
 		// Get all tabs that match the host permissions (the 3 sites)
 		const matchUrls = [
 			'*://prince.iatserv.com/*',
@@ -33,8 +35,17 @@ class ServiceWorker {
 
 			});
 		});
-		clearInterval(chrome.updateCountdownNotice);
-		chrome.updateCountdownNotice = setInterval(()=>{
+		clearInterval(ServiceWorker.updateCountdownNotice);
+		chrome.storage.local.set({ noticeTimerState: true });
+
+		console.log("Init:", ServiceWorker.timerState);
+		
+		ServiceWorker.updateCountdownNotice = setInterval(()=>{
+			chrome.storage.local.get(["noticeTimerState"], (state) => {
+				console.log("Before:", state, ServiceWorker.timerState);
+				ServiceWorker.timerState = state;
+				console.log("After:", state, ServiceWorker.timerState);
+			});
 			chrome.tabs.query({ url: matchUrls }, (tabs) => {
 				ServiceWorker.log(ServiceWorker.timer,tabs);
 				ServiceWorker.timer--;
@@ -42,8 +53,13 @@ class ServiceWorker {
 					// Send the message to each matching tab to start the countdown
 					chrome.tabs.sendMessage(tab.id, { action: 'noticePing', patientData: request.patientData, timer:ServiceWorker.timer});
 				});
-				if (ServiceWorker.timer <= 0) {
-					clearInterval(chrome.updateCountdownNotice);
+				if (ServiceWorker.timer <= 0 || !ServiceWorker.timerState) {
+					console.log("Timer:", ServiceWorker.timer, " | State: ", ServiceWorker.timerState);
+					clearInterval(ServiceWorker.updateCountdownNotice);
+					if(ServiceWorker.timerState) {
+						ServiceWorker.timerState = false;
+						chrome.storage.local.set({ noticeTimerState: false });
+					}
 					chrome.storage.local.set({ patientData: {} }, () => {
 						ServiceWorker.log('Patient data cleared after timeout');
 					});
@@ -51,15 +67,15 @@ class ServiceWorker {
 		})}, 1000);
 	}
 
-	static clearPTData() {
-		clearInterval(chrome.updateCountdownNotice);
+	static clearPTData(request) {
+		clearInterval(ServiceWorker.updateCountdownNotice);
 		ServiceWorker.timer=0;
 		chrome.storage.local.set({ patientData: {} }, () => {
 			ServiceWorker.log('Patient data cleared after timeout');
 		});
 	}
 
-	static setNotification() {
+	static setNotification(request,sendResponse) {
 		const notifId = request.notifId;
 		const remindTime = request.remindTime;
 		const title = request.title;
@@ -96,7 +112,7 @@ class ServiceWorker {
 		sendResponse({ status: "notification handled" });
 	}
 
-	static clearReminder() {
+	static clearReminder(request,sendResponse) {
 		const notifId = request.notifId;
 
 		chrome.storage.local.remove("pcxid_" + notifId, () => {
@@ -106,7 +122,7 @@ class ServiceWorker {
 		sendResponse({ status: "reminder cleared" });
 	}
 
-	static getCurrentSite() {
+	static async getCurrentSite(request) {
 		return new Promise((resolve, reject) => {
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 				const url = tabs[0]?.url;
@@ -123,11 +139,12 @@ class ServiceWorker {
 		});
 	}
 
-	static getSite() {
-		getCurrentSite().then((site) => {
-			sendResponse({ site: site });
+	static async getSite(request,sender) {
+		ServiceWorker.getCurrentSite().then((site) => {
+			console.log(site)
+        	chrome.tabs.sendMessage(sender.tab.id, {"action":"returnSite", "site": site});
 		}).catch((error) => {
-			sendResponse({ error: error });
+        	chrome.tabs.sendMessage(sender.tab.id, {"action":"error", "note": "returnSite failed", "error": error});
 		});
 		return true; // Indicates the response will be sent asynchronously
 	}
@@ -161,19 +178,19 @@ class ServiceWorker {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 	if (request.action === 'initPatientTransfer') {
-		ServiceWorker.initPatientTransfer();
+		ServiceWorker.initPatientTransfer(request);
 	}
 	if (request.action === 'clearPTData') {
-		ServiceWorker.clearPTData();
+		ServiceWorker.clearPTData(request);
 	}
 	if (request.action === 'setNotification') {
-		ServiceWorker.setNotification();
+		ServiceWorker.setNotification(request,sendResponse);
 	}
 	if (request.action === 'clearReminder') {
-		ServiceWorker.clearReminder();
+		ServiceWorker.clearReminder(request);
 	}
-	if (message.action === "getSite") {
-		ServiceWorker.getSite();
+	if (request.action === "getSite") {
+		ServiceWorker.getSite(request, sender);
 	}
 });
 

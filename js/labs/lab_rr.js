@@ -1,4 +1,5 @@
 PCX.log("Reliable Results Labs");
+PCX.setLabPortal('RR');
 
 if(PCX.preferedUserMode()) {
 /**

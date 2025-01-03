@@ -1,8 +1,19 @@
 // Define the PCX class in content.js
 class PCX {
 
+	static activeLabPortal = "";
+
+	static setLabPortal(lab) {
+		PCX.activeLabPortal = lab;
+	}
 	static preferedUserMode(){
-		return PCX.currentUser() == "Max";
+		if(PCX.activeLabPortal == "PL") {
+			return PCX.currentUser() == "Max";
+		}
+		if(PCX.activeLabPortal == "PD" || PCX.activeLabPortal == "RR") {
+			return true;
+		}
+		return false;
 	}
 
 /**
@@ -323,16 +334,15 @@ class PCX {
 		Timer	: "patientDataTimer",
 	}
 	static initializeNotice(patientData, timeLeft = 90, callback=()=>{return;}) {
-		const notice = PCX.createDOM('div', {id: PCX.patientTransfer.Notice, style:{cssText:"position:fixed; top:0; width:100%; background-color:yellow; z-index:1000; padding:10px; display:flex; justify-content:space-between;"}});
+		const notice = PCX.createDOM('div', {id: PCX.patientTransfer.Notice});
+			notice.style = "position:fixed; top:0; width:100%; background-color:yellow; z-index:1000; padding:10px; display:flex; justify-content:space-between;";
 
 		// Left side: Patient details
 		const patientInfo = PCX.createDOM('span', {
 			id: 			PCX.patientTransfer.Info,
-			textContent: 	`Patient: ${patientData.LastName}, ${patientData.FirstName} | ${patientData.Category}`,
-			dataset: {
-				hash: PCX.hashCode(`${patientData.LastName}${patientData.FirstName}${patientData.Category}`)
-			}
+			textContent: 	`Patient: ${patientData.LastName}, ${patientData.FirstName} | ${patientData.Category}`
 		});
+			patientInfo.dataset.hash = PCX.hashCode(`${patientData.LastName}${patientData.FirstName}${patientData.Category}`)
 
 		// Right side: Countdown timer
 		const timer = PCX.createDOM('span', {id: PCX.patientTransfer.Timer, textContent: "-:--"})
@@ -413,6 +423,7 @@ class PCX {
 	 * @return STRING/BOOL
 	 */
 	static currentUser() {
+		if(!PCX.getEl('.userName',true)){return;}
 		return PCX.getEl('.userName').textContent.replace('Welcome ','').replace(' ','');
 	}
 

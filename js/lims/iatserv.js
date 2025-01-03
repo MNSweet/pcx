@@ -19,7 +19,7 @@ class IATSERV {
  	static orderId	= PCX.getUrlParams()['OrderId'];
  	static type		= PCX.getUrlParams()['type'];
 
- 	static noticeDisplay = "#noticeDisplay";
+ 	static noticeDisplayEl = "#noticeDisplay";
 
 	// Lab Lookup Table
 	static labs = {};
@@ -27,7 +27,7 @@ class IATSERV {
 	// Test Categories / Codes Lookup Table
 	static testCategories = {};
 
-	// Translation Lookup Table for Prince Laboratories to Reference Lab
+	// Translation Lookup Table for Prince Laboratories to wReference Lab
 	static categoryTranslation = {};
 	static genderTranslation = {};
 	static raceTranslation = {};
@@ -35,6 +35,8 @@ class IATSERV {
 
 	// Element DOM Selectors
 	static selectors = {};
+
+	static uiAutocomplete = {};
 
 	static setTestCategories(testCats){
 		if(typeof testCats == "object"){
@@ -75,6 +77,12 @@ class IATSERV {
 	static setOrderDefaults(orderDefaults){
 		if(typeof orderDefaults == "object"){
 			IATSERV.orderDefaults = orderDefaults;
+		}
+	}
+
+	static setuiAutocomplete(uiAutocomplete){
+		if(typeof uiAutocomplete == "object"){
+			IATSERV.uiAutocomplete = uiAutocomplete;
 		}
 	}
 
@@ -410,17 +418,8 @@ class IATSERV {
 	 * 
 	 */
 	static capturePTData() {
-
 		const el = IATSERV.selectors;
-		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-			//if(chrome.runtime.id == undefined) return;
-			if (message.action === 'noticeDisplay') {
-			// If the notice is already present, don't recreate it
-				if (!PCX.getEl(IATSERV.noticeDisplay)) {
-					PCX.initializeNotice(message.patientData);
-				}
-			}
-		});
+		IATSERV.noticeDisplay();
 
 		PCX.getEl(el.newPatientBtn).parentNode.addEventListener('click', function(event) {
 			const siteAssets = PCX.createDOM('div', { id: 'siteAssets'});
@@ -434,7 +433,7 @@ class IATSERV {
 			waitForElm('.fancybox-iframe').then((elm) => {
 				PCX.getEl('.fancybox-overlay',true).appendChild(siteAssets);
 				PCX.getEl("#patientCopy").addEventListener('click', function(event) {
-					
+					console.log("patientCopy clicked");
 					// Temp Capture was discussed with Dean. As long as 
 					// it never leaves the browser/local, it's HIPAA compliant.
 					// Fn PCX.initializeNotice() immediately takes the data after 
@@ -457,8 +456,10 @@ class IATSERV {
 						Email:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Email).value
 					};
 
+					console.log("patientData", patientData);
 					// Store patient data in Chrome's storage
 					chrome.storage.local.set({ patientData }, () => {
+					console.log("initPatientTransfer >");
 						// Send a message to the service worker to notify all relevant tabs
 						//if(chrome.runtime.id == undefined) return;
 						chrome.runtime.sendMessage({
@@ -558,7 +559,7 @@ class IATSERV {
 				// Clear the patient data after usage
 				chrome.storage.local.set({ patientData: {} }, () => {
 					PCX.log('Patient data cleared after use');
-					PCX.getEl(IATSERV.noticeDisplay).remove();
+					PCX.getEl(IATSERV.noticeDisplayEl).remove();
 				});
 			}
 		});
@@ -572,16 +573,32 @@ class IATSERV {
 		});
 	}
 
+	static noticeDisplay(){
+		console.log("FN noticeDisplay");
+		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+		console.log("Listener message", message.action);
+			//if(chrome.runtime.id == undefined) return;
+			if (message.action === 'noticeDisplay') {
+			// If the notice is already present, don't recreate it
+				if (!PCX.getEl(IATSERV.noticeDisplayEl)) {
+					console.log("Message patientData", message.patientData);
+					PCX.initializeNotice(message.patientData);
+				}
+			}
+		});
+	}
+
 	static createOrder(callback=()=>{return;}) {
 		const el = IATSERV.selectors;
 		el.orderDefaults = IATSERV.orderDefaults;
+		IATSERV.noticeDisplay();
 
 		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			//if(chrome.runtime.id == undefined) return;
 			if (message.action === 'noticeDisplay') {
 				// If the notice is already present, don't recreate it
-				if (PCX.getEl(IATSERV.noticeDisplay)) {
-					PCX.getEl(IATSERV.noticeDisplay).remove();
+				if (PCX.getEl(IATSERV.noticeDisplayEl)) {
+					PCX.getEl(IATSERV.noticeDisplayEl).remove();
 				}
 				PCX.noticeUpdate(message.patientData,message.timer,callback);
 			}

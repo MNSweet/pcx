@@ -1,7 +1,14 @@
 PCX.log("Prince Laboratories");
+PCX.setLabPortal('PL');
 PCX.log(IATSERV.linkId);
 
 if(PCX.preferedUserMode()) {
+	IATSERV.setuiAutocomplete({ //id "ui-id-*#""
+		   location:	1,
+		   patient:		2,
+		   testCode:	7
+	});
+
 	IATSERV.setLabs({
 		   2: {Code:"IP",	Label:"Ipseity Diagnostics LLC",Stability:{NGS: 90}},
 		1010: {Code:"SQ",	Label:"SureQuest Diagnostics", 	Stability:{NGS: 90}},

@@ -66,7 +66,7 @@ class DXRESULTS {
 				message.patientData.Category = DXRESULTS.categoryTranslation[message.patientData.Category]
 				PCX.noticeUpdate(message.patientData,message.timer,callback);
 
-				if(message.patientData.Category == DXRESULTS.getLocation()){
+				if(message.patientData.Category == DXRESULTS.getLocation()) {
 					PCX.getEl(DXRESULTS.noticeDisplay).appendChild(
 						Object.assign(PCX.createDOM('span', {
 							textContent: 'Paste Patient Data',
@@ -77,9 +77,10 @@ class DXRESULTS {
 					PCX.getEl("#patientDataClone").addEventListener('click', function(event) {
 						DXRESULTS.pastePatientData();
 
-						chrome.runtime.sendMessage({
+						/*chrome.runtime.sendMessage({
 							action: 'clearPTData',
-						});
+						});*/
+
 					});
 				};
 			}
@@ -153,6 +154,7 @@ class DXRESULTS {
 	
 			if (patientData) {
 				// Clear the patient data after usage
+				chrome.storage.local.set({ noticeTimerState: false });
 				chrome.storage.local.set({ patientData: {} }, () => {
 					PCX.log('Patient data cleared after use');
 					PCX.getEl(DXRESULTS.noticeDisplay).remove();

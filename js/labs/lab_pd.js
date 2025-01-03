@@ -1,4 +1,5 @@
 console.log("Principle Diagnostics");
+PCX.setLabPortal('PD');
 
 console.log(DXRESULTS.location);
 
