@@ -12,27 +12,27 @@ if(PCX.preferedUserMode()) {
 	IATSERV.setLabs({
 		   2: {Code:"IP",	Label:"Ipseity Diagnostics LLC",Stability:{NGS: 90}},
 		1010: {Code:"SQ",	Label:"SureQuest Diagnostics", 	Stability:{NGS: 90}},
-		1011: {Code:"RR",	Label:"Reliable Result Labs", 	Stability:{NGS: 30}},
-		1012: {Code:"PL",	Label:"Prince Laboratories", 	Stability:{NGS: 30}},
+		1011: {Code:"RR",	Label:"Reliable Result Labs", 	Stability:{NGS: 60}},
+		1012: {Code:"PL",	Label:"Prince Laboratories", 	Stability:{NGS: 60}},
 		1013: {Code:"PD",	Label:"Principle Diagnostics", 	Stability:{NGS: 90}}
 	});
 
 	IATSERV.setTestCategories({
-		 1: {Code:"Toxicology",		Test:""},		// --
-		 3: {Code:"PGX",			Test:"PHARMA"},	// Panel - PHARMACOGENOMICSCOMPREHENSIVE
-		 4: {Code:"CGX",			Test:"CANCER"},	// Panel - COMPREHENSICE CANCER
-		 5: {Code:"STI",			Test:"STI"},	// Panel - STI Panel
-		 6: {Code:"UTI",			Test:"UTI"},	// Panel - UTI Panel
-		 7: {Code:"HPV",			Test:"HPV"},	// Panel - HPV Panel
-		 8: {Code:"Wound",			Test:"WOUND"},	// Panel - Wound Panel
-		 9: {Code:"COVID Flu RSV",	Test:"COVID"},	// Panel - COVIDFluRSV
-		11: {Code:"Immuno",			Test:"IMMUNO"},	// Panel - COMPREHENSICE PRIMARY IMMUNODEFICIENCY
-		12: {Code:"Neuro",			Test:"NEURO"},	// Panel - COMPREHENSIVE NEUROLOGY
-		13: {Code:"RPP",			Test:""},		// --
-		14: {Code:"Eyes Disorder",	Test:"EYE"},	// Panel - COMPREHENSIVE EYE DISORDER
-		15: {Code:"Thyroid",		Test:"THYROID"},// Panel - THYROID GENETIC DISEASE
-		16: {Code:"Diabetes",		Test:""},		// -- 
-		17: {Code:"Cardio",			Test:"CARDIO"}	// Panel - CARDIO-PULMONARY
+		 1: {Code:"Toxicology",		Test:"",		Lab:'PL', LabCode:1012},// --
+		 3: {Code:"PGX",			Test:"PHARMA",	Lab:'PL', LabCode:1012},// Panel - PHARMACOGENOMICSCOMPREHENSIVE
+		 4: {Code:"CGX",			Test:"CANCER",	Lab:'PD', LabCode:1013},// Panel - COMPREHENSICE CANCER
+		 5: {Code:"STI",			Test:"STI",		Lab:'PL', LabCode:1012},// Panel - STI Panel
+		 6: {Code:"UTI",			Test:"UTI",		Lab:'PL', LabCode:1012},// Panel - UTI Panel
+		 7: {Code:"HPV",			Test:"HPV",		Lab:'PL', LabCode:1012},// Panel - HPV Panel
+		 8: {Code:"Wound",			Test:"WOUND",	Lab:'PL', LabCode:1012},// Panel - Wound Panel
+		 9: {Code:"COVID Flu RSV",	Test:"COVID",	Lab:'PL', LabCode:1012},// Panel - COVIDFluRSV
+		11: {Code:"Immuno",			Test:"IMMUNO",	Lab:'PL', LabCode:1012},// Panel - COMPREHENSICE PRIMARY IMMUNODEFICIENCY
+		12: {Code:"Neuro",			Test:"NEURO",	Lab:'PL', LabCode:1012},// Panel - COMPREHENSIVE NEUROLOGY
+		13: {Code:"RPP",			Test:"",		Lab:'PL', LabCode:1012},// --
+		14: {Code:"Eyes Disorder",	Test:"EYE",		Lab:'PL', LabCode:1012},// Panel - COMPREHENSIVE EYE DISORDER
+		15: {Code:"Thyroid",		Test:"THYROID",	Lab:'PL', LabCode:1012},// Panel - THYROID GENETIC DISEASE
+		16: {Code:"Diabetes",		Test:"",		Lab:'PL', LabCode:1012},// -- 
+		17: {Code:"Cardio",			Test:"CARDIO",	Lab:'PL', LabCode:1012}	// Panel - CARDIO-PULMONARY
 	});
 
 	// Accession List
@@ -65,6 +65,7 @@ if(PCX.preferedUserMode()) {
 			UploadTable		: '#uploadTable',
 			UploadSpan		: '.upload span',
 			ICDCodesInput	: '#MainContent_ctl00_ctl00_ctrlICDCodes_tbList_tbText',
+			PreformingLab	: '#ddPerformingLabId',
 
 			// Disable Tab Index
 			SearchPatient	: '#btnAddEditPatient+#btnSearchPatient',

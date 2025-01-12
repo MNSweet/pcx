@@ -23,9 +23,10 @@ class PCX {
  */
 	static events = {
 		Space	: {bubbles: true, cancelable: true,	key: ' '},
-		End		: {bubbles: true, cancelable: true,	shiftKey: false, keyCode: 35,	code: "END",	key: "END"},
-		Tab		: {bubbles: true, cancelable: true,	shiftKey: false, keyCode: 9,	code: "Tab",	key: "Tab"},
-		Enter	: {bubbles: true, cancelable: false,shiftKey: false, keyCode: 13,	code: "Enter",	key: "Enter"},
+		Delete	: {bubbles: true, cancelable: true,	shiftKey: false, keyCode: 8,	code: "Backspace",	key: "Backspace"},
+		End		: {bubbles: true, cancelable: true,	shiftKey: false, keyCode: 35,	code: "END",		key: "END"},
+		Tab		: {bubbles: true, cancelable: true,	shiftKey: false, keyCode: 9,	code: "Tab",		key: "Tab"},
+		Enter	: {bubbles: true, cancelable: false,shiftKey: false, keyCode: 13,	code: "Enter",		key: "Enter"},
 
 	};
 	// Page Element points to avoid multiple queries
@@ -154,18 +155,20 @@ class PCX {
 		return document.querySelectorAll(selector);
 	}
 
-	static simulateUserKey(element, opts) {
+	static simulateUserKey(element, opts, type = 'keydown') {
 		PCX.log(`PCX.simulateUserKey:`,element, opts);
 		if (element && typeof opts == 'object') {
 			let defaults = {bubbles: true, cancelable : false, key : "",shiftKey : false, keyCode: 0};
 			let options = {...defaults,...opts};
 			PCX.log(`PCX.simulateUserKey:`,options);
 
-			let simKey = new KeyboardEvent('keydown', {bubbles: options.bubbles, cancelable: options.cancelable, key: options.key, shiftKey: options.shiftKey, keyCode: options.keyCode});
+			let simKey = new KeyboardEvent(type, {bubbles: options.bubbles, cancelable: options.cancelable, key: options.key, shiftKey: options.shiftKey, keyCode: options.keyCode});
 			element.dispatchEvent(simKey);
 			PCX.log(`Simulated Key Press '${options.key}' on element: ${element.id}`);
+			return true;
 		} else {
 			PCX.log(`Element not found: ${element.id}`);
+			return false;
 		}
 	}
 
