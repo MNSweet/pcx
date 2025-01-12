@@ -239,7 +239,6 @@ class IATSERV {
 	 */
 	static async checkTestCat(elCategory,elTestCodes,testCategories){
 		const el = IATSERV.selectors;
-		console.log("checkTestCat: ",elCategory,elTestCodes,testCategories);
 			// The website developer creates new autocompletes with each call with no garbage collections. This cleans up old lists
 			[...document.querySelectorAll('.ui-menu.ui-widget.ui-widget-content.ui-autocomplete.ui-front.autocomplete-ul')].forEach(ul => {
 				let sibling = ul.nextSibling;
@@ -363,7 +362,6 @@ class IATSERV {
 
 	static upPanelChange(e) {
 		const el = IATSERV.selectors;
-		console.log(e,[e.target],e.target && "#"+e.target.id === el.Category);
 		if (e.target && "#"+e.target.id === el.Category) {
 			IATSERV.checkTestCat(PCX.getEl(el.Category,true),{Input: PCX.getEl(el.TestCodesInput,true),Output: PCX.getEl(el.TestCodesOutput,true)},IATSERV.testCategories);
 			PCX.getEl(el.newPatientBtn,true).addEventListener('click', IATSERV.newPatientBtn);

@@ -157,6 +157,10 @@ class QAManager {
 			stabilityPhase	= "phaseOne";
 		}
 
+		if(stabilityAge <= 90 && stabilityAge >= 60){
+			PCX.getEl(IATSERV.selectors.PreformingLab,true).value = 1013; // Principle's ID
+		}
+
 		if(!PCX.findEl('#stabilityNotice')) {
 			const stabilityNotice = PCX.createDOM("div", {
 				innerHTML: `<span class="QAManagerSubHeading">Sample Stability</span><span id="stabilityNoticeAge"></span>`,
