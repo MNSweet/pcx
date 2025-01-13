@@ -1,23 +1,23 @@
-.CreatePaCheckboxes {
-    font-size: 10px;
-    line-height: 9px;
-    display: block;
-    text-align: left;
-    margin: 0px;
+.createPaCheckboxes {
+	font-size: 10px;
+	line-height: 9px;
+	display: block;
+	text-align: left;
+	margin: 0px;
 }
-.CreatePaCheckboxes input {
-    width: 20px;
-    min-width: inherit;
-    transform: translateY(2px);
+.createPaCheckboxes input {
+	width: 20px;
+	min-width: inherit;
+	transform: translateY(2px);
 }
 
 <div style="
-    display: inline-block;
-    transform: translateY(6px);
-    margin-top: -15px;
+	display: inline-block;
+	transform: translateY(6px);
+	margin-top: -15px;
 ">
-<label class="CreatePaCheckboxes"><input type="checkbox" id="CreatePaNoComment" checked="">No Comment</label>
-<label class="CreatePaCheckboxes"><input type="checkbox" id="CreatePaNewAccession" checked="">Start New Accession</label>    
+	<label class="createPaCheckboxes"><input type="checkbox" id="createPaNoComment" checked="">No Comment</label>
+	<label class="createPaCheckboxes"><input type="checkbox" id="createPaNewAccession" checked="">Start New Accession</label>    
 </div>
 
 CLIENT MANAGERMENT - WIZARD - NEW LOCATION
@@ -51,22 +51,6 @@ https://prince.iatserv.com/?LinkId=2006&_ml=31&_mlp=12
 </tbody></table>
         
     </div>
-
-
-
-
-
-
-
-    
-.iconPA {
-    max-width: 14px;
-    margin-top: -6px;
-    transform: translateY(4px);
-}
-.iconLettering {
-  
-}
 
     <svg viewBox="0 0 55 65" xmlns="http://www.w3.org/2000/svg" fill="#000000" class="iconPA">
   <g>

@@ -1,0 +1,846 @@
+PCX.log("IATServ LIMS");
+
+// Fix Spelling Mistake
+if(document.querySelector("#mnu_8")){
+	document.querySelector("#mnu_8").innerHTML = document.querySelector("#mnu_8").innerHTML.replace("Bach","Batch");
+}
+
+class IATSERV {
+/**
+ *
+ * PREP Variables/Constants
+ *
+ * @param INT	linkId
+ * @param OBJ	labs			Lookup table for Labs by DB ID's
+ * @param OBJ	testCategories	Lookup table for Test Categories by DB ID's
+ * 
+ */
+ 	static linkId	= PCX.getUrlParams()['LinkId'];
+ 	static orderId	= PCX.getUrlParams()['OrderId'];
+ 	static type		= PCX.getUrlParams()['type'];
+
+ 	static noticeDisplayEl = "#noticeDisplay";
+
+	// Lab Lookup Table
+	static labs = {};
+
+	// Test Categories / Codes Lookup Table
+	static testCategories = {};
+
+	// Translation Lookup Table for Prince Laboratories to wReference Lab
+	static categoryTranslation = {};
+	static genderTranslation = {};
+	static raceTranslation = {};
+	static orderDefaults = {};
+
+	// Element DOM Selectors
+	static selectors = {};
+
+	static uiAutocomplete = {};
+
+	static setTestCategories(testCats){
+		if(typeof testCats == "object"){
+			IATSERV.testCategories = testCats;
+		}
+	}
+
+	static setCategoryTranslation(catTranslation){
+		if(typeof catTranslation == "object"){
+			IATSERV.categoryTranslation = catTranslation;
+		}
+	}
+
+	static setGenderTranslation(genderTranslation){
+		if(typeof genderTranslation == "object"){
+			IATSERV.genderTranslation = genderTranslation;
+		}
+	}
+
+	static setRaceTranslation(raceTranslation){
+		if(typeof raceTranslation == "object"){
+			IATSERV.raceTranslation = raceTranslation;
+		}
+	}
+
+	static setLabs(labs){
+		if(typeof labs == "object"){
+			IATSERV.labs = labs;
+		}
+	}
+
+	static setSelectors(selector){
+		if(typeof selector == "object"){
+			IATSERV.selectors = selector;
+		}
+	}
+
+	static setOrderDefaults(orderDefaults){
+		if(typeof orderDefaults == "object"){
+			IATSERV.orderDefaults = orderDefaults;
+		}
+	}
+
+	static setuiAutocomplete(uiAutocomplete){
+		if(typeof uiAutocomplete == "object"){
+			IATSERV.uiAutocomplete = uiAutocomplete;
+		}
+	}
+
+
+
+
+/*************************************************************************************
+ *
+ * Page Templete: 	Accession List
+ * linkId:			2070
+ *
+ * Search for Accession by
+ * 		Date [Received|Collected|Resulted|Created], Date Range, Status, Sub Status,
+ * 		Test Category, Accession, Requisition, Batch# , First / Last Name, DOB,
+ * 		Location, Physician, External ID, Source, Billing Status, Result Entry Status,
+ * 		Priority
+ *
+ * Column Headings available:
+ * 		Accession, AcsNo, Alt ID 1, Alt ID 2, Alt ID 3, Batch, Bill Type, Billing Status,
+ * 		Code, Collection Date, Created Date, Created Date Time, DOB, Entered First Reported,
+ * 		Gender, Pat Email, Pat Phone, Patient, Pending Test Count, Performing Lab,
+ * 		Performing Lab Count, Performing Lab Level, Physician, Primary Insurance, Priority,
+ * 		Process Date, Processing Days, Processing Hours, Location, Received, Released Date,
+ * 		Report Generation Status, Reported, Requisition, Result Status, Secondary Insurance,
+ * 		Source, Specimens, Status, Sub Status, Test Category, Tests
+ * 
+ *************************************************************************************/
+
+
+     
+	/**
+	 * columnParser
+	 *
+	 * @param 			ARRAY	headings				List of all current headings displayed by the search listing
+	 * @requiredParam	STRING	headings['Accession']	Column contains the system ID needed to build all URLS
+	 *
+	 * @process			IF 		Results Link 			Locates 'Alt ID 1' if available and builds a Results link
+	 * @process			IF 		PreAuth Link 			Locates 'Alt ID 2' if available and builds a PreAuth link
+	 * @process			IF 		-- 		Link 			Locates 'Alt ID 3' if available and builds a -- link / Unused
+	 * 
+	 */
+	static columnParser() {
+		let headingRow = PCX.getEl('#MainContent_ctl00_grid_DXHeadersRow0',true);
+		if(!headingRow){return;}
+		let headings = headingRow.textContent.replaceAll('\t','').replaceAll('\n','').split(" ");
+		
+		const overrides = [
+			{heading:"Alt ID 1",linkId:2461,text:"Results"},
+			{heading:"Alt ID 2",linkId:0,text:""},
+			{heading:"Alt ID 3",linkId:0,text:""} // Available
+		]
+
+		for (const [i,column] of Object.entries(overrides)) {
+			if (headings.includes(column.heading) && headings.includes('Accession')) {
+				let rowData = document.querySelectorAll('.dxgvDataRow_Metropolis');
+				if(rowData.length){
+					rowData.forEach((row) => {
+						let accessionID = row.querySelector('td:nth-child('+(headings.indexOf('Accession')+1)+') a').getAttribute('onclick').replace(/ShowForm\((\d*),this\)/i,'$1');
+						let columnLinkTD = row.querySelector('td:nth-child('+(headings.indexOf(column.heading)+1)+')');
+
+						columnLinkTD.innerHTML = `<a href="/?LinkId=${column.linkId}&AccessionId=${accessionID}" target="_blank">${column.text}</a>`
+					});
+					PCX.getEl('#MainContent_ctl00_grid_DXHeadersRow0 td:nth-child('+(headings.indexOf(column.heading)+1)+ ')',true).textContent = column.text;
+				}
+			}
+		}	
+	}
+
+
+
+
+/*************************************************************************************
+ *
+ * Page Templete: 	Location List
+ * linkId:			2004
+ *
+ * Search for Accession by
+ * 		Date [Received|Collected|Resulted|Created], Date Range, Status, Sub Status,
+ * 		Test Category, Accession, Requisition, Batch# , First / Last Name, DOB,
+ * 		Location, Physician, External ID, Source, Billing Status, Result Entry Status,
+ * 		Priority
+ *
+ * Column Headings available:
+ * 		Accession, AcsNo, Alt ID 1, Alt ID 2, Alt ID 3, Batch, Bill Type, Billing Status,
+ * 		Code, Collection Date, Created Date, Created Date Time, DOB, Entered First Reported,
+ * 		Gender, Pat Email, Pat Phone, Patient, Pending Test Count, Performing Lab,
+ * 		Performing Lab Count, Performing Lab Level, Physician, Primary Insurance, Priority,
+ * 		Process Date, Processing Days, Processing Hours, Location, Received, Released Date,
+ * 		Report Generation Status, Reported, Requisition, Result Status, Secondary Insurance,
+ * 		Source, Specimens, Status, Sub Status, Test Category, Tests
+ * 
+ *************************************************************************************/
+
+
+     
+	/**
+	 * columnLocationParser
+	 *
+	 * @param 			ARRAY	headings				List of all current headings displayed by the search listing
+	 * @requiredParam	STRING	headings['Accession']	Column contains the system ID needed to build all URLS
+	 *
+	 * @process			IF 		Results Link 			Locates 'Alt ID 1' if available and builds a Results link
+	 * @process			IF 		PreAuth Link 			Locates 'Alt ID 2' if available and builds a PreAuth link
+	 * @process			IF 		-- 		Link 			Locates 'Alt ID 3' if available and builds a -- link / Unused
+	 * 
+	 */
+	static columnLocationParser() {
+		let headingRow = PCX.getEl('#MainContent_ctl00_grid_DXHeadersRow0',true);
+		if(!headingRow){console.log('not found'); return;}
+		let headings = headingRow.textContent.replaceAll('\t','').replaceAll('\n','').split(" ");
+		
+		const overrides = [
+			{heading:"ID1",linkId:2005,text:"Delivery"},
+			{heading:"ID2",linkId:0,text:""},
+			{heading:"ID3",linkId:0,text:""} // Available
+		]
+
+		for (const [i,column] of Object.entries(overrides)) {
+			if (headings.includes(column.heading) && headings.includes('Code')) {
+				let rowData = document.querySelectorAll('.dxgvDataRow_Metropolis');
+				if(rowData.length){
+					rowData.forEach((row) => {
+						let locationID = row.querySelector('td:nth-child('+(headings.indexOf('Code')+1)+') a').getAttribute('onclick').replace(/ShowForm\((\d*)\)/i,'$1');
+						let columnLinkTD = row.querySelector('td:nth-child('+(headings.indexOf(column.heading)+1)+')');
+
+						columnLinkTD.innerHTML = `<a href="javascript:void(null)" onclick="ShowForm('${locationID}#delivery')">${column.text}</a>`
+					});
+					PCX.getEl('#MainContent_ctl00_grid_DXHeadersRow0 td:nth-child('+(headings.indexOf(column.heading)+1)+ ')',true).textContent = column.text;
+				}
+			}
+		}	
+	}
+
+
+
+
+/*************************************************************************************
+ *
+ * Page Templete: 	Create Accession List (type=acs) & Create Orders
+ * linkId:			2011
+ * 
+ * Page Templete: 	Update Accession List
+ * linkId:			2071
+ *
+ * 
+ * 
+ *************************************************************************************/
+
+	/**
+	 * checkTestCat
+	 * @param  DOM	elCategory
+	 * @param  DOM	elTestCodes
+	 * @param  OBJ	testCategories
+	 */
+	static async checkTestCat(elCategory,elTestCodes,testCategories){
+		PCX.processEnabled("Automation_CheckTestCategoryForCodes",true);
+		const el = IATSERV.selectors;
+			// The website developer creates new autocompletes with each call with no garbage collections. This cleans up old lists
+			[...document.querySelectorAll('.ui-menu.ui-widget.ui-widget-content.ui-autocomplete.ui-front.autocomplete-ul')].forEach(ul => {
+				let sibling = ul.nextSibling;
+				if (sibling.classList.contains('ui-helper-hidden-accessible')) {sibling.remove();}
+				ul.remove();
+			});
+			document.querySelector('#MainContent_ctl00_ctl00_upPanel').addEventListener('load',watchForLaterNode,true);
+			function watchForLaterNode(evt) {
+				if(evt.target.nodeName == "STYLE") {
+					elTestCodes.Input = PCX.getEl("#"+elTestCodes.Input.id,true);
+					elTestCodes.Input.value = testCategories[elCategory.value].Test;
+					PCX.simulateUserKey(elTestCodes.Input,PCX.events.End,"keydown");
+					waitForElm('[id^="ui-id-"][style^="z-index"].autocomplete-ul').then(()=>{
+						PCX.simulateUserKey(elTestCodes.Input,PCX.events.Tab,"keydown");
+						
+						if(PCX.processEnabled("Automation_SetLabByTestCode",true)) {
+							PCX.getEl(el.PreformingLab,true).value = testCategories[elCategory.value].LabCode;
+						}
+
+						PCX.getEl(el.UpPanel).addEventListener('change', IATSERV.upPanelChange);
+					});
+					document.querySelector('#MainContent_ctl00_ctl00_upPanel').removeEventListener('load',watchForLaterNode,true);
+				}
+			}
+			QAManager.setStablityNotice(el.DOS,PCX.getEl(el.DOC,true).value);
+			PCX.getEl(el.ICDCodesInput+"~.body",true).insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
+	}
+
+	/**
+	 * createAccession
+	 * 
+	 * Set Default Inputs
+	 *
+	 * @elementValue	INT			BillType	1			"Primary Insurance"
+	 * @elementValue	STRING		Status		Received
+	 *
+	 * @elementState	DISABLED	#btnAddEditPatient
+	 *
+	 * @listener		CLICK		selectors.newPatientBtn
+	 *	@promise		LOAD		selectors.FancyBox
+	 *	 @promise		LOAD		selectors.FancyBox[selectors.IframeDOB]
+	 *	  @listener		BLUR		selectors.FancyBox[selectors.IframeDOB]
+	 *	  @listener		SUBMIT		selectors.FancyBox[selectors.IframeForm]
+	 * @listener		BLUR		selectors.locationInput
+	 *  @promise		LOAD		selectors.PhysicianOptions
+	 * @listener		CHANGE		selectors.UpPanel
+	 * @listener		BLUR		selectors.UpPanel
+	 *
+	 * @function		async		checkTestCat()
+	 * 
+	 */
+	static createAccession() {
+
+		const el = IATSERV.selectors;
+
+		// Set Bill Type to Primary Insurance as default
+		PCX.getEl(el.BillType).value = 1;
+		// Set Status to Received as default
+		PCX.getEl(el.Status).value = "Received";
+
+		PCX.getEl(el.newPatientBtn,true).addEventListener('click', IATSERV.newPatientBtn);
+
+		// Disable Create Patient Button if no location is set
+		PCX.getEl(el.newPatientBtn).classList.add("disabled");
+		PCX.getEl(el.locationInput).addEventListener("blur", (event) => {
+			if(event.target.value != "" && PCX.getEl(el.newPatientBtn).classList.contains("disabled")) {
+				if(event.target.value.match("^(AM-|CTD-).*")){
+					waitForElm(el.PhysicianOptions).then((elm) => {
+						PCX.getEl(el.Physician,true).innerHTML = `<option value="0" disabled selected hidden>Select a Physician</option>`+PCX.getEl(el.Physician).innerHTML;
+						PCX.getEl(el.PhysicianId,true).value = "";
+						PCX.getEl(el.PhysicianName,true).value = "";
+					});
+				}
+				PCX.getEl(el.newPatientBtn).classList.remove("disabled");
+			}else if(event.target.value == "" && !PCX.getEl(el.newPatientBtn).classList.contains("disabled")){
+				PCX.getEl(el.newPatientBtn).classList.add("disabled");
+			}
+		});
+
+		// CHANGE
+		PCX.getEl(el.UpPanel).addEventListener('change', IATSERV.upPanelChange);
+
+		// BLUR
+		PCX.getEl(el.UpPanel).addEventListener('blur', (e) => {
+			if (e.target && "#"+e.target.id === el.DOC) {
+				let attempt = 0;
+				let lastValue = '';
+				const intervalId = setInterval(() => {
+					if (PCX.getEl(el.DOC,true).value !== lastValue) {
+						QAManager.setStablityNotice(el.DOS,PCX.getEl(el.DOC).value)
+						lastValue = PCX.getEl(el.DOC).value;
+						clearInterval(intervalId);
+					}
+					if (++attempt >= 5) {
+						clearInterval(intervalId);
+					}
+				}, 100);
+			}
+		},true);
+
+		PCX.getEl(el.ICDCodesInput+"~.body").insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
+		let observer = new MutationObserver(()=>{});
+		PCX.getEl(el.UpPanel,true).addEventListener('keydown', async (e) => {
+			if (e.target && "#"+e.target.id === el.ICDCodesInput && (e.key == "Enter" || e.key == "Tab")) {
+				const targetElement = PCX.getEl(el.ICDCodesInput+"~#dvCount #lblCount",true); // Select the element you want to monitor
+				observer.disconnect()
+				observer = new MutationObserver((mutations) => {
+					let icdCodes = Array.from(PCX.getEls(el.ICDCodesInput+"~.body #dvSelectedItems #xv_param",true)).reverse();
+					PCX.getEl("#icdCodePreviewer",true).innerHTML = `<span class="icdCode">` + icdCodes.map((element)=>{return element.value;}).join(`</span><span class="icdCode">`) + `</span>`;	
+				});
+				observer.observe(targetElement, { childList: true });
+			}
+		},true);
+
+		const removeTabIndexSelectors = [
+			el.SearchPatient, el.PatientCode, el.PatientDOB, el.PatientAddress, el.PatientPhone, 
+			el.PatientEmail, el.PrimaryInsurance, el.PrimaryInsurancePolicy, el.PrimaryInsuranceGroup, 
+			el.SecondaryInsurance, el.SecondaryInsurancePolicy, el.SecondaryInsuranceGroup, el.SpecimenType, 
+			el.Quantity, el.Requisition, el.DOCTime, el.ReceivedDate, el.ReceivedTime, el.ClearBTN, el.Medication,
+			el.MedicationBTN, el.OtherMedication, el.PhySigCaptured, el.PTSigCaptured, el.SigSuccess, el.SigClear, el.SigToggle
+		];
+		PCX.disableTabIndex(removeTabIndexSelectors);
+	}
+
+	static upPanelChange(e) {
+		const el = IATSERV.selectors;
+		if (e.target && "#"+e.target.id === el.Category) {
+			IATSERV.checkTestCat(PCX.getEl(el.Category,true),{Input: PCX.getEl(el.TestCodesInput,true),Output: PCX.getEl(el.TestCodesOutput,true)},IATSERV.testCategories);
+			PCX.getEl(el.newPatientBtn,true).addEventListener('click', IATSERV.newPatientBtn);
+		}
+	}
+
+	static async newPatientBtn(eventPtBtnClick) {
+		waitForElm(el.FancyBox).then( (elementLoaded) => {
+			waitForIframeElm(el.FancyBox,el.IframeDOB).then( (elementIframeLoaded) => {
+				// Date of Birth Checks
+				let inputDOB = PCX.getEl(el.FancyBox,true).contentWindow.document.querySelector(el.IframeDOB);
+				let minorDate = new Date();
+					minorDate.setFullYear(minorDate.getFullYear() - 18);
+				let docAttempt 	 = 0;
+				let docLastValue = '';
+				inputDOB.addEventListener('blur', (e) => {
+					let docAttempt 	 = 0;
+					const docIntervalId = setInterval(() => { // Wait for date picker
+						if (e.target.value !== docLastValue) {
+							docLastValue = e.target.value;
+							clearInterval(docIntervalId);
+
+							let dob = e.target.value;
+							if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= Date.now()){
+								QAManager.addNotice("DOB","It seems that your patient hasn't been born yet. Is this birthday correct? " + dob);
+							}else if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= minorDate.getTime()){ // 18+ Minor check
+								QAManager.addNotice("DOB","Intesting, your patient is a minor. Just a quick check. Is this birthday correct? " + dob);
+							}else if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= 946702800000){ //Jan 1 2000
+								QAManager.addNotice("DOB","Just being vigilant, Though I may be wrong: Is this birthday correct? " + dob);
+							}else {
+								QAManager.removeNotice("DOB");
+							}
+						}
+						if (++docAttempt >= 5) {
+							clearInterval(docIntervalId);
+						}
+					}, 100);
+				});
+
+				const removeIframeTabIndexSelectors = [
+					el.SSN, el.LicenseState, el.LicenseNumber, el.CopyColumnBTN1, el.CopyColumnBTN2,
+					el.CopyColumnBTN3, el.CopyColumnBTN4, el.PrimeRelation, 
+					el.PrimeFirstName, el.PrimeLastName, el.PrimeMiddleName, el.PrimeDOB, el.PrimeSSN,
+					el.PrimeGender, el.PrimeGroupNo, el.PrimeCovStart, el.PrimeCovEnd, el.PrimeAddress1,
+					el.PrimeAddress2, el.PrimeState, el.PrimeCity, el.PrimeZip, el.PrimePhone, el.PrimeFax,
+					el.PrimeEmail, el.SeconRelation, el.SeconFirstName, el.SeconLastName, el.SeconMiddleName,
+					el.SeconDOB, el.SeconSSN, el.SeconGender, el.SeconGroupNo, el.SeconCovStart, el.SeconCovEnd, 
+					el.Seconddress1, el.Seconddress2, el.SeconState, el.SeconCity, el.SeconZip, el.SeconPhone, 
+					el.SeconFax, el.SeconEmail, el.Cancel
+				];
+				PCX.disableTabIndex(removeIframeTabIndexSelectors,el.FancyBox);
+
+				PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.IframeForm).addEventListener('submit', (eventSubmit) => {
+					if(QAManager.getNoticeCount() > 0) {
+						eventSubmit.preventDefault()
+						QAManager.showQAModalNotification();
+					}
+				});
+
+			});
+			
+		});
+	};
+
+	static createPACheckboxes(argument) {
+		btnCreatePA
+		let paCheckoxesContainer = PCX.createDOM('div', { style: 'display: inline-block;transform: translateY(6px);margin-top: -15px;'});
+		let labelPACheckboxes = PCX.createDOM('label', { classList: 'createPaCheckboxes'});
+		let createPaNoComment = PCX.createDOM('input', { type: 'createPaCheckboxes'});
+			siteAssets.appendChild(
+				Object.assign(PCX.createDOM('span'), {
+					textContent: '⎘',
+					id: 'patientCopy',
+					title: 'Capture Patient Record'
+				})
+			);
+
+		<div style="
+	display: inline-block;
+	transform: translateY(6px);
+	margin-top: -15px;
+">
+	<label class="createPaCheckboxes"><input type="checkbox" id="createPaNoComment" checked="">No Comment</label>
+	<label class="createPaCheckboxes"><input type="checkbox" id="createPaNewAccession" checked="">Start New Accession</label>    
+</div>
+	}
+
+	/**
+	 * 
+	 * Reference Lab Transfer Assist - Capture
+	 * 
+	 */
+	static capturePTData() {
+		const el = IATSERV.selectors;
+		IATSERV.noticeDisplay();
+
+		PCX.getEl(el.newPatientBtn).parentNode.addEventListener('click', function(event) {
+			const siteAssets = PCX.createDOM('div', { id: 'siteAssets'});
+			siteAssets.appendChild(
+				Object.assign(PCX.createDOM('span'), {
+					textContent: '⎘',
+					id: 'patientCopy',
+					title: 'Capture Patient Record'
+				})
+			);
+			waitForElm('.fancybox-iframe').then((elm) => {
+				PCX.getEl('.fancybox-overlay',true).appendChild(siteAssets);
+				PCX.getEl("#patientCopy").addEventListener('click', function(event) {
+					console.log("patientCopy clicked");
+					// Temp Capture was discussed with Dean. As long as 
+					// it never leaves the browser/local, it's HIPAA compliant.
+					// Fn PCX.initializeNotice() immediately takes the data after 
+					// being added to local storage and sets a deletion timer to purge
+					// the data from cache and local storage, never saving to hard disk
+					const patientData = {
+						Category:	PCX.getEl(el.CategoryOpt).value,
+						DOC:		PCX.getEl(el.DOC).value,
+						FirstName:	PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.FirstName).value,
+						LastName:	PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.LastName).value,
+						MiddleName:	PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.MiddleName).value,
+						DOB:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.DOB).value.split('/'),
+						Gender:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Gender).textContent,
+						Race:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Race).textContent,
+						Address:	PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Address1).value + ' ' + PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Address2).value,
+						State:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.State).value,
+						City:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.City).value,
+						Zip:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Zip).value,
+						Phone:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Phone).value,
+						Email:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Email).value
+					};
+
+					console.log("patientData", patientData);
+					// Store patient data in Chrome's storage
+					chrome.storage.local.set({ patientData }, () => {
+					console.log("initPatientTransfer >");
+						// Send a message to the service worker to notify all relevant tabs
+						//if(chrome.runtime.id == undefined) return;
+						chrome.runtime.sendMessage({
+							action: 'initPatientTransfer',
+							patientData: {
+								FirstName:	patientData.FirstName,
+								LastName:	patientData.LastName,
+								Category:	patientData.Category
+							}
+						});
+					});
+
+				});
+			});
+		});
+	}
+
+
+	/**
+	 *
+	 * Reference Lab Transfer Assist - Fill
+	 * 
+	 * Demo Data
+	 * patientData = {
+	 * 	"Address": "11 Demo dr ",
+	 * 	"Category": "11", //Immuno
+	 * 	"City": "DemoCity",
+	 * 	"DOB": [
+	 * 		"4",
+	 * 		"25",
+	 * 		"2000"
+	 * 	],
+	 * 	"DOC": "4/28/2023",
+	 * 	"Email": "",
+	 * 	"FirstName": "DemoFirst",
+	 * 	"Gender": "Male",
+	 * 	"LastName": "DemoLast",
+	 * 	"MiddleName": "",
+	 * 	"Phone": "5551234567",
+	 * 	"Race": "Caucasian",
+	 * 	"State": "GA",
+	 * 	"Zip": "30043"
+	 * };
+	 * 
+	 */
+
+	static async pastePatientData() {
+		chrome.storage.local.get('patientData', ({ patientData }) => {
+
+			const el = IATSERV.selectors;
+
+			// Fill in data
+			PCX.getEl(el.DOC).value			= patientData.DOC;
+			PCX.getEl(el.Category).value	= categoryTranslation[patientData.Category];
+			
+			IATSERV.checkTestCat(PCX.getEl(`${el.Category} option:checked`),{Input: PCX.getEl(el.TestCodesInput,true),Output: PCX.getEl(el.TestCodesOutput,true)},IATSERV.testCategories).then( (elm) => {
+				// Trigger inline OnClick Function via OnFocus
+				PCX.getEl(el.NewPatientBTN).setAttribute('onFocus',"newPatient()");
+				PCX.getEl(el.NewPatientBTN).focus();
+				PCX.getEl(el.NewPatientBTN).setAttribute('onFocus',"");
+
+				waitForElm(el.FancyBox).then( (elm) => {
+					PCX.getEl(el.FancyBox).addEventListener('load', (el) => {
+						iframeEl["FirstName"]	= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.FirstName);
+						iframeEl["LastName"]	= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.LastName);
+						iframeEl["MiddleName"]	= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.MiddleName);
+						iframeEl["DOB"]			= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.DOB);
+						iframeEl["Gender"]		= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.Gender);
+						iframeEl["Race"]		= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.Race);
+						iframeEl["Address"]		= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.Address);
+						iframeEl["State"]		= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.State);
+						iframeEl["City"]		= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.City);
+						iframeEl["Zip"]			= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.Zip);
+						iframeEl["Phone"]		= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.Phone);
+						iframeEl["Email"]		= PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.Email);
+						
+
+						iframeEl.FirstName.value	= patientData.FirstName;
+						iframeEl.LastName.value		= patientData.LastName;
+						iframeEl.MiddleName.value	= patientData.MiddleName;
+						iframeEl.DOB.value			= patientData.DOB.join('/');
+						iframeEl.Gender.value		= genderTranslate[patientData.Gender];
+						iframeEl.Race.value			= raceTranslate[patientData.Race];
+						iframeEl.Address.value		= patientData.Address;
+						iframeEl.State.value		= patientData.State;
+						iframeEl.City.value			= patientData.City;
+						iframeEl.Zip.value			= patientData.Zip;
+						iframeEl.Phone.value		= patientData.Phone;
+						iframeEl.Email.value		= patientData.Email;
+
+						iframeEl.DOB.focus();
+						PCX.simulateUserKey(iframeEl.DOB,PCX.events.Tab);
+					});
+				});
+			});
+			if (patientData) {
+				// Clear the patient data after usage
+				chrome.storage.local.set({ patientData: {} }, () => {
+					PCX.log('Patient data cleared after use');
+					PCX.getEl(IATSERV.noticeDisplayEl).remove();
+				});
+			}
+		});
+
+
+		PCX.getEl(el.UpPanel).addEventListener('change', (e) => {
+			// Ping reloaded Elements
+			if (e.target && e.target.id === el.Category.replace('#','')) {
+				IATSERV.checkTestCat(PCX.getEl(`${el.Category} option:checked`),{Input: pageElements.TestCodesInput,Output: pageElements.TestCodesOutput},testCategories);
+			}
+		});
+	}
+
+	static noticeDisplay(){
+		console.log("FN noticeDisplay");
+		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+		console.log("Listener message", message.action);
+			//if(chrome.runtime.id == undefined) return;
+			if (message.action === 'noticeDisplay') {
+			// If the notice is already present, don't recreate it
+				if (!PCX.getEl(IATSERV.noticeDisplayEl)) {
+					console.log("Message patientData", message.patientData);
+					PCX.initializeNotice(message.patientData);
+				}
+			}
+		});
+	}
+
+	static createOrder(callback=()=>{return;}) {
+		const el = IATSERV.selectors;
+		el.orderDefaults = IATSERV.orderDefaults;
+		IATSERV.noticeDisplay();
+
+		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+			//if(chrome.runtime.id == undefined) return;
+			if (message.action === 'noticeDisplay') {
+				// If the notice is already present, don't recreate it
+				if (PCX.getEl(IATSERV.noticeDisplayEl)) {
+					PCX.getEl(IATSERV.noticeDisplayEl).remove();
+				}
+				PCX.noticeUpdate(message.patientData,message.timer,callback);
+			}
+		});
+
+		// Prefill Location and Physician
+		waitForElm(el.Location).then((elm) => {
+			PCX.getEl(el.Location).value = el.orderDefaults.Location;
+			PCX.simulateUserKey(PCX.getEl(el.Location),PCX.events.Space);
+			waitForElm(el.LocationMenu).then((elm) => {
+			PCX.simulateUserKey(PCX.getEl(el.Location),PCX.events.Tab);
+				waitForElm(el.PhysicianOptions).then((elm) => {
+					PCX.getEl(el.Physician).value = el.orderDefaults.Physician;
+					PCX.getEl(el.PhysicianId).value = el.orderDefaults.Physician;
+					PCX.getEl(el.PhysicianName).value = el.orderDefaults.PhysicianName;
+				})
+			});
+		});
+		PCX.getEl(el.BillTo).value = el.orderDefaults.BillTo;
+		PCX.getEl(el.Category).focus();
+	}
+
+	/**
+	 *
+	 * fileDrop
+	 *
+	 * Expands the Drop area of file upload and applies a QA Check
+	 *
+	 * @param		OBJECT 		qa			If Enabled, all other Keys are Required
+	 *  @param		BOOL 		enabled		Boolean to check file name against Patient's Name, Accession number & System ID
+	 *  @param		STRING 		acsNum		Accession number as used by the user 
+	 *  @param		STRING 		acsID		Accession number as used by the system 
+	 *  @param		ARRAY 		patient		Patient Name .split() into an array by spaces
+	 * @param		STRING 		target		The "upload" DOM Element that is expecting a file
+	 * @param		STRING 		targetSpan	The DOM Element that displays text related to file transfer status 
+	 *
+	 * @let			BOOL		isDragging	Boolean to hold the state if user is currently dragging a file over the viewport
+	 * @const		OBJECT		el			All the DOM Element Selectors to reference from
+	 * @const		NODE		dropArea	DOM element that is to receive the file upon drop
+	 * @const		ARRAY		acceptTypes	File types/extensions that the system will allow
+	 * 
+	 * @listener	DRAGOVER	dropArea
+	 * @listener	DRAGLEAVE	dropArea
+	 * @listener	DRAGOVER	document
+	 * @listener	DRAGLEAVE	window
+	 * @listener	DROP		dropArea
+	 *  @process	IF 			qa.enabled 	Check file name against Patient's Name, Accession number & System ID
+	 *  
+	 * @function	async		dropZoneKeepAlive() 	
+	 * @function	async		dropZoneTimeOut()		
+	 */
+	static fileDrop(qa={enabled:false,acsNum:null,acsID:null,patient:null,result:false},target=false,targetSpan=false,scrollTo=false){
+		let 	isDragging 	= false;
+		const	el			= IATSERV.selectors;
+				el.DropArea		= target ? target : el.UploadTable;
+				el.ScrollTo		= scrollTo ? scrollTo : el.DropArea;
+				el.AcceptTypes	= el.DropArea+' input[type="file"]';
+				el.TargetSpan	= targetSpan ? targetSpan : el.UploadSpan;
+		const 	dropArea	= PCX.getEl(el.DropArea).closest('*');
+		const 	acceptTypes = PCX.getEl(el.AcceptTypes).getAttribute('accept').split(',');
+
+
+		dropArea.addEventListener("dragover", (e) => {
+			dropZoneKeepAlive(isDragging,e);
+		});
+		dropArea.addEventListener("dragleave", (e) => {
+			dropZoneTimeOut(isDragging,e);
+		});
+		document.addEventListener("dragover", (e) => {
+			dropZoneKeepAlive(isDragging,e);
+		});
+		window.addEventListener("dragleave", (e) => {
+			dropZoneTimeOut(isDragging,e);
+		});
+
+		dropArea.addEventListener("drop", (e) => {
+			isDragging = false;
+			if (document.body.classList.contains('dropZoneKeepAlive')) {
+				document.body.classList.remove('dropZoneKeepAlive');
+
+				if(PCX.getEl(el.TargetSpan).textContent == "Drop File"){
+					PCX.getEl(el.TargetSpan).textContent = "Choose File";
+				}
+			}
+			if(e.dataTransfer.files.length > 0) {
+				for (const [i, file] of Object.entries(e.dataTransfer.files)) {
+					let fileExt = file.name.split('.').pop();
+					let fileName = file.name.replace('.'+fileExt,'');
+					PCX.getEl(el.ScrollTo).scrollIntoView({ behavior: "instant", block: "end"});
+					if (acceptTypes.findIndex(function (a) { return a.toLowerCase() == ('.' + fileExt).toLowerCase() }) == -1) {
+						return; // File not accepted
+					}
+
+					if(qa.enabled){
+						let queries	= qa.patient;
+							queries.push(qa.acsNum, qa.acsID);
+						let showDialog = false;
+
+						let tokens	= fileName.toUpperCase()
+							.replace(/(\d{2})-(\d{2})-(\d{4})/gm, `$1$2$3`) // Condense Dates with dashes
+							.replace(/(\d{2})\.(\d{2})\.(\d{4})/gm, `$1$2$3`) // Condense Dates with periods
+							.split(/[\s-\._]/)	// Separate by whitespace, dashes, periods, underscores
+
+						if(!tokens.some(item => queries.includes(item))) {
+							QAManager.addNotice("FileUpload","<h4>Sorry to bother</h4>The file you just uploaded does not have the Patient's Name or Accession Number in it's name.<br/>Just wanted to double check you didn't upload the wrong file: <pre>" + file.name + "</pre>");
+							QAManager.showQAModalNotification();
+							QAManager.removeNotice("FileUpload");
+						}
+						if(!tokens.some(item => queries.includes(item))) {
+							QAManager.addNotice("FileUpload2","<h4>Sorry to bother</h4>The file you just uploaded does not have the Patient's Name or Accession Number in it's name.<br/>Just wanted to double check you didn't upload the wrong file: <pre>" + file.name + "</pre>");
+							showDialog = true;
+						}
+
+						if(qa.result){
+							if((tokens.includes('NEG') && tokens.includes('POS')) || (!tokens.includes('NEG') && !tokens.includes('POS'))) {
+								QAManager.addNotice("FileUpload1","<h4>Quick Note</h4>The file you just uploaded appear to not have it's result status set: <pre>" + file.name + "</pre>");
+								showDialog = true;
+							}
+						}
+						if(showDialog){
+							QAManager.showQAModalNotification();
+							QAManager.removeNotice("FileUpload");
+							QAManager.removeNotice("FileUpload1");
+							QAManager.removeNotice("FileUpload2");
+						}
+					}else{
+						PCX.log('Call to QAManager: Not Enabled')
+					}
+				};
+			}
+		});
+
+		function dropZoneKeepAlive(isDragging, e) {
+			isDragging = true;
+			if (!document.body.classList.contains('dropZoneKeepAlive')) {
+				document.body.classList.add('dropZoneKeepAlive');
+				PCX.getEl(el.TargetSpan).textContent = "Drop File";
+			}
+		}
+		function dropZoneTimeOut(isDragging, e) {
+			if (e.target === window || (e.clientX === 0 && e.clientY === 0)) {
+				isDragging = false;
+				if (document.body.classList.contains('dropZoneKeepAlive')) {
+					document.body.classList.remove('dropZoneKeepAlive');
+					PCX.getEl(el.TargetSpan).textContent = "Choose File";
+				}
+			}
+		}
+	}
+
+	/**
+	 *
+	 *	Result Download
+	 *
+	 * 	Prep file name for download
+	 * 
+	 */
+	
+	static resultsDownloader() {
+		const el = IATSERV.selectors;
+		document.body.addEventListener('click', (event) => {
+			const downloadLink = event.target.closest(`${el.UpdatePanel} a[title="Download Result"]`);
+			if (!downloadLink) {return};
+
+			event.preventDefault();
+			const headings = PCX.getEl(el.DXHeaderRow).textContent.replaceAll('\t','').replaceAll('\n','').split(" ");
+			// Check if the clicked element or one of its parents is the <a> with title "Download Result"
+			
+			// Find the parent <tr> for the clicked <a>
+			const row = downloadLink.closest('tr');
+
+			// Collect the text content of all <td> elements in the row into an array
+			const rowData = Array.from(row.querySelectorAll('td')).map(td => td.textContent.trim());
+			row.classList.add(el.TDCheckedClass);
+			const tdCheckBox = row.querySelector(el.TDCheckBox);
+			tdCheckBox.classList.replace(el.BoxUnchecked,el.BoxChecked);
+			const date = new Date();
+			const customFilename =  "Res "
+						+('0' + (date.getMonth()+1)).slice(-2)
+						+"."+('0' + (date.getDate())).slice(-2)
+						+"."+(date.getFullYear().toString().substr(-2))
+						+" "
+						+rowData[headings.indexOf('Last')]
+						+" "
+						+rowData[headings.indexOf('First')]
+						+".pdf"; // Output the row data as an array
+
+			fetch(downloadLink.href)
+				.then(response => response.blob().then(blob => {
+					// Extract filename from Content-Disposition or use custom/default filename
+					const filename = customFilename ||
+						(response.headers.get('Content-Disposition')?.match(/filename="?(.+?)"?$/)?.[1]) ||
+						'DownloadedFile.pdf';
+
+					// Trigger download with the determined filename
+					const url = window.URL.createObjectURL(blob);
+					PCX.createDOM('a', { href: url, download: filename }).click();
+					window.URL.revokeObjectURL(url);
+				}))
+				.catch(console.error);
+		});
+	}
+
+}
