@@ -238,6 +238,7 @@ class IATSERV {
 	 * @param  OBJ	testCategories
 	 */
 	static async checkTestCat(elCategory,elTestCodes,testCategories){
+		PCX.processEnabled("Automation_CheckTestCategoryForCodes",true);
 		const el = IATSERV.selectors;
 			// The website developer creates new autocompletes with each call with no garbage collections. This cleans up old lists
 			[...document.querySelectorAll('.ui-menu.ui-widget.ui-widget-content.ui-autocomplete.ui-front.autocomplete-ul')].forEach(ul => {
@@ -253,7 +254,10 @@ class IATSERV {
 					PCX.simulateUserKey(elTestCodes.Input,PCX.events.End,"keydown");
 					waitForElm('[id^="ui-id-"][style^="z-index"].autocomplete-ul').then(()=>{
 						PCX.simulateUserKey(elTestCodes.Input,PCX.events.Tab,"keydown");
-						PCX.getEl(el.PreformingLab,true).value = testCategories[elCategory.value].LabCode;
+						
+						if(PCX.processEnabled("Automation_SetLabByTestCode",true)) {
+							PCX.getEl(el.PreformingLab,true).value = testCategories[elCategory.value].LabCode;
+						}
 
 						PCX.getEl(el.UpPanel).addEventListener('change', IATSERV.upPanelChange);
 					});
@@ -425,6 +429,29 @@ class IATSERV {
 			
 		});
 	};
+
+	static createPACheckboxes(argument) {
+		btnCreatePA
+		let paCheckoxesContainer = PCX.createDOM('div', { style: 'display: inline-block;transform: translateY(6px);margin-top: -15px;'});
+		let labelPACheckboxes = PCX.createDOM('label', { classList: 'createPaCheckboxes'});
+		let createPaNoComment = PCX.createDOM('input', { type: 'createPaCheckboxes'});
+			siteAssets.appendChild(
+				Object.assign(PCX.createDOM('span'), {
+					textContent: '⎘',
+					id: 'patientCopy',
+					title: 'Capture Patient Record'
+				})
+			);
+
+		<div style="
+	display: inline-block;
+	transform: translateY(6px);
+	margin-top: -15px;
+">
+	<label class="createPaCheckboxes"><input type="checkbox" id="createPaNoComment" checked="">No Comment</label>
+	<label class="createPaCheckboxes"><input type="checkbox" id="createPaNewAccession" checked="">Start New Accession</label>    
+</div>
+	}
 
 	/**
 	 * 

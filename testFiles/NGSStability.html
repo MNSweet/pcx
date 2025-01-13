@@ -166,47 +166,146 @@
 
 		.color .display-no-6 .segment-b,
 
-		.display-no-7 .segment-d,
-		.display-no-7 .segment-e,
-		.display-no-7 .segment-f,
-		.display-no-7 .segment-g,
+		.color .display-no-7 .segment-d,
+		.color .display-no-7 .segment-e,
+		.color .display-no-7 .segment-f,
+		.color .display-no-7 .segment-g,
 
 		/*.display-no-8*/ 
 
-		.display-no-9 .segment-e,
+		.color .display-no-9 .segment-e,
 
-		.display-no-0 .segment-g,
+		.color .display-no-0 .segment-g,
 
-		.display-no-t .segment-a,
-		.display-no-t .segment-b,
-		.display-no-t .segment-c,
+		.color .display-no-t .segment-a,
+		.color .display-no-t .segment-b,
+		.color .display-no-t .segment-c,
 
-		.display-no-o .segment-a,
-		.display-no-o .segment-b,
-		.display-no-o .segment-f,
+		.color .display-no-o .segment-a,
+		.color .display-no-o .segment-b,
+		.color .display-no-o .segment-f,
 
-		.display-no-d .segment-a,
-		.display-no-d .segment-f,
+		.color .display-no-d .segment-a,
+		.color .display-no-d .segment-f,
 
-		.display-no-a .segment-d,
+		.color .display-no-a .segment-d,
 
-		.display-no-y .segment-a,
-		.display-no-y .segment-e, 
+		.color .display-no-y .segment-a,
+		.color .display-no-y .segment-e, 
 
-		.display-no-null .segment-a,
-		.display-no-null .segment-b,
-		.display-no-null .segment-c,
-		.display-no-null .segment-d,
-		.display-no-null .segment-e,
-		.display-no-null .segment-f,
-		.display-no-null .segment-g {
-			/*display: none;*/
+		.color .display-no-null .segment-a,
+		.color .display-no-null .segment-b,
+		.color .display-no-null .segment-c,
+		.color .display-no-null .segment-d,
+		.color .display-no-null .segment-e,
+		.color .display-no-null .segment-f,
+		.color .display-no-null .segment-g {
 			opacity: 0.2;
-			/*filter: invert(100%);*/
+		}
+
+		/* B&W */
+		body:not(.color) .display-no-1 .segment-a,
+		body:not(.color) .display-no-1 .segment-d,
+		body:not(.color) .display-no-1 .segment-e,
+		body:not(.color) .display-no-1 .segment-f,
+		body:not(.color) .display-no-1 .segment-g,
+
+		body:not(.color) .display-no-2 .segment-c,
+		body:not(.color) .display-no-2 .segment-f,
+
+		body:not(.color) .display-no-3 .segment-e,
+		body:not(.color) .display-no-3 .segment-f,
+
+		body:not(.color) .display-no-4 .segment-a,
+		body:not(.color) .display-no-4 .segment-d,
+		body:not(.color) .display-no-4 .segment-e,
+
+		body:not(.color) .display-no-5 .segment-b,
+		body:not(.color) .display-no-5 .segment-e,
+
+		body:not(.color) .display-no-6 .segment-b,
+
+		body:not(.color) .display-no-7 .segment-d,
+		body:not(.color) .display-no-7 .segment-e,
+		body:not(.color) .display-no-7 .segment-f,
+		body:not(.color) .display-no-7 .segment-g,
+
+		/*.display-no-8*/ 
+
+		body:not(.color) .display-no-9 .segment-e,
+
+		body:not(.color) .display-no-0 .segment-g,
+
+		body:not(.color) .display-no-t .segment-a,
+		body:not(.color) .display-no-t .segment-b,
+		body:not(.color) .display-no-t .segment-c,
+
+		body:not(.color) .display-no-o .segment-a,
+		body:not(.color) .display-no-o .segment-b,
+		body:not(.color) .display-no-o .segment-f,
+
+		body:not(.color) .display-no-d .segment-a,
+		body:not(.color) .display-no-d .segment-f,
+
+		body:not(.color) .display-no-a .segment-d,
+
+		body:not(.color) .display-no-y .segment-a,
+		body:not(.color) .display-no-y .segment-e, 
+
+		body:not(.color) .display-no-null .segment-a,
+		body:not(.color) .display-no-null .segment-b,
+		body:not(.color) .display-no-null .segment-c,
+		body:not(.color) .display-no-null .segment-d,
+		body:not(.color) .display-no-null .segment-e,
+		body:not(.color) .display-no-null .segment-f,
+		body:not(.color) .display-no-null .segment-g {
+			filter: invert(100%);
 		}
 		.blank {
 			opacity: .3;
 		}
+		input[type="checkbox"] {
+			cursor: pointer;
+			margin: 1rem;
+			position: relative;
+			width: 100px;
+			height: 60px;
+			border-radius: 25px;
+			outline: none;
+			background-color: #ccc;
+			-webkit-appearance: none;
+			transition: background .3s;
+		}
+		input[type="checkbox"]::after {
+			content: '';
+			position: absolute;
+			top: 50%;
+			left: 30%;
+			transform: translate(-50%, -50%);
+			border-radius: 50%;
+			height: 40px;
+			width: 40px;
+			background-color: white;
+			transition: left .3s;
+		}
+		input[type="checkbox"]:checked {
+			background-color: rgb(141, 221, 141);
+		}
+
+		input[type="checkbox"]:checked::after {
+			left: 70%;
+		}
+		label {
+			color: #fff;
+			font-size: 46px;
+			font-family: monospace;
+		}
+		.fieldContainer {
+			display: flex;
+			flex-wrap: unset;
+			align-items: center;
+		}
+
 		@media (max-width: 900px) {
 			.hide-sm {
 				display: none;
@@ -217,502 +316,506 @@
 		}
 	</style>
 </head>
-<body>
+<body class="">
 	<div id="wrapper">
-	<div id="container">
-		<div class="date-row green" id="today">
-			<div class="blank display-container display-no-null hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
+		<div id="container">
+			<div class="date-row" id="colorToggleContainer">
+				<div class="fieldContainer"><input type="checkbox" value="1" id="colorToggle" name="colorToggle" />
+				<label for="colorToggle">Color Display On/Off</label></div>
 			</div>
-			<div class="display-container display-no-t hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
+			<div class="date-row green" id="today">
+				<div class="blank display-container display-no-null hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="display-container display-no-t hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="display-container display-no-o hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="display-container display-no-d hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="display-container display-no-a hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="display-container display-no-y hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="blank display-container display-no-null hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="month-1 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="month-2 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="blank display-container display-no-null hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="day-1 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="day-2 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="blank display-container display-no-null hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="year-1 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="year-2 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="year-3 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="year-4 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="blank display-container display-no-null hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
 			</div>
-			<div class="display-container display-no-o hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
+			<div class="date-row orange" id="thirty">
+				<div class="blank display-container display-no-null hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="display-container num-6 display-no-6 hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="display-container num-0 display-no-0 hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="display-container display-no-d hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="display-container display-no-a hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="display-container display-no-y hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="blank display-container display-no-null hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="month-1 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="month-2 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="blank display-container display-no-null hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="day-1 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="day-2 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="blank display-container display-no-null hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="year-1 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="year-2 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="year-3 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="year-4 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="blank display-container display-no-null hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
 			</div>
-			<div class="display-container display-no-d hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="display-container display-no-a hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="display-container display-no-y hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="blank display-container display-no-null hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="month-1 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="month-2 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="blank display-container display-no-null hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="day-1 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="day-2 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="blank display-container display-no-null hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="year-1 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="year-2 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="year-3 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="year-4 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="blank display-container display-no-null hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
+			<div class="date-row red" id="ninety">
+				<div class="blank display-container display-no-null hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="display-container num-9 display-no-9 hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="display-container num-0 display-no-0 hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="display-container display-no-d hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="display-container display-no-a hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="display-container display-no-y hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="blank display-container display-no-null hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="month-1 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="month-2 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="blank display-container display-no-null hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="day-1 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="day-2 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="blank display-container display-no-null hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="year-1 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="year-2 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="year-3 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="year-4 display-container">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
+				<div class="blank display-container display-no-null hide-sm">
+					<div class="segment-x segment-a"><span class="segment-border"></span></div>
+					<div class="segment-y segment-b"><span class="segment-border"></span></div>
+					<div class="segment-y segment-c"><span class="segment-border"></span></div>
+					<div class="segment-x segment-d"><span class="segment-border"></span></div>
+					<div class="segment-y segment-e"><span class="segment-border"></span></div>
+					<div class="segment-y segment-f"><span class="segment-border"></span></div>
+					<div class="segment-x segment-g"><span class="segment-border"></span></div>
+				</div>
 			</div>
 		</div>
-		<div class="date-row orange" id="thirty">
-			<div class="blank display-container display-no-null hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="display-container display-no-6 hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="display-container display-no-0 hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="display-container display-no-d hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="display-container display-no-a hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="display-container display-no-y hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="blank display-container display-no-null hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="month-1 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="month-2 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="blank display-container display-no-null hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="day-1 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="day-2 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="blank display-container display-no-null hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="year-1 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="year-2 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="year-3 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="year-4 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="blank display-container display-no-null hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-		</div>
-		<div class="date-row red" id="ninety">
-			<div class="blank display-container display-no-null hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="display-container display-no-9 hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="display-container display-no-0 hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="display-container display-no-d hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="display-container display-no-a hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="display-container display-no-y hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="blank display-container display-no-null hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="month-1 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="month-2 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="blank display-container display-no-null hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="day-1 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="day-2 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="blank display-container display-no-null hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="year-1 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="year-2 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="year-3 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="year-4 display-container">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-			<div class="blank display-container display-no-null hide-sm">
-				<div class="segment-x segment-a"><span class="segment-border"></span></div>
-				<div class="segment-y segment-b"><span class="segment-border"></span></div>
-				<div class="segment-y segment-c"><span class="segment-border"></span></div>
-				<div class="segment-x segment-d"><span class="segment-border"></span></div>
-				<div class="segment-y segment-e"><span class="segment-border"></span></div>
-				<div class="segment-y segment-f"><span class="segment-border"></span></div>
-				<div class="segment-x segment-g"><span class="segment-border"></span></div>
-			</div>
-		</div>
-	</div>
 	</div>
 
 	<script>
@@ -755,7 +858,11 @@
 			dateStr=dateStr.replaceAll(' ','');
 
 			const row = document.getElementById(rowId);
-			// Assign month parts    
+			// Assign month parts
+			if(rowId=="thirty"){row.querySelector('.num-6').classList.add(`display-no-6`);}
+			if(rowId=="ninety"){row.querySelector('.num-9').classList.add(`display-no-9`);}
+			if(rowId!="today"){row.querySelector('.num-0').classList.add(`display-no-0`);}
+			
 			row.querySelector('.month-1').classList.add(`display-no-${dateStr[0]}`);
 			row.querySelector('.month-2').classList.add(`display-no-${dateStr[1]}`);
 
@@ -774,9 +881,43 @@
 		renderDateParts('thirty', formatDate(sixtyDaysAgo));
 		renderDateParts('ninety', formatDate(ninetyDaysAgo));
 
-		setTimeout(function() {
-		  location.reload();
-		}, 5000 * 60 * 60 * 4);
+		let reset = setInterval(function() {
+
+			const suffixes = [...Array.from({ length: 10 }, (_, i) => i.toString())];
+			const classRegex = new RegExp(`^display-no-(${suffixes.join('|')})$`);
+
+			document.querySelectorAll('[class*="display-no-"]').forEach(element => {
+				element.classList.forEach(cls => {
+					if (classRegex.test(cls)) {
+						element.classList.remove(cls);
+					}
+				});
+			});
+
+			renderDateParts('today', formatDate(today));
+			renderDateParts('thirty', formatDate(sixtyDaysAgo));
+			renderDateParts('ninety', formatDate(ninetyDaysAgo));
+		}, 1000 * 60 * 60 * 4);
+
+		document.querySelector('#colorToggle').addEventListener("click", (e) => {
+			if (e.target.checked) {
+				document.body.classList.add('color');
+				localStorage.setItem('colorMode', 'true');
+			} else {
+				document.body.classList.remove('color');
+				localStorage.setItem('colorMode', 'false');
+			}
+		});
+		window.addEventListener('DOMContentLoaded', () => {
+			const savedColorMode = localStorage.getItem('colorMode') === 'true';
+			const checkbox = document.querySelector('#colorToggle');
+			
+			// Apply saved state
+			checkbox.checked = savedColorMode;
+			if (savedColorMode) {
+				document.body.classList.add('color');
+			}
+		});
 	</script>
 </body>
 </html>
