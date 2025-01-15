@@ -19,7 +19,7 @@ class IATSERV {
  	static orderId	= PCX.getUrlParams()['OrderId'];
  	static type		= PCX.getUrlParams()['type'];
 
- 	static noticeDisplayEl = "#noticeDisplay";
+ 	static noticeDisplay = "#noticeDisplay";
 
 	// Lab Lookup Table
 	static labs = {};
@@ -27,7 +27,7 @@ class IATSERV {
 	// Test Categories / Codes Lookup Table
 	static testCategories = {};
 
-	// Translation Lookup Table for Prince Laboratories to wReference Lab
+	// Translation Lookup Table for Prince Laboratories to Reference Lab
 	static categoryTranslation = {};
 	static genderTranslation = {};
 	static raceTranslation = {};
@@ -35,8 +35,6 @@ class IATSERV {
 
 	// Element DOM Selectors
 	static selectors = {};
-
-	static uiAutocomplete = {};
 
 	static setTestCategories(testCats){
 		if(typeof testCats == "object"){
@@ -77,12 +75,6 @@ class IATSERV {
 	static setOrderDefaults(orderDefaults){
 		if(typeof orderDefaults == "object"){
 			IATSERV.orderDefaults = orderDefaults;
-		}
-	}
-
-	static setuiAutocomplete(uiAutocomplete){
-		if(typeof uiAutocomplete == "object"){
-			IATSERV.uiAutocomplete = uiAutocomplete;
 		}
 	}
 
@@ -153,7 +145,34 @@ class IATSERV {
 
 
 
+	static columnReportsParser() {
+		//console.log("columnReportsParser");
+		let count = document.querySelectorAll('[id^=MainContent_ctl00_grid_tccell]:not(.processCopyTo)').length;
 
+		if(count <= 0){ return; }
+		document.querySelectorAll('[id^=MainContent_ctl00_grid_tccell]').forEach((asc) => {
+			if(!asc.classList.contains('processCopyTo')){
+		//console.log(asc);
+				asc.classList.add('processCopyTo');
+				
+				const copyTo = PCX.createDOM("span", {});
+				copyTo.innerText = "📋 ";
+				asc.innerHTML = copyTo.outerHTML + asc.innerHTML;
+				if(count == 1){
+					let quickClipboard = asc.querySelector('a').innerText + "\t" + asc.nextSibling.innerText;
+					console.log(quickClipboard);
+					PCX.copyToClipboard(quickClipboard);
+				}
+				asc.querySelector('span').addEventListener('click', (e)=>{
+					let td = e.target.parentNode;
+					//console.log(td);
+					let clipboard = td.querySelector('a').innerText + "\t" + td.nextSibling.innerText;
+					console.log(clipboard);
+					PCX.copyToClipboard(clipboard);
+				});
+			}
+		});
+	}
 /*************************************************************************************
  *
  * Page Templete: 	Location List
@@ -207,8 +226,17 @@ class IATSERV {
 					rowData.forEach((row) => {
 						let locationID = row.querySelector('td:nth-child('+(headings.indexOf('Code')+1)+') a').getAttribute('onclick').replace(/ShowForm\((\d*)\)/i,'$1');
 						let columnLinkTD = row.querySelector('td:nth-child('+(headings.indexOf(column.heading)+1)+')');
-
-						columnLinkTD.innerHTML = `<a href="javascript:void(null)" onclick="ShowForm('${locationID}#delivery')">${column.text}</a>`
+						let link = PCX.createDOM("a",{class:"delivery",href:"javascript:ShowForm("+locationID+");"});
+						link.addEventListener('click', ()=>{
+							waitForElm(".fancybox-iframe").then((iframe)=> {
+								waitForIframeElm(".fancybox-iframe",'[href="#delivery"]').then((link)=> {
+									console.log('found');
+									PCX.getEl(".fancybox-iframe",true).contentWindow.document.querySelector('[href="#delivery"]').click();
+								});
+							});
+						});
+						link.innerHTML = column.text;
+						columnLinkTD.appendChild(link);
 					});
 					PCX.getEl('#MainContent_ctl00_grid_DXHeadersRow0 td:nth-child('+(headings.indexOf(column.heading)+1)+ ')',true).textContent = column.text;
 				}
@@ -238,7 +266,7 @@ class IATSERV {
 	 * @param  OBJ	testCategories
 	 */
 	static async checkTestCat(elCategory,elTestCodes,testCategories){
-		PCX.processEnabled("Automation_CheckTestCategoryForCodes",true);
+		//PCX.processEnabled("Automation_CheckTestCategoryForCodes",true);
 		const el = IATSERV.selectors;
 			// The website developer creates new autocompletes with each call with no garbage collections. This cleans up old lists
 			[...document.querySelectorAll('.ui-menu.ui-widget.ui-widget-content.ui-autocomplete.ui-front.autocomplete-ul')].forEach(ul => {
@@ -255,10 +283,11 @@ class IATSERV {
 					waitForElm('[id^="ui-id-"][style^="z-index"].autocomplete-ul').then(()=>{
 						PCX.simulateUserKey(elTestCodes.Input,PCX.events.Tab,"keydown");
 						
-						if(PCX.processEnabled("Automation_SetLabByTestCode",true)) {
+						//if(PCX.processEnabled("Automation_SetLabByTestCode",true)) {
 							PCX.getEl(el.PreformingLab,true).value = testCategories[elCategory.value].LabCode;
-						}
+						//}
 
+			PCX.getEl(el.ICDCodesInput+"~.body",true).insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
 						PCX.getEl(el.UpPanel).addEventListener('change', IATSERV.upPanelChange);
 					});
 					document.querySelector('#MainContent_ctl00_ctl00_upPanel').removeEventListener('load',watchForLaterNode,true);
@@ -322,6 +351,7 @@ class IATSERV {
 		// CHANGE
 		PCX.getEl(el.UpPanel).addEventListener('change', IATSERV.upPanelChange);
 
+
 		// BLUR
 		PCX.getEl(el.UpPanel).addEventListener('blur', (e) => {
 			if (e.target && "#"+e.target.id === el.DOC) {
@@ -340,7 +370,7 @@ class IATSERV {
 			}
 		},true);
 
-		PCX.getEl(el.ICDCodesInput+"~.body").insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
+		PCX.getEl(el.ICDCodesInput+"~.body",true).insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
 		let observer = new MutationObserver(()=>{});
 		PCX.getEl(el.UpPanel,true).addEventListener('keydown', async (e) => {
 			if (e.target && "#"+e.target.id === el.ICDCodesInput && (e.key == "Enter" || e.key == "Tab")) {
@@ -369,10 +399,12 @@ class IATSERV {
 		if (e.target && "#"+e.target.id === el.Category) {
 			IATSERV.checkTestCat(PCX.getEl(el.Category,true),{Input: PCX.getEl(el.TestCodesInput,true),Output: PCX.getEl(el.TestCodesOutput,true)},IATSERV.testCategories);
 			PCX.getEl(el.newPatientBtn,true).addEventListener('click', IATSERV.newPatientBtn);
-		}
+
 	}
+		}
 
 	static async newPatientBtn(eventPtBtnClick) {
+		const el = IATSERV.selectors;
 		waitForElm(el.FancyBox).then( (elementLoaded) => {
 			waitForIframeElm(el.FancyBox,el.IframeDOB).then( (elementIframeLoaded) => {
 				// Date of Birth Checks
@@ -405,6 +437,7 @@ class IATSERV {
 					}, 100);
 				});
 
+
 				const removeIframeTabIndexSelectors = [
 					el.SSN, el.LicenseState, el.LicenseNumber, el.CopyColumnBTN1, el.CopyColumnBTN2,
 					el.CopyColumnBTN3, el.CopyColumnBTN4, el.PrimeRelation, 
@@ -430,27 +463,59 @@ class IATSERV {
 		});
 	};
 
-	static createPACheckboxes(argument) {
-		btnCreatePA
-		let paCheckoxesContainer = PCX.createDOM('div', { style: 'display: inline-block;transform: translateY(6px);margin-top: -15px;'});
-		let labelPACheckboxes = PCX.createDOM('label', { classList: 'createPaCheckboxes'});
-		let createPaNoComment = PCX.createDOM('input', { type: 'createPaCheckboxes'});
-			siteAssets.appendChild(
-				Object.assign(PCX.createDOM('span'), {
-					textContent: '⎘',
-					id: 'patientCopy',
-					title: 'Capture Patient Record'
-				})
-			);
+	static scanFilenamer() {
+		// Define the object with keywords and corresponding values
+		let type = "REQ";  // Default type if no match is found
+		const locationKeywords = {
+			"ABCO": "",
+			"AXXESSRX": " AND FS",
+			"MONROE": " AND FS",
+			"RELIABLE": "",
+			"TKS": " AND FS",
+			"SNL": " AND FS",
+			"VIBRANT": " AND FS"
+			//"SAFE": ""
+		};
 
-		<div style="
-	display: inline-block;
-	transform: translateY(6px);
-	margin-top: -15px;
-">
-	<label class="createPaCheckboxes"><input type="checkbox" id="createPaNoComment" checked="">No Comment</label>
-	<label class="createPaCheckboxes"><input type="checkbox" id="createPaNewAccession" checked="">Start New Accession</label>    
-</div>
+		// Function to generate the string
+		function generateLabel() {
+			// Grab the value of the LOCATION field
+			const location = document.querySelector('#MainContent_ctl00_tbLocation_tbText').value;
+
+			// Check if LOCATION contains any of the keywords and set the type
+			for (const keyword in locationKeywords) {
+				const regex = new RegExp(keyword, 'i');  // Create a case-insensitive regex for the keyword
+				if (regex.test(location)) {  // Check if the keyword is present anywhere in the LOCATION string
+					type += locationKeywords[keyword];
+					break;
+				}
+			}
+
+			// Grab the value of the PATIENT field and remove commas
+			const patient = document.querySelector('#MainContent_ctl00_tbPatient_tbText').value;
+			const name = patient.replace(/,/g, '');  // Remove commas from the patient name
+
+			// Get the current date in MM.DD.YY format
+			const today = new Date();
+			const date = `${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getDate().toString().padStart(2, '0')}.${today.getFullYear().toString().slice(-2)}`;
+
+			// Create the final string
+			const labelString = `${type} ${date} ${name}`;
+
+			// Log the result to the console
+			//console.log(labelString);
+
+			// Copy the result to the clipboard
+			navigator.clipboard.writeText(labelString).then(() => {
+				//console.log("Label copied to clipboard!");
+			}).catch(err => {
+				//console.error("Failed to copy label to clipboard: ", err);
+			});
+		}
+
+		// Add event listener to the button
+		document.querySelector('[onclick="printLables()"]').addEventListener('click', generateLabel);
+
 	}
 
 	/**
@@ -459,8 +524,17 @@ class IATSERV {
 	 * 
 	 */
 	static capturePTData() {
+
 		const el = IATSERV.selectors;
-		IATSERV.noticeDisplay();
+		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+			//if(chrome.runtime.id == undefined) return;
+			if (message.action === 'noticeDisplay') {
+			// If the notice is already present, don't recreate it
+				if (!PCX.getEl(IATSERV.noticeDisplay)) {
+					PCX.initializeNotice(message.patientData);
+				}
+			}
+		});
 
 		PCX.getEl(el.newPatientBtn).parentNode.addEventListener('click', function(event) {
 			const siteAssets = PCX.createDOM('div', { id: 'siteAssets'});
@@ -474,7 +548,7 @@ class IATSERV {
 			waitForElm('.fancybox-iframe').then((elm) => {
 				PCX.getEl('.fancybox-overlay',true).appendChild(siteAssets);
 				PCX.getEl("#patientCopy").addEventListener('click', function(event) {
-					console.log("patientCopy clicked");
+					
 					// Temp Capture was discussed with Dean. As long as 
 					// it never leaves the browser/local, it's HIPAA compliant.
 					// Fn PCX.initializeNotice() immediately takes the data after 
@@ -497,10 +571,8 @@ class IATSERV {
 						Email:		PCX.getEl(el.Iframe).contentWindow.document.querySelector(el.Email).value
 					};
 
-					console.log("patientData", patientData);
 					// Store patient data in Chrome's storage
 					chrome.storage.local.set({ patientData }, () => {
-					console.log("initPatientTransfer >");
 						// Send a message to the service worker to notify all relevant tabs
 						//if(chrome.runtime.id == undefined) return;
 						chrome.runtime.sendMessage({
@@ -600,7 +672,7 @@ class IATSERV {
 				// Clear the patient data after usage
 				chrome.storage.local.set({ patientData: {} }, () => {
 					PCX.log('Patient data cleared after use');
-					PCX.getEl(IATSERV.noticeDisplayEl).remove();
+					PCX.getEl(IATSERV.noticeDisplay).remove();
 				});
 			}
 		});
@@ -614,32 +686,16 @@ class IATSERV {
 		});
 	}
 
-	static noticeDisplay(){
-		console.log("FN noticeDisplay");
-		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-		console.log("Listener message", message.action);
-			//if(chrome.runtime.id == undefined) return;
-			if (message.action === 'noticeDisplay') {
-			// If the notice is already present, don't recreate it
-				if (!PCX.getEl(IATSERV.noticeDisplayEl)) {
-					console.log("Message patientData", message.patientData);
-					PCX.initializeNotice(message.patientData);
-				}
-			}
-		});
-	}
-
 	static createOrder(callback=()=>{return;}) {
 		const el = IATSERV.selectors;
 		el.orderDefaults = IATSERV.orderDefaults;
-		IATSERV.noticeDisplay();
 
 		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			//if(chrome.runtime.id == undefined) return;
 			if (message.action === 'noticeDisplay') {
 				// If the notice is already present, don't recreate it
-				if (PCX.getEl(IATSERV.noticeDisplayEl)) {
-					PCX.getEl(IATSERV.noticeDisplayEl).remove();
+				if (PCX.getEl(IATSERV.noticeDisplay)) {
+					PCX.getEl(IATSERV.noticeDisplay).remove();
 				}
 				PCX.noticeUpdate(message.patientData,message.timer,callback);
 			}

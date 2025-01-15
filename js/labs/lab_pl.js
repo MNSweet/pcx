@@ -3,11 +3,11 @@ PCX.setLabPortal('PL');
 PCX.log(IATSERV.linkId);
 
 if(PCX.preferedUserMode()) {
-	IATSERV.setuiAutocomplete({ //id "ui-id-*#""
+	/*IATSERV.setuiAutocomplete({ //id "ui-id-*#""
 		   location:	1,
 		   patient:		2,
 		   testCode:	7
-	});
+	});*/
 
 	IATSERV.setLabs({
 		   2: {Code:"IP",	Label:"Ipseity Diagnostics LLC",Stability:{NGS: 90}},
@@ -148,6 +148,8 @@ if(PCX.preferedUserMode()) {
 		IATSERV.fileDrop({
 			enabled:false
 		});
+
+		//IATSERV.scanFilenamer();
 	}
 
 	// Update Accession
@@ -191,6 +193,8 @@ if(PCX.preferedUserMode()) {
 			acsID	: PCX.getEl("#tbAccessionId").value,
 			patient	: PCX.getEl("#MainContent_ctl00_tbPatient_tbText").value.toUpperCase().split(', ')
 		},false,false,"#dvFooter");
+
+		IATSERV.scanFilenamer();
 	}
 
 	// Results
@@ -212,6 +216,17 @@ if(PCX.preferedUserMode()) {
 	// Locations
 	if (IATSERV.linkId == "2004") {
 		const intervalLocationID = setInterval(IATSERV.columnLocationParser, 500);
+	}
+
+	// Reports
+	if (IATSERV.linkId == "6001") {
+		const reportsIntervalACSID = setInterval(IATSERV.columnReportsParser, 500);
+
+	}
+
+	// Edit Location
+	if (IATSERV.linkId == "2005") {
+		console.log(window.location.hash);
 	}
 }
 if(PCX.currentUser() == "Joel") {
