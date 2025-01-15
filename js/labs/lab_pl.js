@@ -149,7 +149,7 @@ if(PCX.preferedUserMode()) {
 			enabled:false
 		});
 
-		IATSERV.scanFilenamer();
+		//IATSERV.scanFilenamer();
 	}
 
 	// Update Accession

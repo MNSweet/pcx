@@ -266,7 +266,7 @@ class IATSERV {
 	 * @param  OBJ	testCategories
 	 */
 	static async checkTestCat(elCategory,elTestCodes,testCategories){
-		PCX.processEnabled("Automation_CheckTestCategoryForCodes",true);
+		//PCX.processEnabled("Automation_CheckTestCategoryForCodes",true);
 		const el = IATSERV.selectors;
 			// The website developer creates new autocompletes with each call with no garbage collections. This cleans up old lists
 			[...document.querySelectorAll('.ui-menu.ui-widget.ui-widget-content.ui-autocomplete.ui-front.autocomplete-ul')].forEach(ul => {
@@ -283,10 +283,11 @@ class IATSERV {
 					waitForElm('[id^="ui-id-"][style^="z-index"].autocomplete-ul').then(()=>{
 						PCX.simulateUserKey(elTestCodes.Input,PCX.events.Tab,"keydown");
 						
-						if(PCX.processEnabled("Automation_SetLabByTestCode",true)) {
+						//if(PCX.processEnabled("Automation_SetLabByTestCode",true)) {
 							PCX.getEl(el.PreformingLab,true).value = testCategories[elCategory.value].LabCode;
-						}
+						//}
 
+			PCX.getEl(el.ICDCodesInput+"~.body",true).insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
 						PCX.getEl(el.UpPanel).addEventListener('change', IATSERV.upPanelChange);
 					});
 					document.querySelector('#MainContent_ctl00_ctl00_upPanel').removeEventListener('load',watchForLaterNode,true);
@@ -369,7 +370,7 @@ class IATSERV {
 			}
 		},true);
 
-		PCX.getEl(el.ICDCodesInput+"~.body").insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
+		PCX.getEl(el.ICDCodesInput+"~.body",true).insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
 		let observer = new MutationObserver(()=>{});
 		PCX.getEl(el.UpPanel,true).addEventListener('keydown', async (e) => {
 			if (e.target && "#"+e.target.id === el.ICDCodesInput && (e.key == "Enter" || e.key == "Tab")) {
@@ -398,10 +399,12 @@ class IATSERV {
 		if (e.target && "#"+e.target.id === el.Category) {
 			IATSERV.checkTestCat(PCX.getEl(el.Category,true),{Input: PCX.getEl(el.TestCodesInput,true),Output: PCX.getEl(el.TestCodesOutput,true)},IATSERV.testCategories);
 			PCX.getEl(el.newPatientBtn,true).addEventListener('click', IATSERV.newPatientBtn);
-		}
+
 	}
+		}
 
 	static async newPatientBtn(eventPtBtnClick) {
+		const el = IATSERV.selectors;
 		waitForElm(el.FancyBox).then( (elementLoaded) => {
 			waitForIframeElm(el.FancyBox,el.IframeDOB).then( (elementIframeLoaded) => {
 				// Date of Birth Checks
@@ -459,29 +462,7 @@ class IATSERV {
 			
 		});
 	};
-/*
-	static createPACheckboxes(argument) {
-		btnCreatePA
-		let paCheckoxesContainer = PCX.createDOM('div', { style: 'display: inline-block;transform: translateY(6px);margin-top: -15px;'});
-		let labelPACheckboxes = PCX.createDOM('label', { classList: 'createPaCheckboxes'});
-		let createPaNoComment = PCX.createDOM('input', { type: 'createPaCheckboxes'});
-			siteAssets.appendChild(
-				Object.assign(PCX.createDOM('span'), {
-					textContent: '⎘',
-					id: 'patientCopy',
-					title: 'Capture Patient Record'
-				})
-			);
 
-		<div style="
-	display: inline-block;
-	transform: translateY(6px);
-	margin-top: -15px;
-">
-	<label class="createPaCheckboxes"><input type="checkbox" id="createPaNoComment" checked="">No Comment</label>
-	<label class="createPaCheckboxes"><input type="checkbox" id="createPaNewAccession" checked="">Start New Accession</label>    
-</div> 
-*/
 	static scanFilenamer() {
 		// Define the object with keywords and corresponding values
 		let type = "REQ";  // Default type if no match is found
