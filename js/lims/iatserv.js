@@ -18,6 +18,7 @@ class IATSERV {
  	static linkId	= PCX.getUrlParams()['LinkId'];
  	static orderId	= PCX.getUrlParams()['OrderId'];
  	static type		= PCX.getUrlParams()['type'];
+ 	static report	= PCX.getUrlParams()['report'];
 
  	static noticeDisplay = "#noticeDisplay";
 
@@ -76,6 +77,16 @@ class IATSERV {
 		if(typeof orderDefaults == "object"){
 			IATSERV.orderDefaults = orderDefaults;
 		}
+	}
+
+	static prepInterface(){
+		PCX.getEls("#side-menu li").forEach((li)=>{
+			if(li.querySelector('a')) {
+				li.id = "Menu-"+li.querySelector('a').innerText.trim().replace(/ /g, "-")
+			}
+		})
+		let reportGenerator = PCX.createDOM('li',{id:'Menu-Report-Generator',innerHTML:'<a href="/?LinkId=2070&amp;_ml=36&amp;_mlp=13&report" link-id="2070" id="mnu_101" pid="mnu_p_101"><i class="fa fa-list fa-fw"></i> Report Generator</a>'})
+		PCX.getEl("#Menu-Reports ul.nav-second-level").appendChild(reportGenerator);
 	}
 
 
@@ -145,14 +156,117 @@ class IATSERV {
 
 
 
+	static generateReportPage(){
+		let loadPanelState = "";
+		const observerCallback = (mutationList, observer) => {
+			for (const mutation of mutationList) {
+				if (
+					mutation.type === 'attributes' 
+					&& mutation.attributeName === 'style'
+					&& mutation.target.style.display != loadPanelState
+				) {
+					loadPanelState = mutation.target.style.display;
+					if(loadPanelState === "none"){
+						console.log('Style changed:', mutation.target.style.display);
+						console.log('observed');
+						reportPageformatter();
+						observer.disconnect();
+					}
+				}
+			}
+		};
+		let observer = new MutationObserver(observerCallback);
+		PCX.getEl('#MainContent_ctl00_updatePanel1',true).addEventListener('click', (e)=>{
+			if (e.target && e.target.innerText === "Search") {
+				console.log('target found');
+				observer.disconnect()
+				observer = new MutationObserver(observerCallback);
+				observer.observe(PCX.getEl("#LoadingPanel_LD",true), { attributes: true, attributeFilter: ['style'] });
+			}
+		},true);
+
+
+
+
+		//document.querySelector().addEventListener('change',reportPageformatter,true);
+
+		PCX.getEl("ul.nav-second-level.in").classList.remove('in');
+		PCX.getEl("#Menu-Report-Generator a").classList.add('active');
+		PCX.getEl("#Menu-Reports ul.nav-second-level").classList.add('in');
+
+		let style = PCX.createDOM('style',{"innerText":"#formGroup-Accession, #formGroup-Requisition, #formGroup-Batch, #formGroup-Location, #formGroup-Physician, #formGroup-External-ID, #formGroup-Source, #formGroup-Billing-Status, #formGroup-Result-Entry-Status, #formGroup-Priority {display:none;}"})
+		PCX.getEl(".accessions-view-page",true).appendChild(style);
+		PCX.getEl("#MainContent_ctl00_btnNew",true).remove();
+
+		reportPageformatter();
+
+		async function reportPageformatter(e) {
+			PCX.getEl("#page-title",true).innerText = "Report Generator";
+			PCX.getEls("#filter-form .form-group",true).forEach((formGroup)=>{
+				if(formGroup.querySelector('label')) {
+					formGroup.id = "formGroup-"+formGroup.querySelector('label').innerText.trim().replace(/ /g, "-").replace("#", "");
+					if(formGroup.querySelector("#MainContent_ctl00_btnSearch")){
+						formGroup.id = "formGroup-Search";
+					}
+				}
+			});
+			
+			if(PCX.getEl('.panel',true)) {
+				let genDupDoc = PCX.createDOM('span',{id:"generateReportDuplicateDOC",innerText:"Generate Report Duplicate DOC"});
+				genDupDoc.addEventListener('click',()=>{IATSERV.generateReportDuplicateDOC()})
+				PCX.getEl('.panel').after(PCX.createDOM('div',{id:"reportlog"}));
+				PCX.getEl('.panel').after(genDupDoc)
+			};
+		}
+
+			//#MainContent_ctl00_grid, 
+		
+	}
+	static generateReportDuplicateDOC(){
+		let headingRow = PCX.getEls('#MainContent_ctl00_grid_DXHeadersRow0 .dxgvHeader_Metropolis',true);
+		if(!headingRow){return;}
+
+		let headingRowset = [];
+		headingRow.forEach((cell)=>{
+        	let textHeading = cell.textContent.replaceAll('\t','').replaceAll('\n','').trim();
+	    	if(["","|"].includes(textHeading)){return;}
+			headingRowset.push(textHeading);
+		});
+		console.log(headingRowset);
+		/*
+headingRow.forEach((node)=>{
+    nodeSet = [];
+    node.querySelectorAll('td').forEach((cell)=>{
+        nodeSet.push(cell.textContent.replaceAll('\t','').replaceAll('\n','').trim());
+    });
+    headingRowset.push(nodeSet);
+})*/
+	}
+
+
+/*************************************************************************************
+ *
+ * Page Templete: 	Reports Accession List
+ * linkId:			6001
+ *
+ * Search for Accession by
+ * 		Date [Received|Collected|Resulted|Created], Date Range, Status, Sub Status,
+ * 		Test Category, Location, Physician
+ *
+ * Column Headings available:
+ * 		Accession, Account Manager, Area Sales Director, Bill Type, Code, Created, DOS, 
+ * 		Distributor, Distributor Account Manager, First Reported, Patient First, Patient Last,
+ * 		Insurance, Location, Master Account, Physician First, Physician Last, Process Date,
+ * 		Processing Days, Processing Hours, Reported, Requisition, Status, Sub Status, Test Category
+ * 
+ *************************************************************************************/
+
 	static columnReportsParser() {
-		//console.log("columnReportsParser");
 		let count = document.querySelectorAll('[id^=MainContent_ctl00_grid_tccell]:not(.processCopyTo)').length;
 
 		if(count <= 0){ return; }
 		document.querySelectorAll('[id^=MainContent_ctl00_grid_tccell]').forEach((asc) => {
 			if(!asc.classList.contains('processCopyTo')){
-		//console.log(asc);
 				asc.classList.add('processCopyTo');
 				
 				const copyTo = PCX.createDOM("span", {});
@@ -160,19 +274,21 @@ class IATSERV {
 				asc.innerHTML = copyTo.outerHTML + asc.innerHTML;
 				if(count == 1){
 					let quickClipboard = asc.querySelector('a').innerText + "\t" + asc.nextSibling.innerText;
-					console.log(quickClipboard);
+					//console.log(quickClipboard);
 					PCX.copyToClipboard(quickClipboard);
 				}
 				asc.querySelector('span').addEventListener('click', (e)=>{
 					let td = e.target.parentNode;
 					//console.log(td);
 					let clipboard = td.querySelector('a').innerText + "\t" + td.nextSibling.innerText;
-					console.log(clipboard);
+					//console.log(clipboard);
 					PCX.copyToClipboard(clipboard);
 				});
 			}
 		});
 	}
+
+
 /*************************************************************************************
  *
  * Page Templete: 	Location List
@@ -379,6 +495,7 @@ class IATSERV {
 				observer = new MutationObserver((mutations) => {
 					let icdCodes = Array.from(PCX.getEls(el.ICDCodesInput+"~.body #dvSelectedItems #xv_param",true)).reverse();
 					PCX.getEl("#icdCodePreviewer",true).innerHTML = `<span class="icdCode">` + icdCodes.map((element)=>{return element.value;}).join(`</span><span class="icdCode">`) + `</span>`;	
+					//observer.disconnect();
 				});
 				observer.observe(targetElement, { childList: true });
 			}

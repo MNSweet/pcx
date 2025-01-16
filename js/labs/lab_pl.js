@@ -3,6 +3,7 @@ PCX.setLabPortal('PL');
 PCX.log(IATSERV.linkId);
 
 if(PCX.preferedUserMode()) {
+	IATSERV.prepInterface();
 	/*IATSERV.setuiAutocomplete({ //id "ui-id-*#""
 		   location:	1,
 		   patient:		2,
@@ -37,7 +38,11 @@ if(PCX.preferedUserMode()) {
 
 	// Accession List
 	if (IATSERV.linkId == "2070") {
-		const intervalACSID = setInterval(IATSERV.columnParser, 500);
+		if(typeof IATSERV.report != "undefined") {
+			IATSERV.generateReportPage();
+		} else {
+			const intervalACSID = setInterval(IATSERV.columnParser, 500);
+		}
 	}
 
 	// Create Accession
@@ -149,7 +154,6 @@ if(PCX.preferedUserMode()) {
 			enabled:false
 		});
 
-		//IATSERV.scanFilenamer();
 	}
 
 	// Update Accession
@@ -220,6 +224,7 @@ if(PCX.preferedUserMode()) {
 
 	// Reports
 	if (IATSERV.linkId == "6001") {
+		PCX.getEl("#page-title").innerText = "Reports: " + PCX.getEl("#page-title").innerText
 		const reportsIntervalACSID = setInterval(IATSERV.columnReportsParser, 500);
 
 	}
