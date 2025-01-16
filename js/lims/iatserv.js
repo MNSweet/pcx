@@ -15,12 +15,12 @@ class IATSERV {
  * @param OBJ	testCategories	Lookup table for Test Categories by DB ID's
  * 
  */
- 	static linkId	= PCX.getUrlParams()['LinkId'];
- 	static orderId	= PCX.getUrlParams()['OrderId'];
- 	static type		= PCX.getUrlParams()['type'];
- 	static report	= PCX.getUrlParams()['report'];
+	static linkId	= PCX.getUrlParams()['LinkId'];
+	static orderId	= PCX.getUrlParams()['OrderId'];
+	static type		= PCX.getUrlParams()['type'];
+	static report	= PCX.getUrlParams()['report'];
 
- 	static noticeDisplay = "#noticeDisplay";
+	static noticeDisplay = "#noticeDisplay";
 
 	// Lab Lookup Table
 	static labs = {};
@@ -85,7 +85,7 @@ class IATSERV {
 				li.id = "Menu-"+li.querySelector('a').innerText.trim().replace(/ /g, "-")
 			}
 		})
-		let reportGenerator = PCX.createDOM('li',{id:'Menu-Report-Generator',innerHTML:'<a href="/?LinkId=2070&amp;_ml=36&amp;_mlp=13&report" link-id="2070" id="mnu_101" pid="mnu_p_101"><i class="fa fa-list fa-fw"></i> Report Generator</a>'})
+		let reportGenerator = PCX.createDOM('li',{id:'Menu-Report-Generator',innerHTML:'<a href="/?LinkId=2070&amp;_ml=101&amp;_mlp=13&report" link-id="2070" id="mnu_101" pid="mnu_p_13"><i class="fa fa-list fa-fw"></i> Report Generator</a>'})
 		PCX.getEl("#Menu-Reports ul.nav-second-level").appendChild(reportGenerator);
 	}
 
@@ -115,7 +115,7 @@ class IATSERV {
  *************************************************************************************/
 
 
-     
+	 
 	/**
 	 * columnParser
 	 *
@@ -186,10 +186,6 @@ class IATSERV {
 		},true);
 
 
-
-
-		//document.querySelector().addEventListener('change',reportPageformatter,true);
-
 		PCX.getEl("ul.nav-second-level.in").classList.remove('in');
 		PCX.getEl("#Menu-Report-Generator a").classList.add('active');
 		PCX.getEl("#Menu-Reports ul.nav-second-level").classList.add('in');
@@ -201,6 +197,7 @@ class IATSERV {
 		reportPageformatter();
 
 		async function reportPageformatter(e) {
+			console.log('reportPageformatter');
 			PCX.getEl("#page-title",true).innerText = "Report Generator";
 			PCX.getEls("#filter-form .form-group",true).forEach((formGroup)=>{
 				if(formGroup.querySelector('label')) {
@@ -212,6 +209,7 @@ class IATSERV {
 			});
 			
 			if(PCX.getEl('.panel',true)) {
+				console.log('panel');
 				let genDupDoc = PCX.createDOM('span',{id:"generateReportDuplicateDOC",innerText:"Generate Report Duplicate DOC"});
 				genDupDoc.addEventListener('click',()=>{IATSERV.generateReportDuplicateDOC()})
 				PCX.getEl('.panel').after(PCX.createDOM('div',{id:"reportlog"}));
@@ -223,24 +221,36 @@ class IATSERV {
 		
 	}
 	static generateReportDuplicateDOC(){
+		console.log('generateReportDuplicateDOC');
 		let headingRow = PCX.getEls('#MainContent_ctl00_grid_DXHeadersRow0 .dxgvHeader_Metropolis',true);
 		if(!headingRow){return;}
 
 		let headingRowset = [];
 		headingRow.forEach((cell)=>{
-        	let textHeading = cell.textContent.replaceAll('\t','').replaceAll('\n','').trim();
-	    	if(["","|"].includes(textHeading)){return;}
+			let textHeading = cell.textContent.replaceAll('\t','').replaceAll('\n','').trim();
+			if(["","|"].includes(textHeading)){return;}
 			headingRowset.push(textHeading);
 		});
 		console.log(headingRowset);
+		IATSERV.reportsGrabData();
 		/*
 headingRow.forEach((node)=>{
-    nodeSet = [];
-    node.querySelectorAll('td').forEach((cell)=>{
-        nodeSet.push(cell.textContent.replaceAll('\t','').replaceAll('\n','').trim());
-    });
-    headingRowset.push(nodeSet);
+	nodeSet = [];
+	node.querySelectorAll('td').forEach((cell)=>{
+		nodeSet.push(cell.textContent.replaceAll('\t','').replaceAll('\n','').trim());
+	});
+	headingRowset.push(nodeSet);
 })*/
+	}
+
+	static reportsGrabData(){
+		console.log('reportsGrabData');
+		//Check for entries per page
+		let pageSize = PCX.getEl('#MainContent_ctl00_grid_DXPagerBottom_PSI',true);
+		if(pageSize && pageSize.value != "100") {
+			pageSize.value = 100;
+			pageSize.dispatchEvent(new Event('blur'));
+		}
 	}
 
 
@@ -312,7 +322,7 @@ headingRow.forEach((node)=>{
  *************************************************************************************/
 
 
-     
+	 
 	/**
 	 * columnLocationParser
 	 *
