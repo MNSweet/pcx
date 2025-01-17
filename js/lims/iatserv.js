@@ -159,7 +159,7 @@ class IATSERV {
 	static generateReportPage(){
 		let loadPanelState = "";
 		let loadPanel = new Promise(resolve => {
-			const observerCallback = (mutationList, observer) => {
+			const observer = new MutationObserver((mutationList, observer) => {
 				for (const mutation of mutationList) {
 					if (
 						mutation.type === 'attributes' 
@@ -176,20 +176,9 @@ class IATSERV {
 						}
 					}
 				}
-			};
-
-			const observer = new MutationObserver(observerCallback);
+			});
 			observer.observe(PCX.getEl("#LoadingPanel_LD",true), { attributes: true, attributeFilter: ['style'] });
-
-			/*PCX.getEl('#MainContent_ctl00_updatePanel1',true).addEventListener('click', (e)=>{
-				if (e.target && e.target.innerText === "Search") {
-					console.log('target found');
-					//observer.disconnect()
-					//observer = new MutationObserver(observerCallback);
-				}
-			},true);*/
 		});
-
 
 		PCX.getEl("ul.nav-second-level.in").classList.remove('in');
 		PCX.getEl("#Menu-Report-Generator a").classList.add('active');
@@ -199,11 +188,17 @@ class IATSERV {
 		PCX.getEl(".accessions-view-page",true).appendChild(style);
 		PCX.getEl("#MainContent_ctl00_btnNew",true).remove();
 
+		/*PCX.getEl('#MainContent_ctl00_updatePanel1',true).addEventListener('click', (e)=>{
+			if (e.target && e.target.innerText === "Search") {
+				console.log('target found');
+			}
+		},true);*/
 		reportPageformatter();
 
 		function reportPageformatter(e) {
 			console.log('reportPageformatter');
 			PCX.getEl("#page-title",true).innerText = "Report Generator";
+			document.title = "Report Generator";
 			PCX.getEls("#filter-form .form-group",true).forEach((formGroup)=>{
 				if(formGroup.querySelector('label')) {
 					formGroup.id = "formGroup-"+formGroup.querySelector('label').innerText.trim().replace(/ /g, "-").replace("#", "");
@@ -250,7 +245,7 @@ headingRow.forEach((node)=>{
 
 	static reportsGrabData(){
 		let fnName = `FN reportsGrabData()`;
-		console.log('reportsGrabData');
+		console.log(fnName);
 		//Check for entries per page
 		try {
 			waitForElm('#MainContent_ctl00_grid_DXPagerBottom_PSI').then((pageSize)=>{
