@@ -157,7 +157,7 @@ class QAManager {
 			stabilityPhase	= "phaseOne";
 		}
 
-		if(stabilityAge <= 90 && stabilityAge >= 60){
+		if(IATSERV.linkId == "2011" && IATSERV.type == "acs" && stabilityAge <= 90 && stabilityAge >= 60){
 			PCX.getEl(IATSERV.selectors.PreformingLab,true).value = 1013; // Principle's ID
 		}
 
