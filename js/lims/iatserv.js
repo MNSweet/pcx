@@ -158,32 +158,37 @@ class IATSERV {
 
 	static generateReportPage(){
 		let loadPanelState = "";
-		const observerCallback = (mutationList, observer) => {
-			for (const mutation of mutationList) {
-				if (
-					mutation.type === 'attributes' 
-					&& mutation.attributeName === 'style'
-					&& mutation.target.style.display != loadPanelState
-				) {
-					loadPanelState = mutation.target.style.display;
-					if(loadPanelState === "none"){
-						console.log('Style changed:', mutation.target.style.display);
-						console.log('observed');
-						reportPageformatter();
-						observer.disconnect();
+		let loadPanel = new Promise(resolve => {
+			const observerCallback = (mutationList, observer) => {
+				for (const mutation of mutationList) {
+					if (
+						mutation.type === 'attributes' 
+						&& mutation.attributeName === 'style'
+						&& mutation.target.style.display != loadPanelState
+					) {
+						loadPanelState = mutation.target.style.display;
+						if(loadPanelState === "none"){
+							console.log('Style changed:', mutation.target.style.display);
+							console.log('observed');
+							resolve(true);
+							reportPageformatter();
+							observer.disconnect();
+						}
 					}
 				}
-			}
-		};
-		let observer = new MutationObserver(observerCallback);
-		PCX.getEl('#MainContent_ctl00_updatePanel1',true).addEventListener('click', (e)=>{
-			if (e.target && e.target.innerText === "Search") {
-				console.log('target found');
-				observer.disconnect()
-				observer = new MutationObserver(observerCallback);
-				observer.observe(PCX.getEl("#LoadingPanel_LD",true), { attributes: true, attributeFilter: ['style'] });
-			}
-		},true);
+			};
+
+			const observer = new MutationObserver(observerCallback);
+			observer.observe(PCX.getEl("#LoadingPanel_LD",true), { attributes: true, attributeFilter: ['style'] });
+
+			/*PCX.getEl('#MainContent_ctl00_updatePanel1',true).addEventListener('click', (e)=>{
+				if (e.target && e.target.innerText === "Search") {
+					console.log('target found');
+					//observer.disconnect()
+					//observer = new MutationObserver(observerCallback);
+				}
+			},true);*/
+		});
 
 
 		PCX.getEl("ul.nav-second-level.in").classList.remove('in');
@@ -196,7 +201,7 @@ class IATSERV {
 
 		reportPageformatter();
 
-		async function reportPageformatter(e) {
+		function reportPageformatter(e) {
 			console.log('reportPageformatter');
 			PCX.getEl("#page-title",true).innerText = "Report Generator";
 			PCX.getEls("#filter-form .form-group",true).forEach((formGroup)=>{
@@ -244,12 +249,82 @@ headingRow.forEach((node)=>{
 	}
 
 	static reportsGrabData(){
+		let fnName = `FN reportsGrabData()`;
 		console.log('reportsGrabData');
 		//Check for entries per page
-		let pageSize = PCX.getEl('#MainContent_ctl00_grid_DXPagerBottom_PSI',true);
-		if(pageSize && pageSize.value != "100") {
-			pageSize.value = 100;
-			pageSize.dispatchEvent(new Event('blur'));
+		try {
+			waitForElm('#MainContent_ctl00_grid_DXPagerBottom_PSI').then((pageSize)=>{
+			console.log(fnName,'pageSize',pageSize);
+				let pageSizeData = {
+					selector: ".dxp-summary",
+					dropdownSelector: "#MainContent_ctl00_grid_DXPagerBottom_PSI",
+					regex:/Page (\d+) of (\d+) \((\d+) items\)/,
+					validOptions: [10, 20, 50, 100],
+					initial:{
+						currentPage:0,
+						totalPages:0,
+						totalRecords:0,
+						recordsPerPage:0
+					},
+					currentMatch:[],
+					currentState:{
+						currentPage:-1,
+						totalPages:-1,
+						totalRecords:-1,
+						recordsPerPage:-1
+					}
+				}
+				pageSizeData.currentMatch = PCX.getEl(pageSizeData.selector,true).innerText.match(pageSizeData.regex);
+				if (pageSizeData.currentMatch) {
+					console.log(fnName,`Parsed page text and collecting stats`,pageSizeData.currentMatch);
+					pageSizeData.initial.currentPage 	= parseInt(pageSizeData.currentMatch[1], 10); // Current page
+					pageSizeData.initial.totalPages 	= parseInt(pageSizeData.currentMatch[2], 10); // Total number of pages
+					pageSizeData.initial.totalRecords 	= parseInt(pageSizeData.currentMatch[3], 10); // Total records
+
+					//if greater than 10, 20 or 50 set to next in sequence, else set to 10. E.g. >=10 : 20, >=20 : 50, >=50 : 100, <10 : 10
+					pageSizeData.initial.recordsPerPage = pageSizeData.validOptions.find(option => option >= Math.ceil(pageSizeData.initial.totalRecords / pageSizeData.initial.totalPages)) || pageSizeData.validOptions[pageSizeData.validOptions.length - 1];
+
+					console.log(fnName,`initial state`,pageSizeData.initial);
+					console.log(fnName,`Page > 1?`,pageSizeData.initial.totalPages > 1);
+					console.log(fnName,`RecordPerPage != 100?`,pageSizeData.initial.recordsPerPage != "100");
+					if(pageSizeData.initial.totalPages > 1 && pageSizeData.initial.recordsPerPage != "100") {
+						console.log(fnName,'More then one page of data and not set to maximum density. Attempting to expand data page');
+						console.log(fnName,`Changing records per page from ${pageSizeData.initial.recordsPerPage} to 100`);
+						pageSizeData.currentState = pageSizeData.initial;
+						PCX.getEl(pageSizeData.dropdownSelector,true).value = 100;
+						PCX.getEl(pageSizeData.dropdownSelector).dispatchEvent(new Event('blur'));
+
+						function waitForPageUpdate(pageSizeData) {
+							return new Promise(resolve => {
+								pageSizeData.currentMatch = PCX.getEl(pageSizeData.selector,true).innerText.match(pageSizeData.regex);
+								pageSizeData.currentState.currentPage 	= parseInt(pageSizeData.currentMatch[1], 10); // Current page
+								pageSizeData.currentState.totalPages 	= parseInt(pageSizeData.currentMatch[2], 10); // Total number of pages
+								pageSizeData.currentState.totalRecords 	= parseInt(pageSizeData.currentMatch[3], 10); // Total records
+
+								console.log(fnName,`Current state`,pageSizeData.currentState);
+								console.log(fnName,`Page > 1?`,pageSizeData.currentState.totalPages > 1);
+								console.log(fnName,`RecordPerPage != 100?`,pageSizeData.currentState.recordsPerPage != "100");
+								if(pageSizeData.currentState.totalPages =- pageSizeData.initial.totalPages) {
+									console.log(fnName,`Data has been expanded`, pageSizeData.currentState);
+									return resolve(pageSizeData.currentState);
+								} else {
+									console.log(fnName,`Scanning...`);
+									waitForPageUpdate();
+								}
+							});
+						}
+						waitForPageUpdate(pageSizeData);
+					} else {
+						console.log('1 page of data. Start processing');
+					}
+				} else {
+					throw 'No match found';
+				}
+
+			},(err)=>{throw err;});
+
+		} catch (error) {
+		  console.error(error);
 		}
 	}
 
