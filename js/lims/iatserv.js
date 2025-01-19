@@ -5,6 +5,13 @@ if(document.querySelector("#mnu_8")){
 	document.querySelector("#mnu_8").innerHTML = document.querySelector("#mnu_8").innerHTML.replace("Bach","Batch");
 }
 
+// Fix function not found error from lims
+if(typeof replace !== "function") {
+	function replace(string, search, replaceWith) {
+		return string.replace(search,replaceWith);
+	}
+}
+
 class IATSERV {
 /**
  *
@@ -399,9 +406,19 @@ class IATSERV {
 		if (e.target && "#"+e.target.id === el.Category) {
 			IATSERV.checkTestCat(PCX.getEl(el.Category,true),{Input: PCX.getEl(el.TestCodesInput,true),Output: PCX.getEl(el.TestCodesOutput,true)},IATSERV.testCategories);
 			PCX.getEl(el.newPatientBtn,true).addEventListener('click', IATSERV.newPatientBtn);
-
-	}
 		}
+	}
+
+	static showSignaturesBTN(){
+		document.body.classList.add('nosignature');
+		let showSignatureBTN = PCX.createDOM("div", {id:"showSignature",innerText:"Show Signature Section",classList:"form-group col-lg-1 new-row btn btn-default"});
+		showSignatureBTN.addEventListener("click",()=>{
+			document.body.classList.remove('nosignature');
+			document.body.classList.add('signature');
+		});
+		PCX.getEl("#MainContent_ctl00_ctl00_PlacePhysicianAuthorizeText",true)
+			.insertAdjacentElement("beforebegin",showSignatureBTN);
+	}
 
 	static async newPatientBtn(eventPtBtnClick) {
 		const el = IATSERV.selectors;

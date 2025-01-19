@@ -144,6 +144,7 @@ if(PCX.preferedUserMode()) {
 			
 		});
 		IATSERV.createAccession();
+		IATSERV.showSignaturesBTN();
 
 		IATSERV.fileDrop({
 			enabled:false
