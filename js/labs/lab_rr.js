@@ -144,7 +144,10 @@ if(PCX.preferedUserMode()) {
 			TestCodesInput	: '#MainContent_ctl00_ctl00_ctrlTestCodes_tbList_tbText',
 			TestCodesOutput	: '#dvSelectedItems',
 			FancyBox		: '.fancybox-overlay.fancybox-overlay-fixed iframe',
-			UpPanel			: '#MainContent_ctl00_ctl00_upPanel'
+			UpPanel			: '#MainContent_ctl00_ctl00_upPanel',
+			StateDropdown	: '#MainContent_ctl00_AddressControl1_CountryState_ddState',
+			InsuranceLookup	: '#MainContent_ctl00_PrimaryInsurance_tbInsurance_tbText',
+			InsuranceList	: '#ui-id-2',
 		});
 
 

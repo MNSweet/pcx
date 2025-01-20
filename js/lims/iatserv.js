@@ -453,7 +453,38 @@ class IATSERV {
 						}
 					}, 100);
 				});
+				PCX.getEl(el.FancyBox).contentWindow.document.querySelectorAll(el.StateDropdown+' option').forEach((option)=>{
+					//option.dataset.name = option.innerText;
+					if(["","AA","AE","AP"].includes(option.value)){return;}
+					option.innerText = option.value + " - " + option.innerText;
+				});
+if(true){//just in case to disabled it quickly
+				let stateDropdown = PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.StateDropdown);
+				PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.InsuranceLookup).addEventListener('focus',(e)=>{
+					let input = e.target;
+					if(stateDropdown.value == "" || !(stateDropdown.value in IATSERV.insuranceLookUp)) {return;}
+					input.placeholder = IATSERV.insuranceLookUp[stateDropdown.value].name;
+					
+				});
+				PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.InsuranceLookup).addEventListener('blur',(e)=>{
+					let input = e.target;
+					if(
+						stateDropdown.value == ""
+						|| !(stateDropdown.value in IATSERV.insuranceLookUp)
+						|| input.value != ""
+						|| input.placeholder == "Insurance"
+					) {
+						return;
+					}
 
+					// Prevent data desync between interaction states
+					if (input.placeholder == IATSERV.insuranceLookUp[stateDropdown.value].name) {
+						input.value = input.placeholder;
+						PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.InsuranceID).value = IATSERV.insuranceLookUp[stateDropdown.value].id;
+					}
+					input.placeholder = "Insurance";
+				});
+};
 
 				const removeIframeTabIndexSelectors = [
 					el.SSN, el.LicenseState, el.LicenseNumber, el.CopyColumnBTN1, el.CopyColumnBTN2,
@@ -470,7 +501,7 @@ class IATSERV {
 
 				PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.IframeForm).addEventListener('submit', (eventSubmit) => {
 					if(QAManager.getNoticeCount() > 0) {
-						eventSubmit.preventDefault()
+						eventSubmit.preventDefault();
 						QAManager.showQAModalNotification();
 					}
 				});
@@ -916,4 +947,73 @@ class IATSERV {
 		});
 	}
 
+	/**
+	 * insuranceLookUp
+	 * @type Object
+	 *
+	 * Key:		StateAbbr			
+	 * Term: 	State Name		
+	 * Name:	Insurance policy
+	 * Id:		DBID of policy
+	 *
+	 *  `#MainContent_ctl00_AddressControl1_CountryState_ddState`.value: {
+	 *  	term:`#MainContent_ctl00_AddressControl1_CountryState_ddState`.innerText,
+	 *  	name:`#MainContent_ctl00_PrimaryInsurance_tbInsurance_tbText`.value,
+	 *  	id:`#MainContent_ctl00_PrimaryInsurance_tbInsurance_tbID`.value
+	 *  }
+	 * 
+	 */
+	static insuranceLookUp = {
+		AL:{term:"ALABAMA",name:"Medicare Part B Alabama *",id:"3426"},
+		AK:{term:"ALASKA",name:"Medicare Part B Alaska",id:"3427"},
+		AZ:{term:"ARIZONA",name:"Medicare Part B Arizona *",id:"3428"},
+		AR:{term:"ARKANSAS",name:"Medicare Part B Arkansas *",id:"3429"},
+		CA:{term:"CALIFORNIA",name:"Medi-Cal of California 610442",id:"3390"},
+		CO:{term:"COLORADO",name:"Medicare Part B Colorado *",id:"3430"},
+		CT:{term:"CONNECTICUT",name:"Medicare Part B Connecticut *",id:"3431"},
+		DE:{term:"DELAWARE",name:"Medicare Part B Delaware",id:"3432"},
+		FL:{term:"FLORIDA",name:"Medicare Part B Florida",id:"3433"},
+		GA:{term:"GEORGIA",name:"Medicare Part B Georgia",id:"3434"},
+		HI:{term:"HAWAII",name:"Medicare Part B Hawaii",id:"3435"},
+		ID:{term:"IDAHO",name:"Medicare Part B Idaho *",id:"3436"},
+		IL:{term:"ILLINOIS",name:"Medicare Part B Illinois *",id:"3437"},
+		IN:{term:"INDIANA",name:"Medicare Part B Indiana *",id:"3438"},
+		IA:{term:"IOWA",name:"Medicare Part B Iowa *",id:"3439"},
+		KS:{term:"KANSAS",name:"Medicare Part B Kansas *",id:"3440"},
+		KY:{term:"KENTUCKY",name:"Medicare Part B Kentucky *",id:"3442"},
+		LA:{term:"LOUISIANA",name:"Medicare Part B Louisiana *",id:"3443"},
+		ME:{term:"MAINE",name:"Medicare Part B Maine *",id:"3444"},
+		MD:{term:"MARYLAND",name:"Medicare Part B Maryland",id:"3445"},
+		MA:{term:"MASSACHUSETTS",name:"Medicare Part B Massachusetts *",id:"3446"},
+		MI:{term:"MICHIGAN",name:"Medicare Part B Michigan *",id:"3447"},
+		MN:{term:"MINNESOTA",name:"Medicare Part B Minnesota *",id:"3448"},
+		MS:{term:"MISSISSIPPI",name:"Medicare Part B Mississippi *",id:"3449"},
+		MO:{term:"MISSOURI",name:"Medicare Part B Missouri",id:"3450"},
+		MT:{term:"MONTANA",name:"Medicare Part B Montana *",id:"3451"},
+		NE:{term:"NEBRASKA",name:"Medicare Part B Nebraska *",id:"3452"},
+		NV:{term:"NEVADA",name:"Medicare Part B Nevada *",id:"3453"},
+		NH:{term:"NEW HAMPSHIRE",name:"Medicare Part B New Hampshire *",id:"3454"},
+		NJ:{term:"NEW JERSEY",name:"Medicare Part B New Jersey *",id:"3455"},
+		NM:{term:"NEW MEXICO",name:"Medicare Part B New Mexico *",id:"3456"},
+		NY:{term:"NEW YORK",name:"Medicare Part B New York *",id:"3457"},
+		NC:{term:"NORTH CAROLINA",name:"Medicare Part B North Carolina *",id:"3459"},
+		ND:{term:"NORTH DAKOTA",name:"Medicare Part B North Dakota *",id:"3460"},
+		OH:{term:"OHIO",name:"Medicare Part B Ohio *",id:"3463"},
+		OK:{term:"OKLAHOMA",name:"Medicare Part B Oklahoma *",id:"3464"},
+		OR:{term:"OREGON",name:"Medicare Part B Oregon *",id:"3465"},
+		PA:{term:"PENNSYLVANIA",name:"Medicare Part B Pennsylvania *",id:"3466"},
+		RI:{term:"RHODE ISLAND",name:"Medicare Part B Rhode Island *",id:"3467"},
+		SC:{term:"SOUTH CAROLINA",name:"Medicare Part B South Carolina *",id:"3468"},
+		SD:{term:"SOUTH DAKOTA",name:"Medicare Part B South Dakota *",id:"3469"},
+		TN:{term:"TENNESSEE",name:"Medicare Part B Tennessee *",id:"3470"},
+		TX:{term:"TEXAS",name:"Medicare Part B Texas *",id:"3471"},
+		UT:{term:"UTAH",name:"Medicare Part B Utah *",id:"3473"},
+		VT:{term:"VERMONT",name:"Medicare Part B Vermont *",id:"3474"},
+		VA:{term:"VIRGINIA",name:"Medicare Part B Virginia *",id:"3475"},
+		WA:{term:"WASHINGTON",name:"Medicare Part B Washington *",id:"3476"},
+		DC:{term:"DISTRICT OF COLUMBIA",name:"Medicare Part B Washington DC *",id:"3477"},
+		WV:{term:"WEST VIRGINIA",name:"Medicare Part B West Virginia *",id:"3478"},
+		WI:{term:"WISCONSIN",name:"Medicare Part B Wisconsin",id:"3480"},
+		WY:{term:"WYOMING",name:"Medicare Part B Wyoming *",id:"3481"}
+	}
 }

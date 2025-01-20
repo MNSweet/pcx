@@ -144,7 +144,7 @@ class PCX {
 	}
 
 	/**
-	 * findEl
+	 * findEls
 	 * @param  STRING 		selector	DOM Selector string
 	 * @return NODE|BOOL				Found: NODE | Missing: FALSE
 	 *
