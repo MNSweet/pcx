@@ -66,6 +66,11 @@ if(PCX.preferedUserMode()) {
 			UploadSpan		: '.upload span',
 			ICDCodesInput	: '#MainContent_ctl00_ctl00_ctrlICDCodes_tbList_tbText',
 			PreformingLab	: '#ddPerformingLabId',
+			StateDropdown	: '#MainContent_ctl00_AddressControl1_CountryState_ddState',
+			InsuranceLookup	: '#MainContent_ctl00_PrimaryInsurance_tbInsurance_tbText',
+			InsuranceID		: '#MainContent_ctl00_PrimaryInsurance_tbInsurance_tbID',
+			InsuranceList	: '#ui-id-2',
+
 
 			// Disable Tab Index
 			SearchPatient	: '#btnAddEditPatient+#btnSearchPatient',
@@ -171,6 +176,7 @@ if(PCX.preferedUserMode()) {
 			Race			: '#MainContent_ctl00_ddRace_ddControl option:checked',
 			Address1		: '#MainContent_ctl00_AddressControl1_tbAddress1',
 			Address2		: '#MainContent_ctl00_AddressControl1_tbAddress2',
+			StateDropdown	: '#MainContent_ctl00_AddressControl1_CountryState_ddState',
 			State			: '#MainContent_ctl00_AddressControl1_CountryState_ddState option:checked',
 			City			: '#MainContent_ctl00_AddressControl1_tbCity',
 			Zip				: '#MainContent_ctl00_AddressControl1_tbZipCode',
