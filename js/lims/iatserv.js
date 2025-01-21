@@ -292,6 +292,7 @@ class IATSERV {
 						
 						//if(PCX.processEnabled("Automation_SetLabByTestCode",true)) {
 							PCX.getEl(el.PreformingLab,true).value = testCategories[elCategory.value].LabCode;
+							PCX.getEl(el.PreformingLab,true).dispatchEvent(new Event('change'));
 						//}
 
 			PCX.getEl(el.ICDCodesInput+"~.body",true).insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
