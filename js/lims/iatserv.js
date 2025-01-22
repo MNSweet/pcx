@@ -169,7 +169,17 @@ class IATSERV {
 			if(!asc.classList.contains('processCopyTo')){
 		//console.log(asc);
 				asc.classList.add('processCopyTo');
-				
+
+				//?LinkId=2071&AccessionId=15489&_ml=9&_mlp=5
+				let anchor = asc.querySelector('a[href*="/ViewAccession.aspx?AccessionId="]')
+
+				// Regular expression to extract AccessionId
+				let match = anchor.getAttribute('href').match(/AccessionId=(\d+)&?/);
+
+				if (match) {
+					anchor.setAttribute('href', `/?LinkId=2071&AccessionId=${match[1]}&_ml=9&_mlp=5`);
+				}
+
 				const copyTo = PCX.createDOM("span", {});
 				copyTo.innerText = "📋 ";
 				asc.innerHTML = copyTo.outerHTML + asc.innerHTML;
