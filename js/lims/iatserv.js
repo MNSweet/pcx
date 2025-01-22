@@ -135,15 +135,23 @@ class IATSERV {
 		]
 
 		for (const [i,column] of Object.entries(overrides)) {
-			if (headings.includes(column.heading) && headings.includes('Accession')) {
-				let rowData = document.querySelectorAll('.dxgvDataRow_Metropolis');
-				if(rowData.length){
-					rowData.forEach((row) => {
+			let rowData = document.querySelectorAll('.dxgvDataRow_Metropolis');
+			if(rowData.length){
+				rowData.forEach((row) => {
+					row.querySelectorAll('.dxgv').forEach((td)=>{
+						let text = td.innerText.replace(/[^a-zA-Z0-9]/g, "");
+						if(text == "") {return;}
+						td.classList.add(text);
+					});
+   
+					if (headings.includes(column.heading) && headings.includes('Accession')) {
 						let accessionID = row.querySelector('td:nth-child('+(headings.indexOf('Accession')+1)+') a').getAttribute('onclick').replace(/ShowForm\((\d*),this\)/i,'$1');
 						let columnLinkTD = row.querySelector('td:nth-child('+(headings.indexOf(column.heading)+1)+')');
 
 						columnLinkTD.innerHTML = `<a href="/?LinkId=${column.linkId}&AccessionId=${accessionID}" target="_blank">${column.text}</a>`
-					});
+					}
+				});
+				if (headings.includes(column.heading) && headings.includes('Accession')) {
 					PCX.getEl('#MainContent_ctl00_grid_DXHeadersRow0 td:nth-child('+(headings.indexOf(column.heading)+1)+ ')',true).textContent = column.text;
 				}
 			}

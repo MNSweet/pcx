@@ -193,6 +193,26 @@
 .signature #MainContent_ctl00_ctl00_PlacePatientAuthorizeText + .form-group.col-lg-2.new-row + .form-group.col-lg-2{
 	opacity: 1;
 	max-height: 190px;
+
+.BillingHold {
+	background-color: #f1f1f1;
+}
+
+.BillingAccepted {
+	background-color: #e9ffe9;
+}
+
+.BillingRejected,
+.Rejected {
+	background-color: #fff1e9;
+}
+
+.BillingScrubbing {
+	background-color: #e9e9ff;
+}
+
+.Neuro, .Immuno, .CGX, .Wound, .UTI {
+	font-weight: bold;
 }
 
 /*#page-wrapper .container-fluid {
