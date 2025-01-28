@@ -178,6 +178,73 @@
 	font-family: monospace;
 	min-height: 2em;
 	width: 100%;
+
+.nosignature #MainContent_ctl00_ctl00_PlacePhysicianAuthorizeText,
+.nosignature #MainContent_ctl00_ctl00_PlacePatientAuthorizeText,
+.nosignature #MainContent_ctl00_ctl00_PlacePatientAuthorizeText + .form-group.col-lg-2.new-row,
+.nosignature #MainContent_ctl00_ctl00_PlacePatientAuthorizeText + .form-group.col-lg-2.new-row + .form-group.col-lg-2{
+	opacity: 0;
+	transition: opacity 0.26s ease, max-height 0.26s ease;
+	max-height: 0px;
+}
+
+#showSignature {
+	margin: 0 15px;
+	width: calc(100% - 42px);
+}
+
+.signature #showSignature {
+	display: none;
+}
+
+.signature #MainContent_ctl00_ctl00_PlacePhysicianAuthorizeText,
+.signature #MainContent_ctl00_ctl00_PlacePatientAuthorizeText,
+.signature #MainContent_ctl00_ctl00_PlacePatientAuthorizeText + .form-group.col-lg-2.new-row,
+.signature #MainContent_ctl00_ctl00_PlacePatientAuthorizeText + .form-group.col-lg-2.new-row + .form-group.col-lg-2{
+	opacity: 1;
+	max-height: 190px;
+}
+
+.BillingHold {
+	background-color: #f1f1f1;
+}
+
+.BillingAccepted {
+	background-color: #e9ffe9;
+}
+
+.BillingRejected,
+.Rejected {
+	background-color: #fff1e9;
+}
+
+.BillingScrubbing {
+	background-color: #e9e9ff;
+}
+
+.Billed {
+    background-color: #e3e3e3;
+    color: #767676;
+}
+
+.Neuro, .Immuno, .CGX, .Wound, .UTI {
+	font-weight: bold;
+}
+
+.PrinceLaboratories {
+	background-color: #edd2ff;
+}
+
+.PrincipleDiagnostics {
+	background-color: #ffd9bb;
+}
+
+.SureQuestDiagnostics {
+	background-color: #f2ffad;
+}
+
+.ReliableResultLabs {
+	background-color: #ffbbbb;
 }
 
 /*#page-wrapper .container-fluid {

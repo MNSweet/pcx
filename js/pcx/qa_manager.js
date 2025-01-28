@@ -159,6 +159,7 @@ class QAManager {
 
 		if(IATSERV.linkId == "2011" && IATSERV.type == "acs" && stabilityAge <= 90 && stabilityAge >= 60){
 			PCX.getEl(IATSERV.selectors.PreformingLab,true).value = 1013; // Principle's ID
+			PCX.getEl(IATSERV.selectors.PreformingLab,true).dispatchEvent(new Event('change'));
 		}
 
 		if(!PCX.findEl('#stabilityNotice')) {
