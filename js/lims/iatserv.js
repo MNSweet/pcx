@@ -138,7 +138,7 @@ class IATSERV {
 		let headingRow = PCX.getEl('#MainContent_ctl00_grid_DXHeadersRow0',true);
 		if(!headingRow){return;}
 		let headings = headingRow.textContent.replaceAll('\t','').replaceAll('\n','').split(" ");
-		
+		PCX.getEls('input[type="text"].dxeEditArea_Metropolis:not(.select)',true).forEach((input)=>{input.addEventListener('focus',(e)=>{e.target.select();e.target.classList.add('select')})});
 		const overrides = [
 			{heading:"Alt ID 1",linkId:2461,text:"Results"},
 			{heading:"Alt ID 2",linkId:0,text:""},
@@ -1074,7 +1074,7 @@ if(true){//just in case to disabled it quickly
 						}
 
 						if(qa.result){
-							if((tokens.includes('NEG') && tokens.includes('POS')) || (!tokens.includes('NEG') && !tokens.includes('POS'))) {
+							if(!tokens.includes('NEG') && !tokens.includes('POS') && !tokens.includes('QNS')) {
 								QAManager.addNotice("FileUpload1","<h4>Quick Note</h4>The file you just uploaded appear to not have it's result status set: <pre>" + file.name + "</pre>");
 								showDialog = true;
 							}

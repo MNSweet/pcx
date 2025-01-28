@@ -213,7 +213,7 @@ if(PCX.preferedUserMode()) {
 		IATSERV.setSelectors({
 			UploadTable	: '#uploadTable',
 			UploadSpan	: '.upload span'
-		},false,false,"#dvFooter");
+		});
 
 		IATSERV.fileDrop({
 			enabled	: true,
@@ -221,7 +221,7 @@ if(PCX.preferedUserMode()) {
 			acsID	: PCX.getEl("#lblAccession a").href.match(/(\d*)$/gm)[0],
 			patient	: PCX.getEl("#lblPatient").textContent.toUpperCase().split(' '),
 			result	: true
-		});
+		},false,false,"#dvFooter");
 	}
 
 	// Locations
