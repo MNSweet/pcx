@@ -1,0 +1,128 @@
+body {
+	font-family: Arial, sans-serif;
+	background-color: #f9f9f9;
+	color: #333;
+	margin: 0;
+	padding: 38px 0 0 0;
+	font-size: 14px;
+}
+
+.tab-container {
+	display: flex;
+	background-color: #eaeaea;
+	border-bottom: 2px solid #d3d3d3;
+	position: fixed;
+    width: 100%;
+    top: 0;
+}
+
+.tab-button {
+	flex: 1;
+	padding: 10px;
+	border: none;
+	background: none;
+	cursor: pointer;
+	font-size: 14px;
+	transition: background 0.3s ease;
+}
+
+.tab-button.active {
+	background-color: #d6c3ff;
+	color: #333;
+	font-weight: bold;
+}
+
+.tab-content {
+	display: none;
+	padding: 15px;
+}
+
+.tab-content.active {
+	display: block;
+}
+
+.toggle-switch {
+	appearance: none;
+	width: 40px;
+	height: 20px;
+	background: #ccc;
+	border-radius: 10px;
+	position: relative;
+	cursor: pointer;
+	transition: background 0.3s ease;
+}
+
+.toggle-switch:checked {
+	background: #b399ff;
+}
+
+.toggle-switch::before {
+	content: "";
+	position: absolute;
+	width: 18px;
+	height: 18px;
+	background: white;
+	border-radius: 50%;
+	top: 1px;
+	left: 1px;
+	transition: transform 0.3s ease;
+}
+
+.toggle-switch:checked::before {
+	transform: translateX(20px);
+}
+
+/* Field Setting */
+.settingsField {
+	display: flex;
+	align-items: center;
+}
+.settingsFieldInput {
+
+}
+.settingsFieldText {
+
+}
+
+
+/* Markdown */
+#markdown-viewer h2 {
+    border-bottom: 1px solid;
+}
+
+#markdown-viewer h3 {
+    border-bottom: 1px dashed;
+}
+
+#markdown-viewer table {
+	width: 100%;
+	border: 1px solid;
+}
+
+#markdown-viewer tbody tr {
+	background-color: #eeeeee;
+}
+
+#markdown-viewer tbody tr td {
+	padding: 5px 5px;
+}
+
+#markdown-viewer thead {
+	background-color: #d6c3ff;
+}
+
+#markdown-viewer thead th {
+	padding: 5px 10px;
+}
+
+#markdown-viewer a {
+	text-decoration: none;
+	color: #6029d8;
+	font-weight: bold;
+}
+
+#markdown-viewer blockquote {
+	border-left: 4px solid #d6c3ff;
+	margin-inline-start: 10px;
+	padding-left: 10px;
+}

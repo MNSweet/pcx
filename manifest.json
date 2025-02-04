@@ -10,7 +10,9 @@
 		"scripting",
 		"clipboardRead",
 		"clipboardWrite",
-		"notifications"
+		"notifications",
+		"sidePanel",
+		"contextMenus"
 	],
 	"icons": {
 		"16": "icons/default-icon-16.png",
@@ -65,7 +67,8 @@
 				"js/labs/lab_pl.js",
 				"js/labs/lab_rr.js",
 				"js/labs/lab_pd.js",
-				"js/pcx/qa_manager.js"
+				"js/pcx/qa_manager.js",
+				"js/libs/marked.min.js"
 			],
 			"matches": [
 				"https://prince.iatserv.com/*",

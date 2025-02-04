@@ -142,14 +142,15 @@ class ServiceWorker {
 	static async getSite(request,sender) {
 		ServiceWorker.getCurrentSite().then((site) => {
 			console.log(site)
-        	chrome.tabs.sendMessage(sender.tab.id, {"action":"returnSite", "site": site});
+			chrome.tabs.sendMessage(sender.tab.id, {"action":"returnSite", "site": site});
 		}).catch((error) => {
-        	chrome.tabs.sendMessage(sender.tab.id, {"action":"error", "note": "returnSite failed", "error": error});
+			chrome.tabs.sendMessage(sender.tab.id, {"action":"error", "note": "returnSite failed", "error": error});
 		});
 		return true; // Indicates the response will be sent asynchronously
 	}
 
-	static handleTabUpdate(tabId, tabUrl) {
+	static async handleTabUpdate(tabId, tabUrl) {
+		console.log("handleTabUpdate: ",tabId, tabUrl);
 		if (
 			!tabUrl || 
 			(
@@ -158,11 +159,22 @@ class ServiceWorker {
 				&& !tabUrl.startsWith(ServiceWorker.options.domains.pd)
 			)
 		) {
+		console.log("handleTabUpdate: false");
 			//Tab URL does not match
 			ServiceWorker.changeExtensionIcon(false);
+			await chrome.sidePanel.setOptions({
+				tabId,
+				enabled: false
+			});
 		} else {
+		console.log("handleTabUpdate: true");
 			//Tab URL matches
 			ServiceWorker.changeExtensionIcon(true);
+			await chrome.sidePanel.setOptions({
+				tabId,
+				path: 'sidebar.html',
+				enabled: true
+			});
 		}
 	}
 
@@ -175,6 +187,11 @@ class ServiceWorker {
 		});
 	}
 }
+
+chrome.sidePanel
+  .setPanelBehavior({ openPanelOnActionClick: true })
+  .catch((error) => console.error(error));
+
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 	if (request.action === 'initPatientTransfer') {
@@ -195,14 +212,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 // Listen for tab activations
-chrome.tabs.onActivated.addListener(function (info) {
-	chrome.tabs.get(info.tabId, function (tab) {
+chrome.tabs.onActivated.addListener((info) => {
+	chrome.tabs.get(info.tabId, (tab) => {
 		ServiceWorker.handleTabUpdate(tab.id, tab.url);
 	});
 });
 
 // Listen for tab updates
-chrome.tabs.onUpdated.addListener(function (tabId, change, tab) {
+chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
 	if (change.url) {
 		ServiceWorker.handleTabUpdate(tabId, change.url);
 	}
