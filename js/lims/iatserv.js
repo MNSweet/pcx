@@ -161,13 +161,11 @@ class IATSERV {
 
 
 	static columnReportsParser() {
-		//console.log("columnReportsParser");
 		let count = document.querySelectorAll('[id^=MainContent_ctl00_grid_tccell]:not(.processCopyTo)').length;
 
 		if(count <= 0){ return; }
 		document.querySelectorAll('[id^=MainContent_ctl00_grid_tccell]').forEach((asc) => {
 			if(!asc.classList.contains('processCopyTo')){
-		//console.log(asc);
 				asc.classList.add('processCopyTo');
 
 				//?LinkId=2071&AccessionId=15489&_ml=9&_mlp=5
@@ -185,14 +183,12 @@ class IATSERV {
 				asc.innerHTML = copyTo.outerHTML + asc.innerHTML;
 				if(count == 1){
 					let quickClipboard = asc.querySelector('a').innerText + "\t" + asc.nextSibling.innerText;
-					console.log(quickClipboard);
 					PCX.copyToClipboard(quickClipboard);
 				}
 				asc.querySelector('span').addEventListener('click', (e)=>{
 					let td = e.target.parentNode;
 					//console.log(td);
 					let clipboard = td.querySelector('a').innerText + "\t" + td.nextSibling.innerText;
-					console.log(clipboard);
 					PCX.copyToClipboard(clipboard);
 				});
 			}
@@ -220,8 +216,6 @@ class IATSERV {
  * 
  *************************************************************************************/
 
-
-     
 	/**
 	 * columnLocationParser
 	 *
@@ -477,7 +471,7 @@ class IATSERV {
 					if(["","AA","AE","AP"].includes(option.value)){return;}
 					option.innerText = option.value + " - " + option.innerText;
 				});
-if(true){//just in case to disabled it quickly
+
 				let stateDropdown = PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.StateDropdown);
 				PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.InsuranceLookup).addEventListener('focus',(e)=>{
 					let input = e.target;
@@ -503,7 +497,7 @@ if(true){//just in case to disabled it quickly
 					}
 					input.placeholder = "Insurance";
 				});
-};
+
 
 				const removeIframeTabIndexSelectors = [
 					el.SSN, el.LicenseState, el.LicenseNumber, el.CopyColumnBTN1, el.CopyColumnBTN2,
@@ -533,14 +527,15 @@ if(true){//just in case to disabled it quickly
 	static scanFilenamer() {
 		// Define the object with keywords and corresponding values
 		let type = "REQ";  // Default type if no match is found
+		let fs = " FS";
 		const locationKeywords = {
 			"ABCO": "",
-			"AXXESSRX": " AND FS",
-			"MONROE": " AND FS",
+			"AXXESSRX": fs,
+			"MONROE": fs,
 			"RELIABLE": "",
-			"TKS": " AND FS",
-			"SNL": " AND FS",
-			"VIBRANT": " AND FS"
+			"TKS": fs,
+			"SNL": fs,
+			"VIBRANT": fs
 			//"SAFE": ""
 		};
 
@@ -559,15 +554,13 @@ if(true){//just in case to disabled it quickly
 			}
 
 			// Grab the value of the PATIENT field and remove commas
-			const patient = document.querySelector('#MainContent_ctl00_tbPatient_tbText').value;
+			const patient = PCX.getEl('#MainContent_ctl00_tbPatient_tbText',true).value;
 			const name = patient.replace(/,/g, '');  // Remove commas from the patient name
 
-			// Get the current date in MM.DD.YY format
-			const today = new Date();
-			const date = `${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getDate().toString().padStart(2, '0')}.${today.getFullYear().toString().slice(-2)}`;
+			const acsNum = PCX.getEl('#MainContent_ctl00_tbAccession',true).value;
 
 			// Create the final string
-			const labelString = `${type} ${date} ${name}`;
+			const labelString = `${type} ${acsNum} ${name}`;
 
 			// Log the result to the console
 			//console.log(labelString);

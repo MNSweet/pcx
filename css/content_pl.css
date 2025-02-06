@@ -217,7 +217,7 @@
     color: #767676;
 }
 
-.Neuro, .Immuno, .CGX, .Wound, .UTI {
+.Neuro, .Immuno, .CGX, .Wound, .UTI, .COVIDFluRSVPlus, .STI {
 	font-weight: bold;
 }
 
