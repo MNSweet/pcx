@@ -3,11 +3,6 @@ PCX.setLabPortal('PL');
 PCX.log(IATSERV.linkId);
 
 if(PCX.preferedUserMode()) {
-	/*IATSERV.setuiAutocomplete({ //id "ui-id-*#""
-		   location:	1,
-		   patient:		2,
-		   testCode:	7
-	});*/
 
 	IATSERV.setLabs({
 		   2: {Code:"IP",	Label:"Ipseity Diagnostics LLC",Stability:{NGS: 90}},
@@ -33,6 +28,15 @@ if(PCX.preferedUserMode()) {
 		15: {Code:"Thyroid",		Test:"THYROID",	Lab:'PL', LabCode:1012},// Panel - THYROID GENETIC DISEASE
 		16: {Code:"Diabetes",		Test:"",		Lab:'PL', LabCode:1012},// -- 
 		17: {Code:"Cardio",			Test:"CARDIO",	Lab:'PL', LabCode:1012}	// Panel - CARDIO-PULMONARY
+	});
+	
+	const keybindings = new Keybinding({
+		"n"			: { type: "open", target: "_accessionNew", 	url: "https://prince.iatserv.com/?LinkId=2011&type=acs&_ml=7&_mlp=5", whitelist: ["LinkId=2011","LinkId=2071"] },
+		"shift+n"	: { type: "open", target: "_accessionList",	url: "https://prince.iatserv.com/?LinkId=2070&_ml=9&_mlp=5", whitelist: ["LinkId=2070"] },
+		"d"			: { type: "open", target: "_locationNew",	url: "https://prince.iatserv.com/?LinkId=2006&_ml=30&_mlp=12", whitelist: ["LinkId=2006"] },
+		"shift+d"	: { type: "open", target: "_locationList",	url: "https://prince.iatserv.com/?LinkId=2004&_ml=31&_mlp=12", whitelist: ["LinkId=2004"] }//,
+		//"s"			: { type: "click", selector: "button.submit" },
+		//"c": { type: "callback", callback: () => alert("Custom callback executed!") }
 	});
 
 	// Accession List
