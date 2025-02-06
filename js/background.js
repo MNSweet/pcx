@@ -194,6 +194,77 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 	}
 });
 
+const tabWhitelists = {}; // Stores whitelist per tab
+const tabTargets = {}; // Stores tabId for each named target
+
+chrome.runtime.onMessage.addListener((message, sender) => {
+    if (message.action === "openWindow") {
+        handleOpenWindow(message.target, message.url, message.whitelist);
+    }
+});
+
+function handleOpenWindow(target, url, whitelist) {
+    // Check if the tab is still open
+    if (tabTargets[target]) {
+        chrome.tabs.get(tabTargets[target], (tab) => {
+            if (chrome.runtime.lastError || !tab) {
+                // If the tab doesn't exist anymore, open a new one
+                createNewTab(target, url, whitelist);
+            } else if (tab.id === senderTabId) {
+                // If the keybinding is triggered on the assigned tab, refresh it
+                chrome.tabs.reload(tab.id);
+            } else {
+                // Tab exists, bring it to focus
+                chrome.tabs.update(tabTargets[target], { active: true });
+            }
+        });
+    } else {
+        // No existing tab, open a new one
+        createNewTab(target, url, whitelist);
+    }
+}
+
+function createNewTab(target, url, whitelist) {
+    chrome.tabs.create({ url }, (tab) => {
+        tabTargets[target] = tab.id; // Store the tab ID for tracking
+        tabWhitelists[tab.id] = whitelist;
+    });
+}
+
+// Listen for web navigation events to enforce whitelists
+chrome.webNavigation.onCommitted.addListener((details) => {
+    const whitelist = tabWhitelists[details.tabId];
+
+    if (!whitelist) {
+        return; // Skip if no whitelist is set for this tab
+    }
+
+    const isAllowed = whitelist.some(keyword => details.url.includes(keyword));
+
+    if (!isAllowed) {
+        // Remove tracking since navigation went outside the whitelist
+	    delete tabWhitelists[details.tabId];
+
+	    // Remove from `tabTargets` if the tabId was associated with a target
+	    const targetName = Object.keys(tabTargets).find(key => tabTargets[key] === details.tabId);
+	    if (targetName) {
+	        delete tabTargets[targetName];
+	    }
+    }
+}, { url: [{ schemes: ["http", "https"] }] });
+
+// Cleanup when a tab is closed
+chrome.tabs.onRemoved.addListener((tabId) => {
+    delete tabWhitelists[tabId];
+
+    // Remove from `tabTargets` if the tabId was associated with a target
+    const targetName = Object.keys(tabTargets).find(key => tabTargets[key] === tabId);
+    if (targetName) {
+        delete tabTargets[targetName];
+    }
+});
+	
+
 // Listen for tab activations
 chrome.tabs.onActivated.addListener(function (info) {
 	chrome.tabs.get(info.tabId, function (tab) {
