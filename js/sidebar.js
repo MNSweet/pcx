@@ -1,5 +1,9 @@
-document.addEventListener("DOMContentLoaded", () => {
-	// Tab navigation
+document.addEventListener("DOMContentLoaded", async () => {
+	/**
+	 * 
+	 * Tab navigation
+	 * 
+	 */
 	document.querySelectorAll(".tab-button").forEach(button => {
 		button.addEventListener("click", () => {
 			document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
@@ -10,26 +14,11 @@ document.addEventListener("DOMContentLoaded", () => {
 		});
 	});
 
-	// Load settings from storage
-	chrome.storage.sync.get(["sidebarSettings"], (data) => {
-		const settings = data.sidebarSettings || {};
-		document.querySelectorAll(".toggle-switch").forEach((toggle) => {
-			const key = toggle.dataset.setting;
-			toggle.checked = settings[key] || false;
-		});
-	});
-
-	// Handle toggle switches
-	document.querySelectorAll(".toggle-switch").forEach((toggle) => {
-		toggle.addEventListener("change", (event) => {
-			chrome.storage.sync.get(["sidebarSettings"], (data) => {
-				const settings = data.sidebarSettings || {};
-				settings[event.target.dataset.setting] = event.target.checked;
-				chrome.storage.sync.set({ sidebarSettings: settings });
-			});
-		});
-	});
-
+	/**
+	 * 
+	 * Readme
+	 * 
+	 */
 	const markdownViewer = document.getElementById("markdown-viewer");
 
 	function loadMarkdown(file) {
@@ -57,4 +46,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	// Initial load of README.md
 	loadMarkdown("README.md");
+
+	/**
+	 * 
+	 * Settings
+	 * 
+	 */
+	const settingsContainer = document.getElementById("settings-container");
+
+	async function loadSettingsUI() {
+		let settings = await DataHandler.get("chrome", "settings");
+		settingsContainer.innerHTML = "";
+
+		Object.keys(settings).forEach(category => {
+			let categoryHeader = document.createElement("h3");
+			categoryHeader.textContent = category;
+			settingsContainer.appendChild(categoryHeader);
+
+			Object.keys(settings[category]).forEach(permission => {
+				let label = document.createElement("label");
+				label.innerHTML = `<input type="checkbox" class="toggle-switch" data-category="${category}" data-permission="${permission}"> ${permission}`;
+				settingsContainer.appendChild(label);
+			});
+		});
+
+		// Load existing settings states
+		document.querySelectorAll(".toggle-switch").forEach(input => {
+			let category = input.dataset.category;
+			let permission = input.dataset.permission;
+			input.checked = settings[category][permission];
+
+			input.addEventListener("change", async () => {
+				settings[category][permission] = input.checked;
+				await DataHandler.set("chrome", "settings", settings);
+			});
+		});
+	}
+
+	loadSettingsUI();
 });
