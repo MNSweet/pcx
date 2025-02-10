@@ -52,35 +52,69 @@ document.addEventListener("DOMContentLoaded", async () => {
 	 * Settings
 	 * 
 	 */
-	const settingsContainer = document.getElementById("settings-container");
-
 	async function loadSettingsUI() {
-		let settings = await DataHandler.get("chrome", "settings");
-		settingsContainer.innerHTML = "";
+		let settings = await Settings.get() || {};
+		let container = PCX.getEl("#settings-container");
 
-		Object.keys(settings).forEach(category => {
-			let categoryHeader = document.createElement("h3");
-			categoryHeader.textContent = category;
-			settingsContainer.appendChild(categoryHeader);
+		if (!container) {
+			PCX.log("Error: #settings-container not found.");
+			return;
+		}
 
-			Object.keys(settings[category]).forEach(permission => {
-				let label = document.createElement("label");
-				label.innerHTML = `<input type="checkbox" class="toggle-switch" data-category="${category}" data-permission="${permission}"> ${permission}`;
-				settingsContainer.appendChild(label);
+		container.innerHTML = ""; // Clear existing UI
+
+		for (const [category, permissions] of Object.entries(settings)) {
+			let categoryDiv = PCX.createDOM("div", {
+				classList: "settings-category"
 			});
-		});
 
-		// Load existing settings states
-		document.querySelectorAll(".toggle-switch").forEach(input => {
-			let category = input.dataset.category;
-			let permission = input.dataset.permission;
-			input.checked = settings[category][permission];
-
-			input.addEventListener("change", async () => {
-				settings[category][permission] = input.checked;
-				await DataHandler.set("chrome", "settings", settings);
+			let categoryHeader = PCX.createDOM("h3", {
+				innerText: category
 			});
-		});
+			categoryDiv.appendChild(categoryHeader);
+
+			// Convert object to an array and sort by priority, then alphabetically
+			const sortedPermissions = Object.entries(permissions).sort((a, b) => {
+				let metadataA = Settings.PERMISSION_STRUCTURE[category]?.[a[0]] || { priority: 10 };
+				let metadataB = Settings.PERMISSION_STRUCTURE[category]?.[b[0]] || { priority: 10 };
+
+				return metadataA.priority - metadataB.priority || a[0].localeCompare(b[0]);
+			});
+
+			for (const [key, value] of sortedPermissions) {
+				let metadata = Settings.PERMISSION_STRUCTURE[category]?.[key] || { description: "", priority: 10 };
+
+				let settingLabel = PCX.createDOM("label", {
+					classList: "settingsField"
+				});
+
+				let inputCheckbox = PCX.createDOM("input", {
+					type: "checkbox",
+					classList: "settingsFieldInput toggle-switch",
+					"data-category": category,
+					"data-permission": key,
+					checked: value
+				});
+
+				let contentDiv = PCX.createDOM("div", {
+					classList: "settingsFieldContent",
+					innerHTML: `
+						<span class="settingsFieldText">${key}</span>
+						<span class="settingsFieldDesc">${metadata.description}</span>
+					`
+				});
+
+				inputCheckbox.addEventListener("change", async (event) => {
+					await Settings.save(category, key, event.target.checked);
+				});
+
+				settingLabel.appendChild(inputCheckbox);
+				settingLabel.appendChild(contentDiv);
+				categoryDiv.appendChild(settingLabel);
+			}
+
+			container.appendChild(categoryDiv);
+		}
 	}
 
 	loadSettingsUI();

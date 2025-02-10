@@ -7,14 +7,14 @@ class DataHandler {
 	];
 
 	// Generic get method to retrieve data from various storage types
-	static async get(storageType, key, table = null) {
+	static async get(storageType, key, preset = "", table = null) {
 		switch (storageType) {
 			case "chrome":
-				return await DataHandler.getFromChromeStorage(key);
+				return (await DataHandler.getFromChromeStorage(key)) ?? preset;
 			case "local":
-				return await DataHandler.getFromLocalStorage(key);
+				return (await DataHandler.getFromLocalStorage(key)) ?? preset;
 			case "indexedDB":
-				return await DataHandler.getFromIndexedDB(key, table);
+				return (await DataHandler.getFromIndexedDB(key, table)) ?? preset;
 			default:
 				throw new Error("Invalid storage type");
 		}
@@ -73,6 +73,12 @@ class DataHandler {
 		});
 	}
 
+	static async clearChromeStorage() {
+		return new Promise((resolve) => {
+			chrome.storage.local.clear(() => resolve());
+		});
+	}
+
 	// Local Storage Operations
 	static async getFromLocalStorage(key) {
 		try {
@@ -89,6 +95,10 @@ class DataHandler {
 
 	static async removeFromLocalStorage(key) {
 		localStorage.removeItem(key);
+	}
+
+	static async clearLocalStorage() {
+		localStorage.clear();
 	}
 
 	// IndexedDB Operations
@@ -113,6 +123,32 @@ class DataHandler {
 		});
 	}
 
+	// Retrieve data from IndexedDB
+	static async getFromIndexedDB(key, table = DataHandler.AccessionTable, dbName = DataHandler.IndexDB) {
+		const db = await DataHandler.openIndexedDB(dbName, table);
+		return new Promise((resolve, reject) => {
+			const transaction = db.transaction(table, "readonly");
+			const store = transaction.objectStore(table);
+			const request = store.get(key);
+
+			request.onsuccess = () => resolve(request.result || null);
+			request.onerror = () => reject("Error retrieving record from IndexedDB");
+		});
+	}
+
+	// Save data to IndexedDB
+	static async saveToIndexedDB(key, value, table = DataHandler.AccessionTable, dbName = DataHandler.IndexDB) {
+		const db = await DataHandler.openIndexedDB(dbName, table);
+		return new Promise((resolve, reject) => {
+			const transaction = db.transaction(table, "readwrite");
+			const store = transaction.objectStore(table);
+			const request = store.put({ ...value, Accession: key });
+
+			request.onsuccess = () => resolve();
+			request.onerror = () => reject("Error saving record to IndexedDB");
+		});
+	}
+
 	static async removeFromIndexedDB(key, table = DataHandler.AccessionTable, dbName = DataHandler.IndexDB) {
 		const db = await DataHandler.openIndexedDB(dbName, table);
 		return new Promise((resolve, reject) => {
@@ -121,7 +157,7 @@ class DataHandler {
 			const request = store.delete(key);
 
 			request.onsuccess = () => resolve();
-			request.onerror = () => reject("Error deleting record from IndexedDB");
+			request.onerror = () => reject(`Error deleting record ${key} from IndexedDB`);
 		});
 	}
 
@@ -131,11 +167,10 @@ class DataHandler {
 	}
 
 	static async updateLookupTables(record) {
-		const lookupFields = ["FirstName", "LastName", "TestCategory", "PerformingLab", "Code", "CollectionDate", "Received"];
-		for (const field of lookupFields) {
+		for (const field of DataHandler.LookupTables) {
 			const value = record[field];
 			if (!value) continue;
-			const key = value[0].toLowerCase();
+			const key = value[0].toLowerCase(); // Grab first letter of string
 			const lookupData = await DataHandler.get("indexedDB", key, field) || {};
 			if (!lookupData[value]) {
 				lookupData[value] = [];
@@ -145,11 +180,16 @@ class DataHandler {
 		}
 	}
 
-	static async searchByLookup(field, value) {
-		const key = value[0].toLowerCase();
-		const lookupData = await DataHandler.get("indexedDB", key, field);
-		if (lookupData && lookupData[value]) {
-			return await Promise.all(lookupData[value].map(id => DataHandler.get("indexedDB", id, DataHandler.AccessionTable)));
+	static async findRecords(fieldTable, value) {
+		if (!value || typeof value !== "string" || value.length === 0) {
+			return [];
+		}
+
+		const key = value[0].toLowerCase(); // Grab first letter of string
+		const lookupData = await DataHandler.getFromIndexedDB(key, fieldTable) ?? {};
+
+		if (lookupData[value]) {
+			return await Promise.all(lookupData[value].map(id => DataHandler.getFromIndexedDB(id, DataHandler.AccessionTable)));
 		}
 		return [];
 	}
@@ -169,6 +209,18 @@ class DataHandler {
 				resolve();
 			};
 			request.onerror = () => reject("Error rebuilding lookup tables");
+		});
+	}
+
+	static async clearIndexedDB(table = DataHandler.AccessionTable, dbName = DataHandler.IndexDB) {
+		const db = await DataHandler.openIndexedDB(dbName, table);
+		return new Promise((resolve, reject) => {
+			const transaction = db.transaction(table, "readwrite");
+			const store = transaction.objectStore(table);
+			const request = store.clear();
+
+			request.onsuccess = () => resolve();
+			request.onerror = () => reject(`Error clearing table ${table} from IndexedDB`);
 		});
 	}
 }

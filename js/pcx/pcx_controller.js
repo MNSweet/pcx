@@ -18,7 +18,7 @@ class PCX {
 
 /**
  * 
- * Local Storage Operations
+ * Event Handlers 
  * 
  */
 	static events = {
@@ -29,62 +29,6 @@ class PCX {
 		Enter	: {bubbles: true, cancelable: false,shiftKey: false, keyCode: 13,	code: "Enter",		key: "Enter"},
 
 	};
-	// Page Element points to avoid multiple queries
-	static pageElementsCache = {};
-	
-	/**
-	 * setLocalStorage 
-	 * @param STRING		key		A unique idenifer for the storage to pull from later
-	 * @param STRING(IFY)	value	Storaged as a string however the contents can be anything
-	 *
-	 * Used to add data to the storage
-	 */
-	static setLocalStorage(key, value) {
-		chrome.storage.local.set({ [key]: value }, () => {
-			PCX.log(`Stored ${key}: ${value}`);
-		});
-	}
-
-	/**
-	 * getLocalStorage 
-	 * @param	STRING		key		A unique idenifer for the storage to pull from later
-	 * @param	FUNCTION	value	A function to manipulate the returned value
-	 * 
-	 * @return 	FUNCTION			output of callback
-	 *
-	 * Used to recall data from the storage
-	 */
-	static getLocalStorage(key, callback) {
-		chrome.storage.local.get([key], (result) => {
-			PCX.log(`Fetched ${key}: ${result[key]}`);
-			return callback(result[key]);
-		});
-	}
-
-
-	/**
-	 * clearLocalStorage 
-	 * 
-	 * Core functionality that purges all storage. Use With Caution!
-	 */
-	static clearLocalStorage() {
-		chrome.storage.local.clear(() => {
-			PCX.log("Local storage cleared");
-		});
-	}
-
-
-	/**
-	 * removeLocalStorage 
-	 * @param STRING	key		A unique idenifer for the storage to pull from later
-	 *
-	 * Used to purge a specific key/value pair from the storage
-	 */
-	static removeLocalStorage(key) {
-		chrome.storage.local.remove([key], () => {
-			PCX.log(`Removed key: ${key}`);
-		});
-	}
 
 
 /**
@@ -92,6 +36,8 @@ class PCX {
  * UI Interaction
  * 
  */
+	// Page Element points to avoid multiple queries
+	static pageElementsCache = {};
 
 	/**
 	 * getEl
@@ -312,7 +258,7 @@ class PCX {
 
 			if (remindTime > 0) {
 				const remindButton = PCX.createDOM("button", {textContent: `Don't remind me for ${remindTime} hours`, onclick: ()=>{
-					PCX.setLocalStorage("pcxid_" + id, Date.now() + remindTime * 3600000);
+					DataHandler.set("chrome","pcxid_" + id, Date.now() + remindTime * 3600000);
 					document.body.removeChild(modalContainer);
 					PCX.log(`User selected to not be reminded for ${remindTime} hours`);
 				}});
@@ -411,8 +357,15 @@ class PCX {
 		return window.location.pathname.split('/');
 	}
 
-	static processEnabled(processID,overrider = false) {
-		return PCX.getLocalStorage(processID, (result)=>{return result;});
+	static async processEnabled(category, key, trueCallback, callback) {
+		let result = await Settings.check(category, key, callback);
+
+		// Fetch permission metadata (fallback to default if undefined)
+		let metadata = Settings.PERMISSION_STRUCTURE[category]?.[key] || { description: "", priority: 10 };
+
+		console.log(`processEnabled: ${category} - ${key} =`, result, "Priority:", metadata.priority);
+
+		return result ? trueCallback?.() ?? true : result;
 	}
 
 

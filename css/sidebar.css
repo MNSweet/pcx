@@ -73,16 +73,41 @@ body {
 }
 
 /* Field Setting */
+.settings-category h3 {
+	margin: 35px 0 0 0;
+}
 .settingsField {
 	display: flex;
-	align-items: center;
+	align-items: stretch; /* Makes children stretch to the same height */
+	gap: 0.5rem; /* Adds spacing between elements */
+	padding: 0.5rem;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
+
 .settingsFieldInput {
-
+	flex-shrink: 0; /* Prevent shrinking */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 40px;
 }
+
+.settingsFieldContent {
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1; /* Takes remaining width */
+	justify-content: center; /* Centers text vertically */
+}
+
 .settingsFieldText {
-
+	font-weight: bold;
 }
+
+.settingsFieldDesc {
+	font-size: 0.85rem;
+	color: gray;
+}
+
 
 
 /* Markdown */

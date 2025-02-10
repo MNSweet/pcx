@@ -341,7 +341,7 @@ class IATSERV {
 	 * 
 	 */
 	static createAccession() {
-
+console.log('createAccession');
 		const el = IATSERV.selectors;
 
 		// Set Bill Type to Primary Insurance as default
@@ -423,6 +423,8 @@ class IATSERV {
 	}
 
 	static showSignaturesBTN(){
+
+console.log('showSignaturesBTN');
 		document.body.classList.add('nosignature');
 		let showSignatureBTN = PCX.createDOM("div", {id:"showSignature",innerText:"Show Signature Section",classList:"form-group col-lg-1 new-row btn btn-default"});
 		showSignatureBTN.addEventListener("click",()=>{
@@ -431,6 +433,33 @@ class IATSERV {
 		});
 		PCX.getEl("#MainContent_ctl00_ctl00_PlacePhysicianAuthorizeText",true)
 			.insertAdjacentElement("beforebegin",showSignatureBTN);
+
+		PCX.getEl("#MainContent_ctl00_ctl00_PlacePhysicianAuthorizeText")
+			.append(PCX.createDOM('style',{innerText:`.nosignature #MainContent_ctl00_ctl00_PlacePhysicianAuthorizeText,
+.nosignature #MainContent_ctl00_ctl00_PlacePatientAuthorizeText,
+.nosignature #MainContent_ctl00_ctl00_PlacePatientAuthorizeText + .form-group.col-lg-2.new-row,
+.nosignature #MainContent_ctl00_ctl00_PlacePatientAuthorizeText + .form-group.col-lg-2.new-row + .form-group.col-lg-2{
+	opacity: 0;
+	transition: opacity 0.26s ease, max-height 0.26s ease;
+	max-height: 0px;
+}
+
+#showSignature {
+	margin: 0 15px;
+	width: calc(100% - 42px);
+}
+
+.signature #showSignature {
+	display: none;
+}
+
+.signature #MainContent_ctl00_ctl00_PlacePhysicianAuthorizeText,
+.signature #MainContent_ctl00_ctl00_PlacePatientAuthorizeText,
+.signature #MainContent_ctl00_ctl00_PlacePatientAuthorizeText + .form-group.col-lg-2.new-row,
+.signature #MainContent_ctl00_ctl00_PlacePatientAuthorizeText + .form-group.col-lg-2.new-row + .form-group.col-lg-2{
+	opacity: 1;
+	max-height: 190px;
+}`}));
 	}
 
 	static async newPatientBtn(eventPtBtnClick) {
@@ -808,6 +837,7 @@ class IATSERV {
 	 * @function	async		dropZoneTimeOut()		
 	 */
 	static fileDrop(qa={enabled:false,acsNum:null,acsID:null,patient:null,result:false},target=false,targetSpan=false,scrollTo=false){
+console.log("fileDrop");
 		let 	isDragging 	= false;
 		const	el			= IATSERV.selectors;
 				el.DropArea		= target ? target : el.UploadTable;

@@ -41,7 +41,7 @@ if(PCX.preferedUserMode()) {
 
 	// Accession List
 	if (IATSERV.linkId == "2070") {
-		const intervalACSID = setInterval(IATSERV.columnParser, 500);
+		PCX.processEnabled('Interface','Accession List Enhanced Columns', ()=>{const intervalACSID = setInterval(IATSERV.columnParser, 500)});
 	}
 
 	// Create Accession
@@ -152,13 +152,14 @@ if(PCX.preferedUserMode()) {
 			Cancel			: '#MainContent_ctl00_btnCancel'
 			
 		});
-		IATSERV.createAccession();
-		IATSERV.showSignaturesBTN();
 
-		IATSERV.fileDrop({
-			enabled:false
-		});
-
+		PCX.processEnabled('SOP','New Accession Workflow',IATSERV.createAccession);
+		PCX.processEnabled('Interface','Hide Signatures',IATSERV.showSignaturesBTN);
+		PCX.processEnabled('Interface','Enabled FileDrop',
+			()=>{IATSERV.fileDrop({
+				enabled:false
+			})}
+		);
 		//IATSERV.scanFilenamer();
 	}
 
@@ -189,23 +190,27 @@ if(PCX.preferedUserMode()) {
 			UploadTable		: '#uploadTable',
 			UploadSpan		: '.upload span'
 		});
-		QAManager.setStablityNotice(
-			IATSERV.selectors.DOS,
-			PCX.getEl(IATSERV.selectors.DOC).value,
-			true
+		PCX.processEnabled('Interface','Show Stablity Notice',
+			()=>{QAManager.setStablityNotice(
+				IATSERV.selectors.DOS,
+				PCX.getEl(IATSERV.selectors.DOC).value,
+				true
+			)}
 		);
 
 		// Add BTN to copy PT data
-		IATSERV.capturePTData();
+		PCX.processEnabled('SOP','Patient Referrence Lab Transfer',IATSERV.capturePTData);
 
-		IATSERV.fileDrop({
-			enabled	: true,
-			acsNum	: PCX.getEl("#MainContent_ctl00_tbAccession").value,
-			acsID	: PCX.getEl("#tbAccessionId").value,
-			patient	: PCX.getEl("#MainContent_ctl00_tbPatient_tbText").value.toUpperCase().split(', ')
-		},false,false,"#dvFooter");
+		PCX.processEnabled('Interface','Enabled FileDrop',
+			()=>{IATSERV.fileDrop({
+				enabled	: true,
+				acsNum	: PCX.getEl("#MainContent_ctl00_tbAccession").value,
+				acsID	: PCX.getEl("#tbAccessionId").value,
+				patient	: PCX.getEl("#MainContent_ctl00_tbPatient_tbText").value.toUpperCase().split(', ')
+			},false,false,"#dvFooter")}
+		);
 
-		IATSERV.scanFilenamer();
+		PCX.processEnabled('SOP','REQ Filename to Clipboard on Scan',IATSERV.scanFilenamer);
 	}
 
 	// Results
@@ -215,23 +220,25 @@ if(PCX.preferedUserMode()) {
 			UploadSpan	: '.upload span'
 		},false,false,"#dvFooter");
 
-		IATSERV.fileDrop({
-			enabled	: true,
-			acsNum	: PCX.getEl("#lblAccession a").textContent,
-			acsID	: PCX.getEl("#lblAccession a").href.match(/(\d*)$/gm)[0],
-			patient	: PCX.getEl("#lblPatient").textContent.toUpperCase().split(' '),
-			result	: true
-		});
+		PCX.processEnabled('Interface','Enabled FileDrop',
+			()=>{IATSERV.fileDrop({
+				enabled	: true,
+				acsNum	: PCX.getEl("#lblAccession a").textContent,
+				acsID	: PCX.getEl("#lblAccession a").href.match(/(\d*)$/gm)[0],
+				patient	: PCX.getEl("#lblPatient").textContent.toUpperCase().split(' '),
+				result	: true
+			})}
+		);
 	}
 
 	// Locations
 	if (IATSERV.linkId == "2004") {
-		const intervalLocationID = setInterval(IATSERV.columnLocationParser, 500);
+		PCX.processEnabled('Interface','Location List Enhanced Columns', ()=>{const intervalLocationID = setInterval(IATSERV.columnLocationParser, 500)});
 	}
 
 	// Reports
 	if (IATSERV.linkId == "6001") {
-		const reportsIntervalACSID = setInterval(IATSERV.columnReportsParser, 500);
+		PCX.processEnabled('Interface','Reports Enhanced Columns', ()=>{const reportsIntervalACSID = setInterval(IATSERV.columnReportsParser, 500)});
 
 	}
 
