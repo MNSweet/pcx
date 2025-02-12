@@ -131,11 +131,12 @@ class IATSERV {
 		const overrides = [
 			{heading:"Alt ID 1",linkId:2461,text:"Results"},
 			{heading:"Alt ID 2",linkId:0,text:""},
-			{heading:"Alt ID 3",linkId:0,text:""} // Available
+			{heading:"Alt ID 3",linkId:0,text:"Benchmarks"} // Available
 		]
 
 		for (const [i,column] of Object.entries(overrides)) {
 			let rowData = document.querySelectorAll('.dxgvDataRow_Metropolis');
+			let prevTimeStamp = "";
 			if(rowData.length){
 				rowData.forEach((row) => {
 					row.querySelectorAll('.dxgv').forEach((td)=>{
@@ -144,11 +145,20 @@ class IATSERV {
 						td.classList.add(text);
 					});
    
-					if (headings.includes(column.heading) && headings.includes('Accession')) {
-						let accessionID = row.querySelector('td:nth-child('+(headings.indexOf('Accession')+1)+') a').getAttribute('onclick').replace(/ShowForm\((\d*),this\)/i,'$1');
-						let columnLinkTD = row.querySelector('td:nth-child('+(headings.indexOf(column.heading)+1)+')');
+					if (headings.includes(column.heading)) {
+						if (headings.includes('Accession')) {
+							let accessionID = row.querySelector('td:nth-child('+(headings.indexOf('Accession')+1)+') a').getAttribute('onclick').replace(/ShowForm\((\d*),this\)/i,'$1');
+							let columnLinkTD = row.querySelector('td:nth-child('+(headings.indexOf(column.heading)+1)+')');
 
-						columnLinkTD.innerHTML = `<a href="/?LinkId=${column.linkId}&AccessionId=${accessionID}" target="_blank">${column.text}</a>`
+							columnLinkTD.innerHTML = `<a href="/?LinkId=${column.linkId}&AccessionId=${accessionID}" target="_blank">${column.text}</a>`
+						}
+						if (headings.includes("Created Date Time") && column.heading == "Alt ID 3") {
+							let timeStamp = Date.parse(row.querySelector('td:nth-child('+(headings.indexOf('Accession')+1)+')').innerText);
+
+							let columnLinkTD = row.querySelector('td:nth-child('+(headings.indexOf(column.heading)+1)+')');
+
+							columnLinkTD.innerHTML = ``;
+						}
 					}
 				});
 				if (headings.includes(column.heading) && headings.includes('Accession')) {
@@ -164,6 +174,9 @@ class IATSERV {
 		let count = document.querySelectorAll('[id^=MainContent_ctl00_grid_tccell]:not(.processCopyTo)').length;
 
 		if(count <= 0){ return; }
+		let headingRow = PCX.getEl('#MainContent_ctl00_grid_DXHeadersRow0',true);
+		if(!headingRow){return;}
+		let headings = headingRow.textContent.replaceAll('\t','').replaceAll('\n','').split(" ");
 		document.querySelectorAll('[id^=MainContent_ctl00_grid_tccell]').forEach((asc) => {
 			if(!asc.classList.contains('processCopyTo')){
 				asc.classList.add('processCopyTo');
@@ -192,6 +205,22 @@ class IATSERV {
 				});
 			}
 		});
+		let rowData = document.querySelectorAll('.dxgvDataRow_Metropolis');
+		if(rowData.length){
+			rowData.forEach((row) => {
+				if (headings.includes('DOS')) {
+		            let dos = row.querySelector('td:nth-child(' + (headings.indexOf('DOS') + 2) + ')');
+		            let doc = new Date(dos.innerText.trim());
+		            let date = new Date();
+		            dos.classList.add('ngsDate');
+		            if (doc < (new Date(date)).setDate(date.getDate() - 90)) {
+		                dos.classList.add('ngs90');
+		            } else if (doc < (new Date(date)).setDate(date.getDate() - 60)) {
+		                dos.classList.add('ngs60');
+		            }
+				}
+			})
+		}
 	}
 /*************************************************************************************
  *

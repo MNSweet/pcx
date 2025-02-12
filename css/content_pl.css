@@ -211,6 +211,20 @@
 	background-color: #ffbbbb;
 }
 
+.ngsDate {
+	font-weight: bold;
+}
+
+.ngs90 {
+	background-color: #990000;
+	color:#ffffff;
+}
+
+.ngs60 {
+	background-color: #e58a00;
+	color:#ffffff;
+}
+
 /*#page-wrapper .container-fluid {
 	padding-bottom: 70px;
 	position: relative;
