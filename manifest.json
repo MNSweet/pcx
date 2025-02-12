@@ -77,7 +77,8 @@
 				"js/libs/marked.min.js",
 				"js/pcx/data.js",
 				"js/pcx/keybinding.js",
-				"js/pcx/settings.js"
+				"js/pcx/settings.js",
+				"js/data/permissions.js"
 			],
 			"matches": [
 				"https://prince.iatserv.com/*",

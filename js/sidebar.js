@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	 * 
 	 */
 	async function loadSettingsUI() {
-		let settings = await Settings.get() || {};
+		let settings = await Settings.get()
 		let container = PCX.getEl("#settings-container");
 
 		if (!container) {

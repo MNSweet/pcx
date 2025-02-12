@@ -11,6 +11,8 @@ class DataHandler {
 		switch (storageType) {
 			case "chrome":
 				return (await DataHandler.getFromChromeStorage(key)) ?? preset;
+			case "session":
+				return (await DataHandler.getFromChromeSession(key)) ?? preset;
 			case "local":
 				return (await DataHandler.getFromLocalStorage(key)) ?? preset;
 			case "indexedDB":
@@ -25,6 +27,8 @@ class DataHandler {
 		switch (storageType) {
 			case "chrome":
 				return await DataHandler.saveToChromeStorage(key, value);
+			case "session":
+				return await DataHandler.saveToChromeSession(key, value);
 			case "local":
 				return await DataHandler.saveToLocalStorage(key, value);
 			case "indexedDB":
@@ -39,6 +43,8 @@ class DataHandler {
 		switch (storageType) {
 			case "chrome":
 				return await DataHandler.removeFromChromeStorage(key);
+			case "session":
+				return await DataHandler.removeFromChromeSession(key);
 			case "local":
 				return await DataHandler.removeFromLocalStorage(key);
 			case "indexedDB":
@@ -46,6 +52,37 @@ class DataHandler {
 			default:
 				throw new Error("Invalid storage type");
 		}
+	}
+
+	// Chrome Storage Operations
+	static async getFromChromeSession(key) {
+		return new Promise((resolve) => {
+			chrome.storage.session.get([key], (result) => {
+				resolve(result[key] || null);
+			});
+		});
+	}
+
+	static async saveToChromeSession(key, value) {
+		return new Promise((resolve) => {
+			chrome.storage.session.set({ [key]: value }, () => {
+				resolve();
+			});
+		});
+	}
+
+	static async removeFromChromeSession(key) {
+		return new Promise((resolve) => {
+			chrome.storage.session.remove([key], () => {
+				resolve();
+			});
+		});
+	}
+
+	static async clearChromeSession() {
+		return new Promise((resolve) => {
+			chrome.storage.session.clear(() => resolve());
+		});
 	}
 
 	// Chrome Storage Operations
@@ -84,7 +121,6 @@ class DataHandler {
 		try {
 			return JSON.parse(localStorage.getItem(key)) || null;
 		} catch (error) {
-			console.error("Error parsing localStorage data:", error);
 			return null;
 		}
 	}

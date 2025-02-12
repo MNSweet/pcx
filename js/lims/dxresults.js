@@ -85,7 +85,6 @@ class DXRESULTS {
 				};
 			}
 			if (message.action === 'noticePing') {
-				console.log(message);
 				message.patientData.Category = DXRESULTS.categoryTranslation[message.patientData.Category]
 				PCX.noticeUpdate(message.patientData,message.timer,callback);
 			}

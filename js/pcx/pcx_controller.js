@@ -363,7 +363,7 @@ class PCX {
 		// Fetch permission metadata (fallback to default if undefined)
 		let metadata = Settings.PERMISSION_STRUCTURE[category]?.[key] || { description: "", priority: 10 };
 
-		console.log(`processEnabled: ${category} - ${key} =`, result, "Priority:", metadata.priority);
+		PCX.log(`processEnabled: ${category} - ${key} =`, result, "Priority:", metadata.priority);
 
 		return result ? trueCallback?.() ?? true : result;
 	}

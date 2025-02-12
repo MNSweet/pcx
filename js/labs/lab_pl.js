@@ -165,7 +165,6 @@ if(PCX.preferedUserMode()) {
 
 	// Update Accession
 	if (IATSERV.linkId == "2071") {
-	console.log("Update Accession");
 		IATSERV.setSelectors({
 			DOS				: ".dos",
 			DOC				: "#MainContent_ctl00_tbCollectionDateTime_tbDate_tbText",

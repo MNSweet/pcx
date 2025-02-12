@@ -187,7 +187,6 @@ class IATSERV {
 				}
 				asc.querySelector('span').addEventListener('click', (e)=>{
 					let td = e.target.parentNode;
-					//console.log(td);
 					let clipboard = td.querySelector('a').innerText + "\t" + td.nextSibling.innerText;
 					PCX.copyToClipboard(clipboard);
 				});
@@ -229,7 +228,7 @@ class IATSERV {
 	 */
 	static columnLocationParser() {
 		let headingRow = PCX.getEl('#MainContent_ctl00_grid_DXHeadersRow0',true);
-		if(!headingRow){console.log('not found'); return;}
+		if(!headingRow){PCX.log('not found'); return;}
 		let headings = headingRow.textContent.replaceAll('\t','').replaceAll('\n','').split(" ");
 		
 		const overrides = [
@@ -249,7 +248,6 @@ class IATSERV {
 						link.addEventListener('click', ()=>{
 							waitForElm(".fancybox-iframe").then((iframe)=> {
 								waitForIframeElm(".fancybox-iframe",'[href="#delivery"]').then((link)=> {
-									console.log('found');
 									PCX.getEl(".fancybox-iframe",true).contentWindow.document.querySelector('[href="#delivery"]').click();
 								});
 							});
@@ -285,7 +283,7 @@ class IATSERV {
 	 * @param  OBJ	testCategories
 	 */
 	static async checkTestCat(elCategory,elTestCodes,testCategories){
-		//PCX.processEnabled("Automation_CheckTestCategoryForCodes",true);
+		PCX.processEnabled("SOP - Accessioning","Use Preset Test Category Codes",()=>{
 		const el = IATSERV.selectors;
 			// The website developer creates new autocompletes with each call with no garbage collections. This cleans up old lists
 			[...document.querySelectorAll('.ui-menu.ui-widget.ui-widget-content.ui-autocomplete.ui-front.autocomplete-ul')].forEach(ul => {
@@ -302,12 +300,12 @@ class IATSERV {
 					waitForElm('[id^="ui-id-"][style^="z-index"].autocomplete-ul').then(()=>{
 						PCX.simulateUserKey(elTestCodes.Input,PCX.events.Tab,"keydown");
 						
-						//if(PCX.processEnabled("Automation_SetLabByTestCode",true)) {
+						PCX.processEnabled("SOP - Accessioning","Set Lab By Test Category",()=> {
 							PCX.getEl(el.PreformingLab,true).value = testCategories[elCategory.value].LabCode;
 							PCX.getEl(el.PreformingLab,true).dispatchEvent(new Event('change'));
-						//}
+						});
 
-			PCX.getEl(el.ICDCodesInput+"~.body",true).insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
+						PCX.getEl(el.ICDCodesInput+"~.body",true).insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
 						PCX.getEl(el.UpPanel).addEventListener('change', IATSERV.upPanelChange);
 					});
 					document.querySelector('#MainContent_ctl00_ctl00_upPanel').removeEventListener('load',watchForLaterNode,true);
@@ -315,6 +313,7 @@ class IATSERV {
 			}
 			QAManager.setStablityNotice(el.DOS,PCX.getEl(el.DOC,true).value);
 			PCX.getEl(el.ICDCodesInput+"~.body",true).insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
+		});
 	}
 
 	/**
@@ -341,7 +340,6 @@ class IATSERV {
 	 * 
 	 */
 	static createAccession() {
-console.log('createAccession');
 		const el = IATSERV.selectors;
 
 		// Set Bill Type to Primary Insurance as default
@@ -390,28 +388,31 @@ console.log('createAccession');
 			}
 		},true);
 
-		PCX.getEl(el.ICDCodesInput+"~.body",true).insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
-		let observer = new MutationObserver(()=>{});
-		PCX.getEl(el.UpPanel,true).addEventListener('keydown', async (e) => {
-			if (e.target && "#"+e.target.id === el.ICDCodesInput && (e.key == "Enter" || e.key == "Tab")) {
-				const targetElement = PCX.getEl(el.ICDCodesInput+"~#dvCount #lblCount",true); // Select the element you want to monitor
-				observer.disconnect()
-				observer = new MutationObserver((mutations) => {
-					let icdCodes = Array.from(PCX.getEls(el.ICDCodesInput+"~.body #dvSelectedItems #xv_param",true)).reverse();
-					PCX.getEl("#icdCodePreviewer",true).innerHTML = `<span class="icdCode">` + icdCodes.map((element)=>{return element.value;}).join(`</span><span class="icdCode">`) + `</span>`;	
-				});
-				observer.observe(targetElement, { childList: true });
-			}
-		},true);
-
-		const removeTabIndexSelectors = [
-			el.SearchPatient, el.PatientCode, el.PatientDOB, el.PatientAddress, el.PatientPhone, 
-			el.PatientEmail, el.PrimaryInsurance, el.PrimaryInsurancePolicy, el.PrimaryInsuranceGroup, 
-			el.SecondaryInsurance, el.SecondaryInsurancePolicy, el.SecondaryInsuranceGroup, el.SpecimenType, 
-			el.Quantity, el.Requisition, el.DOCTime, el.ReceivedDate, el.ReceivedTime, el.ClearBTN, el.Medication,
-			el.MedicationBTN, el.OtherMedication, el.PhySigCaptured, el.PTSigCaptured, el.SigSuccess, el.SigClear, el.SigToggle
-		];
-		PCX.disableTabIndex(removeTabIndexSelectors);
+		PCX.processEnabled('Interface - Accessioning','ICD Code Previewer', ()=>{
+			PCX.getEl(el.ICDCodesInput+"~.body",true).insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
+			let observer = new MutationObserver(()=>{});
+			PCX.getEl(el.UpPanel,true).addEventListener('keydown', async (e) => {
+				if (e.target && "#"+e.target.id === el.ICDCodesInput && (e.key == "Enter" || e.key == "Tab")) {
+					const targetElement = PCX.getEl(el.ICDCodesInput+"~#dvCount #lblCount",true); // Select the element you want to monitor
+					observer.disconnect()
+					observer = new MutationObserver((mutations) => {
+						let icdCodes = Array.from(PCX.getEls(el.ICDCodesInput+"~.body #dvSelectedItems #xv_param",true)).reverse();
+						PCX.getEl("#icdCodePreviewer",true).innerHTML = `<span class="icdCode">` + icdCodes.map((element)=>{return element.value;}).join(`</span><span class="icdCode">`) + `</span>`;	
+					});
+					observer.observe(targetElement, { childList: true });
+				}
+			},true);
+		});
+		PCX.processEnabled('Interface - Accessioning','Reduce Tabable Inputs', ()=>{
+			const removeTabIndexSelectors = [
+				el.SearchPatient, el.PatientCode, el.PatientDOB, el.PatientAddress, el.PatientPhone, 
+				el.PatientEmail, el.PrimaryInsurance, el.PrimaryInsurancePolicy, el.PrimaryInsuranceGroup, 
+				el.SecondaryInsurance, el.SecondaryInsurancePolicy, el.SecondaryInsuranceGroup, el.SpecimenType, 
+				el.Quantity, el.Requisition, el.DOCTime, el.ReceivedDate, el.ReceivedTime, el.ClearBTN, el.Medication,
+				el.MedicationBTN, el.OtherMedication, el.PhySigCaptured, el.PTSigCaptured, el.SigSuccess, el.SigClear, el.SigToggle
+			];
+			PCX.disableTabIndex(removeTabIndexSelectors);
+		});
 	}
 
 	static upPanelChange(e) {
@@ -423,8 +424,6 @@ console.log('createAccession');
 	}
 
 	static showSignaturesBTN(){
-
-console.log('showSignaturesBTN');
 		document.body.classList.add('nosignature');
 		let showSignatureBTN = PCX.createDOM("div", {id:"showSignature",innerText:"Show Signature Section",classList:"form-group col-lg-1 new-row btn btn-default"});
 		showSignatureBTN.addEventListener("click",()=>{
@@ -466,34 +465,36 @@ console.log('showSignaturesBTN');
 		const el = IATSERV.selectors;
 		waitForElm(el.FancyBox).then( (elementLoaded) => {
 			waitForIframeElm(el.FancyBox,el.IframeDOB).then( (elementIframeLoaded) => {
-				// Date of Birth Checks
-				let inputDOB = PCX.getEl(el.FancyBox,true).contentWindow.document.querySelector(el.IframeDOB);
-				let minorDate = new Date();
-					minorDate.setFullYear(minorDate.getFullYear() - 18);
-				let docAttempt 	 = 0;
-				let docLastValue = '';
-				inputDOB.addEventListener('blur', (e) => {
+				PCX.processEnabled('QA Manager','Check Date of Birth', ()=>{
+					// Date of Birth Checks
+					let inputDOB = PCX.getEl(el.FancyBox,true).contentWindow.document.querySelector(el.IframeDOB);
+					let minorDate = new Date();
+						minorDate.setFullYear(minorDate.getFullYear() - 18);
 					let docAttempt 	 = 0;
-					const docIntervalId = setInterval(() => { // Wait for date picker
-						if (e.target.value !== docLastValue) {
-							docLastValue = e.target.value;
-							clearInterval(docIntervalId);
+					let docLastValue = '';
+					inputDOB.addEventListener('blur', (e) => {
+						let docAttempt 	 = 0;
+						const docIntervalId = setInterval(() => { // Wait for date picker
+							if (e.target.value !== docLastValue) {
+								docLastValue = e.target.value;
+								clearInterval(docIntervalId);
 
-							let dob = e.target.value;
-							if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= Date.now()){
-								QAManager.addNotice("DOB","It seems that your patient hasn't been born yet. Is this birthday correct? " + dob);
-							}else if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= minorDate.getTime()){ // 18+ Minor check
-								QAManager.addNotice("DOB","Intesting, your patient is a minor. Just a quick check. Is this birthday correct? " + dob);
-							}else if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= 946702800000){ //Jan 1 2000
-								QAManager.addNotice("DOB","Just being vigilant, Though I may be wrong: Is this birthday correct? " + dob);
-							}else {
-								QAManager.removeNotice("DOB");
+									let dob = e.target.value;
+									if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= Date.now()){
+										QAManager.addNotice("DOB","It seems that your patient hasn't been born yet. Is this birthday correct? " + dob);
+									}else if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= minorDate.getTime()){ // 18+ Minor check
+										QAManager.addNotice("DOB","Intesting, your patient is a minor. Just a quick check. Is this birthday correct? " + dob);
+									}else if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= 946702800000){ //Jan 1 2000
+										QAManager.addNotice("DOB","Just being vigilant, Though I may be wrong: Is this birthday correct? " + dob);
+									}else {
+										QAManager.removeNotice("DOB");
+									}
 							}
-						}
-						if (++docAttempt >= 5) {
-							clearInterval(docIntervalId);
-						}
-					}, 100);
+							if (++docAttempt >= 5) {
+								clearInterval(docIntervalId);
+							}
+						}, 100);
+					});
 				});
 				PCX.getEl(el.FancyBox).contentWindow.document.querySelectorAll(el.StateDropdown+' option').forEach((option)=>{
 					//option.dataset.name = option.innerText;
@@ -501,46 +502,48 @@ console.log('showSignaturesBTN');
 					option.innerText = option.value + " - " + option.innerText;
 				});
 
-				let stateDropdown = PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.StateDropdown);
-				PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.InsuranceLookup).addEventListener('focus',(e)=>{
-					let input = e.target;
-					if(stateDropdown.value == "" || !(stateDropdown.value in IATSERV.insuranceLookUp)) {return;}
-					input.placeholder = IATSERV.insuranceLookUp[stateDropdown.value].name;
-					
+				PCX.processEnabled('Interface - Accessioning','Insurance Provider Suggestion', ()=>{
+					let stateDropdown = PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.StateDropdown);
+					PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.InsuranceLookup).addEventListener('focus',(e)=>{
+						let input = e.target;
+						if(stateDropdown.value == "" || !(stateDropdown.value in IATSERV.insuranceLookUp)) {return;}
+						input.placeholder = IATSERV.insuranceLookUp[stateDropdown.value].name;
+						
+					});
+					PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.InsuranceLookup).addEventListener('blur',(e)=>{
+						let input = e.target;
+						if(
+							stateDropdown.value == ""
+							|| !(stateDropdown.value in IATSERV.insuranceLookUp)
+							|| input.value != ""
+							|| input.placeholder == "Insurance"
+						) {
+							return;
+						}
+
+						// Prevent data desync between interaction states
+						if (input.placeholder == IATSERV.insuranceLookUp[stateDropdown.value].name) {
+							input.value = input.placeholder;
+							PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.InsuranceID).value = IATSERV.insuranceLookUp[stateDropdown.value].id;
+						}
+						input.placeholder = "Insurance";
+					});
 				});
-				PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.InsuranceLookup).addEventListener('blur',(e)=>{
-					let input = e.target;
-					if(
-						stateDropdown.value == ""
-						|| !(stateDropdown.value in IATSERV.insuranceLookUp)
-						|| input.value != ""
-						|| input.placeholder == "Insurance"
-					) {
-						return;
-					}
 
-					// Prevent data desync between interaction states
-					if (input.placeholder == IATSERV.insuranceLookUp[stateDropdown.value].name) {
-						input.value = input.placeholder;
-						PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.InsuranceID).value = IATSERV.insuranceLookUp[stateDropdown.value].id;
-					}
-					input.placeholder = "Insurance";
+				PCX.processEnabled('Interface - Accessioning','Reduce Tabable Inputs', ()=>{
+					const removeIframeTabIndexSelectors = [
+						el.SSN, el.LicenseState, el.LicenseNumber, el.CopyColumnBTN1, el.CopyColumnBTN2,
+						el.CopyColumnBTN3, el.CopyColumnBTN4, el.PrimeRelation, 
+						el.PrimeFirstName, el.PrimeLastName, el.PrimeMiddleName, el.PrimeDOB, el.PrimeSSN,
+						el.PrimeGender, el.PrimeGroupNo, el.PrimeCovStart, el.PrimeCovEnd, el.PrimeAddress1,
+						el.PrimeAddress2, el.PrimeState, el.PrimeCity, el.PrimeZip, el.PrimePhone, el.PrimeFax,
+						el.PrimeEmail, el.SeconRelation, el.SeconFirstName, el.SeconLastName, el.SeconMiddleName,
+						el.SeconDOB, el.SeconSSN, el.SeconGender, el.SeconGroupNo, el.SeconCovStart, el.SeconCovEnd, 
+						el.Seconddress1, el.Seconddress2, el.SeconState, el.SeconCity, el.SeconZip, el.SeconPhone, 
+						el.SeconFax, el.SeconEmail, el.Cancel
+					];
+					PCX.disableTabIndex(removeIframeTabIndexSelectors,el.FancyBox);
 				});
-
-
-				const removeIframeTabIndexSelectors = [
-					el.SSN, el.LicenseState, el.LicenseNumber, el.CopyColumnBTN1, el.CopyColumnBTN2,
-					el.CopyColumnBTN3, el.CopyColumnBTN4, el.PrimeRelation, 
-					el.PrimeFirstName, el.PrimeLastName, el.PrimeMiddleName, el.PrimeDOB, el.PrimeSSN,
-					el.PrimeGender, el.PrimeGroupNo, el.PrimeCovStart, el.PrimeCovEnd, el.PrimeAddress1,
-					el.PrimeAddress2, el.PrimeState, el.PrimeCity, el.PrimeZip, el.PrimePhone, el.PrimeFax,
-					el.PrimeEmail, el.SeconRelation, el.SeconFirstName, el.SeconLastName, el.SeconMiddleName,
-					el.SeconDOB, el.SeconSSN, el.SeconGender, el.SeconGroupNo, el.SeconCovStart, el.SeconCovEnd, 
-					el.Seconddress1, el.Seconddress2, el.SeconState, el.SeconCity, el.SeconZip, el.SeconPhone, 
-					el.SeconFax, el.SeconEmail, el.Cancel
-				];
-				PCX.disableTabIndex(removeIframeTabIndexSelectors,el.FancyBox);
-
 				PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.IframeForm).addEventListener('submit', (eventSubmit) => {
 					if(QAManager.getNoticeCount() > 0) {
 						eventSubmit.preventDefault();
@@ -591,15 +594,8 @@ console.log('showSignaturesBTN');
 			// Create the final string
 			const labelString = `${type} ${acsNum} ${name}`;
 
-			// Log the result to the console
-			//console.log(labelString);
-
 			// Copy the result to the clipboard
-			navigator.clipboard.writeText(labelString).then(() => {
-				//console.log("Label copied to clipboard!");
-			}).catch(err => {
-				//console.error("Failed to copy label to clipboard: ", err);
-			});
+			navigator.clipboard.writeText(labelString);
 		}
 
 		// Add event listener to the button
@@ -837,7 +833,6 @@ console.log('showSignaturesBTN');
 	 * @function	async		dropZoneTimeOut()		
 	 */
 	static fileDrop(qa={enabled:false,acsNum:null,acsID:null,patient:null,result:false},target=false,targetSpan=false,scrollTo=false){
-console.log("fileDrop");
 		let 	isDragging 	= false;
 		const	el			= IATSERV.selectors;
 				el.DropArea		= target ? target : el.UploadTable;
