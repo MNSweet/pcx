@@ -228,6 +228,14 @@ chrome.runtime.onInstalled.addListener(async () => {
 	} catch (error) {
 		console.error("Failed to refresh permissions.json", error);
 	}
+	await new Promise((resolve) => {
+			chrome.storage.local.get(["pcx_permissions"], (result) => {
+				if(!result) {
+					chrome.storage.local.set({["pcx_permissions"]: "{}"},() => {resolve();})
+				}
+			}
+		);
+	});
 });
 
 chrome.storage.onChanged.addListener((changes, namespace) => {

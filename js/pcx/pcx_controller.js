@@ -535,10 +535,18 @@ function delay(ms) {
 		window.addEventListener("popstate", () => {
 			chrome.runtime.sendMessage({ action: "pageUpdated", url: location.href });
 		});
+		const whitelist = [
+			"BODY"
+		]
 		const domObserver = new MutationObserver((mutations) => {
-			let pageSnapshot = document.body.innerText.substring(0, 500); // Example: Extract first 500 chars
-			console.log("DOM Mutation detected:", pageSnapshot);
-			chrome.runtime.sendMessage({ action: "domUpdated", snapshot: pageSnapshot });
+			//let pageSnapshot = document.body.innerText.substring(0, 500); // Example: Extract first 500 chars
+
+			mutations.forEach((mutation)=>{
+				let id	= mutation.target.id != "" ? "#"+mutation.target.id : "";
+				let style = [...mutation.target.classList].length > 0 ? '.'+[...mutation.target.classList].join('.'):'';
+				console.log("DOM Mutation detected:", `${mutation.target.tagName}${id}${style}`);
+			})
+			//chrome.runtime.sendMessage({ action: "domUpdated", snapshot: pageSnapshot });
 		});
 
 		domObserver.observe(document.body, { childList: true, subtree: true, characterData: true });

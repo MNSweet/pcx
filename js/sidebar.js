@@ -63,6 +63,42 @@ document.addEventListener("DOMContentLoaded", async () => {
 		console.log("Page content changed:", message.snapshot);
 		// Process the updated page content
 	}
+
+	if (message.action === "accessionData") {
+		console.log("Page content changed:", message.data);
+		loadInfoUI(message.data);
+		// Process the updated page content
+	}
+
+	async function loadInfoUI(data) {
+		let container = PCX.getEl("#information-container");
+		container.innerHTML = "";
+
+		container.appendChild(PCX.createDOM("dt", {
+			classList: "infoLabel",
+			innerText: "Requisition Filename"
+		}));
+
+		container.appendChild(PCX.createDOM("dd", {
+			classList: "infoDesc",
+			innerText: `${key}`
+		}));
+
+				inputCheckbox.addEventListener("change", async (event) => {
+					await Settings.save(category, key, event.target.checked);
+				});
+
+				settingLabel.appendChild(inputCheckbox);
+				settingLabel.appendChild(contentDiv);
+				categoryDiv.appendChild(settingLabel);
+
+			container.appendChild(categoryDiv);
+
+		if (!container) {
+			PCX.log("Error: #settings-container not found.");
+			return;
+		}
+	}
 });
 
 

@@ -585,7 +585,7 @@ class IATSERV {
 		});
 	};
 
-	static scanFilenamer() {
+	static scanFilenamer(output=false) {
 		// Define the object with keywords and corresponding values
 		let type = "REQ";  // Default type if no match is found
 		let fs = " FS";
@@ -624,7 +624,11 @@ class IATSERV {
 			const labelString = `${type} ${acsNum} ${name}`;
 
 			// Copy the result to the clipboard
-			navigator.clipboard.writeText(labelString);
+			if(output){
+				return labelString;
+			}else{
+				navigator.clipboard.writeText(labelString);
+			}
 		}
 
 		// Add event listener to the button
