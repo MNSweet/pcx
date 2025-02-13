@@ -1,9 +1,9 @@
 document.addEventListener("DOMContentLoaded", async () => {
-	/**
-	 * 
-	 * Tab navigation
-	 * 
-	 */
+/**
+ * 
+ * Tab navigation
+ * 
+ */
 	document.querySelectorAll(".tab-button").forEach(button => {
 		button.addEventListener("click", () => {
 			document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
@@ -14,11 +14,64 @@ document.addEventListener("DOMContentLoaded", async () => {
 		});
 	});
 
-	/**
-	 * 
-	 * Readme
-	 * 
-	 */
+	async function getCurrentTabUrl() {
+		let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+		return tab?.url || "unknown";
+	}
+
+/**
+ * 
+ * Information
+ * 
+ */
+
+	async function getCurrentTabUrl() {
+		let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+		return tab?.url || "unknown";
+	}
+	async function requestPageContent() {
+		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+			if (tabs.length === 0) return;
+			chrome.tabs.sendMessage(tabs[0].id, { action: "getPageContent" }, (response) => {
+				if (chrome.runtime.lastError) {
+					console.warn("Content script not injected or unavailable");
+					return;
+				}
+				if (response && response.content) {
+					console.log("Page content received:", response.content);
+					// Now you can process the DOM data inside the sidebar
+				}
+			});
+		});
+	}
+
+	async function loadInfoUI() {
+		let container = PCX.getEl("#settings-container");
+
+		if (!container) {
+			PCX.log("Error: #settings-container not found.");
+			return;
+		}
+	}
+	chrome.runtime.onMessage.addListener((message) => {
+	if (message.action === "pageUpdated") {
+		console.log("Page URL changed:", message.url);
+		// Update sidebar UI based on new page
+	}
+
+	if (message.action === "domUpdated") {
+		console.log("Page content changed:", message.snapshot);
+		// Process the updated page content
+	}
+});
+
+
+
+/**
+ * 
+ * Readme
+ * 
+ */
 	const markdownViewer = document.getElementById("markdown-viewer");
 
 	function loadMarkdown(file) {
@@ -47,11 +100,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 	// Initial load of README.md
 	loadMarkdown("README.md");
 
-	/**
-	 * 
-	 * Settings
-	 * 
-	 */
+/**
+ * 
+ * Settings
+ * 
+ */
 	async function loadSettingsUI() {
 		let settings = await Settings.get()
 		let container = PCX.getEl("#settings-container");
@@ -82,7 +135,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			});
 
 			for (const [key, value] of sortedPermissions) {
-				let metadata = Settings.PERMISSION_STRUCTURE[category]?.[key] || { description: "", priority: 10 };
+				let metadata = Settings.PERMISSION_STRUCTURE[category]?.[key] || { description: "", priority: 10, tags:['Unsorted'] };
 
 				let settingLabel = PCX.createDOM("label", {
 					classList: "settingsField"
@@ -101,6 +154,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 					innerHTML: `
 						<span class="settingsFieldText">${key}</span>
 						<span class="settingsFieldDesc">${metadata.description}</span>
+						<span class="settingsFieldTags"><span class="settingsFieldTag">${metadata.tags.join('</span><span class="settingsFieldTag">')}</span>
 					`
 				});
 

@@ -2,71 +2,82 @@
 	"SOP": {
 		"New Accession Workflow": {
 			"description": "Controls new accession workflow behavior",
-			"priority": 10
+			"priority": 10,
+			"tags":["Accessioning"]
 		},
 		"REQ Filename to Clipboard on Scan": {
 			"description": "Generate a REQ filename based on the SOP when printing labels to scan with.",
-			"priority": 10
+			"priority": 10,
+			"tags":["Accessioning"]
 		},
 		"Patient Referrence Lab Transfer": {
 			"description": "Itemizes Patient data to transfer to referrence lab. Data is auto purged by timeout or successful transfer",
-			"priority": 10
-		}
-	},
-	"SOP - Accessioning": {
+			"priority": 10,
+			"tags":["Accessioning"]
+		},
 		"Set Lab By Test Category": {
 			"description": "Use Lab Priority for each test type to determine the Testing Lab",
-			"priority": 10
+			"priority": 10,
+			"tags":["Accessioning"]
 		},
 		"Use Preset Test Category Codes": {
 			"description": "Use Category Panel as default Test Code",
-			"priority": 10
+			"priority": 10,
+			"tags":["Accessioning"]
 		}
 	},
 	"Interface": {
 		"Hide Signatures": {
 			"description": "Hides the signature section",
-			"priority": 10
+			"priority": 10,
+			"tags":["Accessioning"]
 		},
 		"Enabled FileDrop": {
 			"description": "Enables full screen file drag-and-drop",
-			"priority": 10
+			"priority": 10,
+			"tags":["Accessioning","Results"]
 		},
 		"Show Stablity Notice": {
 			"description": "Displays number of dates since Collection Date with color coded ranges",
-			"priority": 10
+			"priority": 10,
+			"tags":["Accessioning"]
 		},
 		"Accession List Enhanced Columns": {
 			"description": "Adds a quicklink via Alt 1 for Results",
-			"priority": 10
+			"priority": 10,
+			"tags":["Accessioning"]
 		},
 		"Reports Enhanced Columns": {
 			"description": "Adds a quicklink via Alt 1 for Accessions",
-			"priority": 10
+			"priority": 10,
+			"tags":["Reports"]
 		},
 		"Location List Enhanced Columns": {
 			"description": "Adds a quicklink via Alt 1 for Delivery Method (Fax)",
-			"priority": 10
-		}
-	},
-	"Interface - Accessioning": {
+			"priority": 10,
+			"tags":["Client Management"]
+		},
 		"ICD Code Previewer": {
 			"description": "Adds a quick view of ICD codes entered under the submission field to assist in keeping place while entring",
-			"priority": 10
+			"priority": 10,
+			"tags":["Accessioning"]
 		},
 		"Reduce Tabable Inputs": {
 			"description": "Removes unused text inputs from Tab Index to reduce keyboard navigation. Fields still available via direct mouse focus",
-			"priority": 10
+			"priority": 10,
+			"tags":["Accessioning"]
 		},
 		"Insurance Provider Suggestion": {
 			"description": "Uses the selected state to suggest the correct Medicare Option in the placeholder. If left blank and user tabs to Insurance number it will auto fill, otherwise user can enter correct Insurance Provider.",
-			"priority": 10
+			"priority": 10,
+			"tags":["Accessioning"]
 		}
 	},
 	"QA Manager": {
 		"Check Date of Birth": {
 			"description": "Checks if Patient's Birthday is: -Years Old (invalid), A Minor (unlikely), Born after 2000 (possible but may still be an error)",
-			"priority": 10
+			"priority": 10,
+			"tags":["Accessioning"]
 		}
 	}
 }

@@ -74,6 +74,14 @@ body {
 }
 
 /* Field Setting */
+button.tab-button[data-tab="info"] {
+    max-width: 50px;
+    font-size: 24px;
+    line-height: 14px;
+}
+button.tab-button:not(:last-child) {
+	border-right: 1px groove #ccc;
+}
 .settings-category h3 {
 	margin: 35px 0 0 0;
 }
@@ -102,11 +110,22 @@ body {
 
 .settingsFieldText {
 	font-weight: bold;
+	font-size: 16px;
 }
 
 .settingsFieldDesc {
 	font-size: 0.85rem;
-	color: gray;
+	color: #666666;
+}
+.settingsFieldTag {
+	border-radius: 5px;
+	padding: 4px 10px;
+	margin: 3px 4px 0 0;
+	display: inline-block;
+	background-color: #d6c3ff;
+	font-weight: bold;
+	font-size: 12px;
+	letter-spacing: .7px;
 }
 
 

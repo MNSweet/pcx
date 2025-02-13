@@ -495,3 +495,52 @@ function waitForIframeElm(frame,selector) {
 function delay(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+/**
+ *
+ * Side Panel Communication
+ * 
+ */
+	(function detectNavigationChanges() {
+		let lastUrl = location.href;
+		
+		// Detect when the page changes without a full reload (SPA navigation)
+		const observer = new MutationObserver(() => {
+			if (location.href !== lastUrl) {
+				lastUrl = location.href;
+				console.log("Navigation detected:", lastUrl);
+				chrome.runtime.sendMessage({ action: "pageUpdated", url: lastUrl });
+			}
+		});
+		
+		// Observe changes to the entire document
+		observer.observe(document, { childList: true, subtree: true });
+
+		// Also detect changes via history API
+		history.pushState = ((original) =>
+			function pushState() {
+				let result = original.apply(this, arguments);
+				chrome.runtime.sendMessage({ action: "pageUpdated", url: location.href });
+				return result;
+			})(history.pushState);
+
+		history.replaceState = ((original) =>
+			function replaceState() {
+				let result = original.apply(this, arguments);
+				chrome.runtime.sendMessage({ action: "pageUpdated", url: location.href });
+				return result;
+			})(history.replaceState);
+
+		// Listen for back/forward button navigation
+		window.addEventListener("popstate", () => {
+			chrome.runtime.sendMessage({ action: "pageUpdated", url: location.href });
+		});
+		const domObserver = new MutationObserver((mutations) => {
+			let pageSnapshot = document.body.innerText.substring(0, 500); // Example: Extract first 500 chars
+			console.log("DOM Mutation detected:", pageSnapshot);
+			chrome.runtime.sendMessage({ action: "domUpdated", snapshot: pageSnapshot });
+		});
+
+		domObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+
+	})();

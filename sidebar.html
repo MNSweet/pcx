@@ -1,32 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PCX Sidebar</title>
-    <link rel="stylesheet" href="css/sidebar.css">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>PCX Sidebar</title>
+	<link rel="stylesheet" href="css/sidebar.css">
 </head>
 <body>
-    <div class="tab-container">
-        <button class="tab-button active" data-tab="settings">Settings</button>
-        <button class="tab-button" data-tab="documentation">Documentation</button>
-    </div>
-    
-    <div id="settings" class="tab-content active">
-        <h2>Settings</h2>
-        <div id="settings-container"></div>
-    </div>
-    
-    <div id="documentation" class="tab-content">
-        <h2>Documentation</h2>
-        <div id="markdown-viewer">Loading...</div>
-    </div>
-    
-    <script src="js/pcx/pcx_controller.js"></script>
-    <script src="js/pcx/qa_manager.js"></script>
-    <script src="js/pcx/settings.js"></script>
-    <script src="js/pcx/data.js"></script>
-    <script src="js/sidebar.js"></script>
-    <script src="js/libs/marked.min.js"></script>
+	<div class="tab-container">
+		<button class="tab-button active" data-tab="info">ⓘ</button>
+		<button class="tab-button " data-tab="settings">Settings</button>
+		<button class="tab-button" data-tab="documentation">Documentation</button>
+	</div>
+	
+	<div id="info" class="tab-content active">
+		<h2>Information</h2>
+		<div id="information-container"></div>
+	</div>
+	
+	<div id="settings" class="tab-content">
+		<h2>Settings</h2>
+		<div id="settings-container"></div>
+	</div>
+	
+	<div id="documentation" class="tab-content">
+		<h2>Documentation</h2>
+		<div id="markdown-viewer">Loading...</div>
+	</div>
+	
+	<script src="js/pcx/pcx_controller.js"></script>
+	<script src="js/pcx/qa_manager.js"></script>
+	<script src="js/pcx/settings.js"></script>
+	<script src="js/pcx/data.js"></script>
+	<script src="js/sidebar.js"></script>
+	<script src="js/libs/marked.min.js"></script>
 </body>
 </html>

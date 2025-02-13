@@ -312,7 +312,7 @@ class IATSERV {
 	 * @param  OBJ	testCategories
 	 */
 	static async checkTestCat(elCategory,elTestCodes,testCategories){
-		PCX.processEnabled("SOP - Accessioning","Use Preset Test Category Codes",()=>{
+		PCX.processEnabled("SOP","Use Preset Test Category Codes",()=>{
 		const el = IATSERV.selectors;
 			// The website developer creates new autocompletes with each call with no garbage collections. This cleans up old lists
 			[...document.querySelectorAll('.ui-menu.ui-widget.ui-widget-content.ui-autocomplete.ui-front.autocomplete-ul')].forEach(ul => {
@@ -329,7 +329,7 @@ class IATSERV {
 					waitForElm('[id^="ui-id-"][style^="z-index"].autocomplete-ul').then(()=>{
 						PCX.simulateUserKey(elTestCodes.Input,PCX.events.Tab,"keydown");
 						
-						PCX.processEnabled("SOP - Accessioning","Set Lab By Test Category",()=> {
+						PCX.processEnabled("SOP","Set Lab By Test Category",()=> {
 							PCX.getEl(el.PreformingLab,true).value = testCategories[elCategory.value].LabCode;
 							PCX.getEl(el.PreformingLab,true).dispatchEvent(new Event('change'));
 						});
@@ -417,7 +417,7 @@ class IATSERV {
 			}
 		},true);
 
-		PCX.processEnabled('Interface - Accessioning','ICD Code Previewer', ()=>{
+		PCX.processEnabled('Interface','ICD Code Previewer', ()=>{
 			PCX.getEl(el.ICDCodesInput+"~.body",true).insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
 			let observer = new MutationObserver(()=>{});
 			PCX.getEl(el.UpPanel,true).addEventListener('keydown', async (e) => {
@@ -432,7 +432,7 @@ class IATSERV {
 				}
 			},true);
 		});
-		PCX.processEnabled('Interface - Accessioning','Reduce Tabable Inputs', ()=>{
+		PCX.processEnabled('Interface','Reduce Tabable Inputs', ()=>{
 			const removeTabIndexSelectors = [
 				el.SearchPatient, el.PatientCode, el.PatientDOB, el.PatientAddress, el.PatientPhone, 
 				el.PatientEmail, el.PrimaryInsurance, el.PrimaryInsurancePolicy, el.PrimaryInsuranceGroup, 
@@ -531,7 +531,7 @@ class IATSERV {
 					option.innerText = option.value + " - " + option.innerText;
 				});
 
-				PCX.processEnabled('Interface - Accessioning','Insurance Provider Suggestion', ()=>{
+				PCX.processEnabled('Interface','Insurance Provider Suggestion', ()=>{
 					let stateDropdown = PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.StateDropdown);
 					PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.InsuranceLookup).addEventListener('focus',(e)=>{
 						let input = e.target;
@@ -559,7 +559,7 @@ class IATSERV {
 					});
 				});
 
-				PCX.processEnabled('Interface - Accessioning','Reduce Tabable Inputs', ()=>{
+				PCX.processEnabled('Interface','Reduce Tabable Inputs', ()=>{
 					const removeIframeTabIndexSelectors = [
 						el.SSN, el.LicenseState, el.LicenseNumber, el.CopyColumnBTN1, el.CopyColumnBTN2,
 						el.CopyColumnBTN3, el.CopyColumnBTN4, el.PrimeRelation, 
