@@ -14,65 +14,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 		});
 	});
 
-	async function getCurrentTabUrl() {
-		let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-		return tab?.url || "unknown";
-	}
-
 /**
  * 
  * Information
  * 
  */
 
-	async function getCurrentTabUrl() {
-		let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-		return tab?.url || "unknown";
-	}
-	async function requestPageContent() {
-		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-			if (tabs.length === 0) return;
-			chrome.tabs.sendMessage(tabs[0].id, { action: "getPageContent" }, (response) => {
-				if (chrome.runtime.lastError) {
-					console.warn("Content script not injected or unavailable");
-					return;
-				}
-				if (response && response.content) {
-					console.log("Page content received:", response.content);
-					// Now you can process the DOM data inside the sidebar
-				}
-			});
-		});
-	}
-
-	async function loadInfoUI() {
-		let container = PCX.getEl("#settings-container");
+	async function loadInfoUI(data) {
+		console.log("loadInfoUI data", data);
+		let container = PCX.getEl("#information-container");
 
 		if (!container) {
-			PCX.log("Error: #settings-container not found.");
+			console.log("Error: #information-container not found.");
 			return;
 		}
-	}
-	chrome.runtime.onMessage.addListener((message) => {
-	if (message.action === "pageUpdated") {
-		console.log("Page URL changed:", message.url);
-		// Update sidebar UI based on new page
-	}
-
-	if (message.action === "domUpdated") {
-		console.log("Page content changed:", message.snapshot);
-		// Process the updated page content
-	}
-
-	if (message.action === "accessionData") {
-		console.log("Page content changed:", message.data);
-		loadInfoUI(message.data);
-		// Process the updated page content
-	}
-
-	async function loadInfoUI(data) {
-		let container = PCX.getEl("#information-container");
-		container.innerHTML = "";
+		container.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
 
 		container.appendChild(PCX.createDOM("dt", {
 			classList: "infoLabel",
@@ -81,27 +37,67 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		container.appendChild(PCX.createDOM("dd", {
 			classList: "infoDesc",
-			innerText: `${key}`
+			innerText: data.req
 		}));
-
-				inputCheckbox.addEventListener("change", async (event) => {
-					await Settings.save(category, key, event.target.checked);
-				});
-
-				settingLabel.appendChild(inputCheckbox);
-				settingLabel.appendChild(contentDiv);
-				categoryDiv.appendChild(settingLabel);
-
-			container.appendChild(categoryDiv);
-
-		if (!container) {
-			PCX.log("Error: #settings-container not found.");
-			return;
-		}
 	}
-});
 
+	chrome.runtime.onMessage.addListener((message) => {
+		if (message.action === "pageUpdated") {
+			console.log("Page URL changed:", message.url);
+			// Update sidebar UI based on new page
+		}
 
+		if (message.action === "domUpdated") {
+			console.log("Page content changed:", message.snapshot);
+			// Process the updated page content
+		}
+
+		if (message.action === "accessionData") {
+			console.log("Accession Data:", message.data);
+			loadInfoUI(message.data);
+			// Process the updated page content
+		}
+	});
+
+	async function requestStoredPageContent() {
+		chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+			if (!tabs.length) return;
+			let tabId = tabs[0].id;
+
+			// Request data from background script
+			chrome.runtime.sendMessage({ action: "getStoredPageData", tabId }, (response) => {
+				if (response?.data) {
+					console.log("Loaded page data:", response.data);
+					loadInfoUI(response.data);
+				} else {
+					console.warn("No stored data found for tab", tabId);
+					retryFetchingPageData(tabId, 5); // Retry if data isn't available
+				}
+			});
+		});
+	}
+
+	// Retry mechanism for fetching page data if not available initially
+	function retryFetchingPageData(tabId, retries) {
+		if (retries <= 0) return;
+		setTimeout(() => {
+			chrome.runtime.sendMessage({ action: "getStoredPageData", tabId }, (response) => {
+				if (response?.data) {
+					loadInfoUI(response.data);
+				} else {
+					retryFetchingPageData(tabId, retries - 1);
+				}
+			});
+		}, 500);
+	}
+
+	// Listen for updates from the background script
+	chrome.runtime.onMessage.addListener((message) => {
+		if (message.action === "pageDataUpdated") {
+			console.log(`Page data updated for tab ${message.tabId}`);
+			requestStoredPageContent();
+		}
+	});
 
 /**
  * 

@@ -501,6 +501,32 @@ function delay(ms) {
  * Side Panel Communication
  * 
  */
+function sendPageDataToBackground() {
+	chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+		if (!tabs.length) return;
+		let tabId = tabs[0].id;
+
+		let processedData = {
+			LinkId: new URL(location.href).searchParams.get("LinkId") || "Unknown",
+			title: document.title,
+			contentPreview: document.body.innerText.substring(0, 500) // Extract first 500 characters
+		};
+
+		chrome.runtime.sendMessage({ action: "storePageData", tabId, data: processedData });
+	});
+}
+
+// Run on page load
+sendPageDataToBackground();
+
+// Monitor for navigation or DOM changes
+new MutationObserver(() => {
+	sendPageDataToBackground();
+}).observe(document, { childList: true, subtree: true });
+
+
+
+
 	(function detectNavigationChanges() {
 		let lastUrl = location.href;
 		
@@ -543,8 +569,11 @@ function delay(ms) {
 
 			mutations.forEach((mutation)=>{
 				let id	= mutation.target.id != "" ? "#"+mutation.target.id : "";
-				let style = [...mutation.target.classList].length > 0 ? '.'+[...mutation.target.classList].join('.'):'';
-				console.log("DOM Mutation detected:", `${mutation.target.tagName}${id}${style}`);
+				let style = "";
+				if(mutation.target.classList && mutation.target.classList.length > 0) {
+					style = '.'+[...mutation.target.classList].join('.')
+				}
+				//console.log("DOM Mutation detected:", `${mutation.target.tagName}${id}${style}`);
 			})
 			//chrome.runtime.sendMessage({ action: "domUpdated", snapshot: pageSnapshot });
 		});

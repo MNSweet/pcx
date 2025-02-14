@@ -586,6 +586,7 @@ class IATSERV {
 	};
 
 	static scanFilenamer(output=false) {
+		console.log("scanFilenamer",output);
 		// Define the object with keywords and corresponding values
 		let type = "REQ";  // Default type if no match is found
 		let fs = " FS";
@@ -634,6 +635,7 @@ class IATSERV {
 		// Add event listener to the button
 		document.querySelector('[onclick="printLables()"]').addEventListener('click', generateLabel);
 
+		if(output){return generateLabel();}
 	}
 
 	/**

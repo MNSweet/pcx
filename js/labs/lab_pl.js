@@ -217,7 +217,7 @@ if(PCX.preferedUserMode()) {
 			acsNum	: PCX.getEl("#MainContent_ctl00_tbAccession").value,
 			acsID	: PCX.getEl("#tbAccessionId").value,
 			location: PCX.getEl("#MainContent_ctl00_tbLocation_tbText").value,
-			req		: IATSERV.scanFilenamer(true),
+			req		: IATSERV.scanFilenamer(true)+".pdf",
 			patient	: PCX.getEl("#MainContent_ctl00_tbPatient_tbText").value.toUpperCase().split(', '),
 			ptID	: PCX.getEl("#MainContent_ctl00_tbPatient_tbID").value,
 			dob		: PCX.getEl("#tbPatientDOB").value,
@@ -232,6 +232,19 @@ if(PCX.preferedUserMode()) {
 			action: "accessionData",
 			data: data
 		});
+		chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+		if (request.action === "getPageContent") {
+			// Extract relevant data from the page
+			let pageData = {
+				url: location.href,
+				title: document.title,
+				content: document.body.innerText.substring(0, 500) // Extract first 500 characters
+			};
+
+			console.log("Sending page content:", pageData);
+			sendResponse({ content: pageData });
+		}
+});
 	}
 
 	// Results

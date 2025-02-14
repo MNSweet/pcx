@@ -17,10 +17,18 @@ export class ServiceWorker {
 		}
 	}
 
-	static enableSidebar() {
-		chrome.sidePanel.setOptions({
+	static enableSidebar(tabId = null) {
+		let options = {
 			enabled: true,
 			path: "sidebar.html"
+		};
+
+		if (tabId) {
+			options.tabId = tabId;
+		}
+
+		chrome.sidePanel.setOptions(options).then(() => {
+			chrome.runtime.sendMessage({ action: "sidePanelOpened" });
 		});
 	}
 
@@ -46,7 +54,7 @@ export class ServiceWorker {
 			await chrome.sidePanel.setOptions({ tabId, enabled: false });
 		} else {
 			ServiceWorker.changeExtensionIcon(true);
-			await chrome.sidePanel.setOptions({ tabId, path: 'sidebar.html', enabled: true });
+			ServiceWorker.enableSidebar(tabId);
 		}
 	}
 
