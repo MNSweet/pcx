@@ -340,7 +340,13 @@ class IATSERV {
 					document.querySelector('#MainContent_ctl00_ctl00_upPanel').removeEventListener('load',watchForLaterNode,true);
 				}
 			}
-			QAManager.setStablityNotice(el.DOS,PCX.getEl(el.DOC,true).value);
+			PCX.processEnabled('Interface','Show Stablity Notice',
+				()=>{QAManager.setStablityNotice(
+					el.DOS,
+					PCX.getEl(el.DOC,true).value,
+					true
+				)}
+			);
 			PCX.getEl(el.ICDCodesInput+"~.body",true).insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
 		});
 	}
@@ -406,7 +412,13 @@ class IATSERV {
 				let lastValue = '';
 				const intervalId = setInterval(() => {
 					if (PCX.getEl(el.DOC,true).value !== lastValue) {
-						QAManager.setStablityNotice(el.DOS,PCX.getEl(el.DOC).value)
+
+						PCX.processEnabled('Interface','Show Stablity Notice',
+							()=>{QAManager.setStablityNotice(
+								el.DOS,
+								PCX.getEl(el.DOC).value
+							)}
+						);
 						lastValue = PCX.getEl(el.DOC).value;
 						clearInterval(intervalId);
 					}
@@ -448,6 +460,7 @@ class IATSERV {
 		const el = IATSERV.selectors;
 		if (e.target && "#"+e.target.id === el.Category) {
 			IATSERV.checkTestCat(PCX.getEl(el.Category,true),{Input: PCX.getEl(el.TestCodesInput,true),Output: PCX.getEl(el.TestCodesOutput,true)},IATSERV.testCategories);
+			PCX.processEnabled('Interface','Hide Signatures',IATSERV.showSignaturesBTN);
 			PCX.getEl(el.newPatientBtn,true).addEventListener('click', IATSERV.newPatientBtn);
 		}
 	}
