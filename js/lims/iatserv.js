@@ -599,7 +599,6 @@ class IATSERV {
 	};
 
 	static scanFilenamer(output=false) {
-		console.log("scanFilenamer",output);
 		// Define the object with keywords and corresponding values
 		let type = "REQ";  // Default type if no match is found
 		let fs = " FS";

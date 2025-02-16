@@ -78,17 +78,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 
 	// Retry mechanism for fetching page data if not available initially
-	function retryFetchingPageData(tabId, retries) {
-		if (retries <= 0) return;
-		setTimeout(() => {
-			chrome.runtime.sendMessage({ action: "getStoredPageData", tabId }, (response) => {
-				if (response?.data) {
-					loadInfoUI(response.data);
-				} else {
-					retryFetchingPageData(tabId, retries - 1);
-				}
-			});
-		}, 500);
+	function fetchPageDataWithRetry(tabId, retries = 5) {
+		if (retries === 0) return;
+		chrome.runtime.sendMessage({ action: "getStoredPageData", tabId }, (response) => {
+			if (response?.data) {
+				loadInfoUI(response.data);
+			} else {
+				setTimeout(() => fetchPageDataWithRetry(tabId, retries - 1), 500);
+			}
+		});
 	}
 
 	// Listen for updates from the background script

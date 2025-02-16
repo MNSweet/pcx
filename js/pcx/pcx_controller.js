@@ -457,39 +457,30 @@ function waitForElm(selector) {
 		if (document.querySelector(selector)) {
 			return resolve(document.querySelector(selector));
 		}
-
-		const observer = new MutationObserver(mutations => {
+		DOMObserver.observe(document.body, { childList: true, subtree: true }, (mutations) => {
 			if (document.querySelector(selector)) {
-				observer.disconnect();
 				resolve(document.querySelector(selector));
+				DOMObserver.removeObserver(document.body, { childList: true, subtree: true }); // Disconnect after resolve
 			}
-		});
-
-		// If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
-		observer.observe(document.body, {
-			childList: true,
-			subtree: true
 		});
 	});
 }
-function waitForIframeElm(frame,selector) {
+function waitForIframeElm(frame, selector) {
 	return new Promise(resolve => {
-		if (document.querySelector(frame).contentWindow.document.querySelector(selector)) {
-			return resolve(document.querySelector(frame).contentWindow.document.querySelector(selector));
-		}
-
-		const observer = new MutationObserver(mutations => {
-			if (document.querySelector(frame).contentWindow.document.querySelector(selector)) {
-				observer.disconnect();
-				resolve(document.querySelector(frame).contentWindow.document.querySelector(selector));
+		try {
+			const frameDoc = document.querySelector(frame)?.contentWindow.document;
+			if (frameDoc && frameDoc.querySelector(selector)) {
+				return resolve(frameDoc.querySelector(selector));
 			}
-		});
-
-		// If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
-		observer.observe(document.body, {
-			childList: true,
-			subtree: true
-		});
+		DOMObserver.observe(frameDoc.body, { childList: true, subtree: true }, (mutations) => {
+				if (frameDoc.querySelector(selector)) {
+					resolve(frameDoc.querySelector(selector));
+					DOMObserver.removeObserver(frameDoc.body, { childList: true, subtree: true }); // Disconnect after resolve
+				}
+			});
+		} catch (error) {
+			console.error("Failed to observe iframe node:", error);
+		}
 	});
 }
 function delay(ms) {
@@ -501,83 +492,73 @@ function delay(ms) {
  * Side Panel Communication
  * 
  */
-function sendPageDataToBackground() {
-	chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-		if (!tabs.length) return;
-		let tabId = tabs[0].id;
 
-		let processedData = {
-			LinkId: new URL(location.href).searchParams.get("LinkId") || "Unknown",
-			title: document.title,
-			contentPreview: document.body.innerText.substring(0, 500) // Extract first 500 characters
-		};
+function sendPageDataToBackground(data) {
+	let lastUrl = location.href;
+	const whitelist = ["DIV#MainContent_ctl00_ctl00_upPanel"];
+	let elementsMutated = []
+	let timeout;
+	// Also detect changes via history API
+	history.pushState = ((original) =>
+		function pushState() {
+			let result = original.apply(this, arguments);
+			chrome.runtime.sendMessage({ action: "pageUpdated", url: location.href });
+			return result;
+		})(history.pushState);
 
-		chrome.runtime.sendMessage({ action: "storePageData", tabId, data: processedData });
+	history.replaceState = ((original) =>
+		function replaceState() {
+			let result = original.apply(this, arguments);
+			chrome.runtime.sendMessage({ action: "pageUpdated", url: location.href });
+			return result;
+		})(history.replaceState);
+
+	// Listen for back/forward button navigation
+	window.addEventListener("popstate", () => {
+		chrome.runtime.sendMessage({ action: "pageUpdated", url: location.href });
+	});
+
+	chrome.runtime.sendMessage({ action: "pageData", data: data });
+
+	DOMObserver.observe(document.body, { childList: true, subtree: true }, (mutations) => {
+		/*const filteredMutations = mutations.filter((m) => {
+			let id = m.target.id ? `#${m.target.id}` : "";
+			let classes = m.target.classList.length > 0 ? '.' + [...m.target.classList].join('.') : "";
+			m.target.elementKey = `${m.target.tagName}${id}${classes}`;
+
+			if(!elementsMutated.includes(m.target.elementKey)) {elementsMutated.push(m.target.elementKey)}
+			
+			if(whitelist.includes(m.target.elementKey)){return true;}
+			if(m.target.tagName == "BODY"){return true;}
+			return false;
+		});
+		if (location.href !== lastUrl) {
+			lastUrl = location.href;
+			chrome.runtime.sendMessage({ action: "pageUpdated", url: lastUrl });
+			return;
+		}
+		//const filteredMutations = mutations.filter(m => whitelist.includes(m.target.tagName));
+		
+		console.log(filteredMutations);
+		if (filteredMutations.length > 0) {
+			clearTimeout(timeout);
+			timeout = setTimeout(() => {
+				let elements = {};
+				filteredMutations.forEach(m => {
+				console.log(m.target.elementKey);
+					elements[m.target.elementKey] = m.target;
+				});
+				let processedData = {
+					LinkId: new URL(location.href).searchParams.get("LinkId") || "0",
+					title: document.title,
+					elements: elements
+				};
+				console.log(elementsMutated);
+				console.log(`Mutation:`,processedData);
+				chrome.runtime.sendMessage({ action: "storePageData", data: processedData });
+			}, 500);
+		}*/
+
 	});
 }
-
-// Run on page load
 sendPageDataToBackground();
-
-// Monitor for navigation or DOM changes
-new MutationObserver(() => {
-	sendPageDataToBackground();
-}).observe(document, { childList: true, subtree: true });
-
-
-
-
-	(function detectNavigationChanges() {
-		let lastUrl = location.href;
-		
-		// Detect when the page changes without a full reload (SPA navigation)
-		const observer = new MutationObserver(() => {
-			if (location.href !== lastUrl) {
-				lastUrl = location.href;
-				console.log("Navigation detected:", lastUrl);
-				chrome.runtime.sendMessage({ action: "pageUpdated", url: lastUrl });
-			}
-		});
-		
-		// Observe changes to the entire document
-		observer.observe(document, { childList: true, subtree: true });
-
-		// Also detect changes via history API
-		history.pushState = ((original) =>
-			function pushState() {
-				let result = original.apply(this, arguments);
-				chrome.runtime.sendMessage({ action: "pageUpdated", url: location.href });
-				return result;
-			})(history.pushState);
-
-		history.replaceState = ((original) =>
-			function replaceState() {
-				let result = original.apply(this, arguments);
-				chrome.runtime.sendMessage({ action: "pageUpdated", url: location.href });
-				return result;
-			})(history.replaceState);
-
-		// Listen for back/forward button navigation
-		window.addEventListener("popstate", () => {
-			chrome.runtime.sendMessage({ action: "pageUpdated", url: location.href });
-		});
-		const whitelist = [
-			"BODY"
-		]
-		const domObserver = new MutationObserver((mutations) => {
-			//let pageSnapshot = document.body.innerText.substring(0, 500); // Example: Extract first 500 chars
-
-			mutations.forEach((mutation)=>{
-				let id	= mutation.target.id != "" ? "#"+mutation.target.id : "";
-				let style = "";
-				if(mutation.target.classList && mutation.target.classList.length > 0) {
-					style = '.'+[...mutation.target.classList].join('.')
-				}
-				//console.log("DOM Mutation detected:", `${mutation.target.tagName}${id}${style}`);
-			})
-			//chrome.runtime.sendMessage({ action: "domUpdated", snapshot: pageSnapshot });
-		});
-
-		domObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
-
-	})();
