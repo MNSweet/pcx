@@ -251,6 +251,16 @@
 	color:#ffffff;
 }
 
+[action^="./Pupup.aspx?LinkId=2005"] .modal-footer {
+	position: fixed;
+	bottom: 0px;
+	background-color: #ffffff;
+	width: 100%;
+}
+[action^="./Pupup.aspx?LinkId=2005"] .tab-content {
+	padding-bottom: 165px;
+}
+
 /*#page-wrapper .container-fluid {
 	padding-bottom: 70px;
 	position: relative;
