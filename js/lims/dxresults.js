@@ -1,5 +1,8 @@
 console.log("DXResults LIMS");
-class DXRESULTS {
+
+import { Operator } from 'Operator.js';
+
+class DXRESULTS extends Operator {
 /**
  *
  * PREP Variables/Constants

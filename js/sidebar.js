@@ -14,88 +14,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 		});
 	});
 
-/**
- * 
- * Information
- * 
- */
-
-	async function loadInfoUI(data) {
-		console.log("loadInfoUI data", data);
-		let container = PCX.getEl("#information-container");
-
-		if (!container) {
-			console.log("Error: #information-container not found.");
-			return;
-		}
-		container.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-
-		container.appendChild(PCX.createDOM("dt", {
-			classList: "infoLabel",
-			innerText: "Requisition Filename"
-		}));
-
-		container.appendChild(PCX.createDOM("dd", {
-			classList: "infoDesc",
-			innerText: data.req
-		}));
-	}
-
-	chrome.runtime.onMessage.addListener((message) => {
-		if (message.action === "pageUpdated") {
-			console.log("Page URL changed:", message.url);
-			// Update sidebar UI based on new page
-		}
-
-		if (message.action === "domUpdated") {
-			console.log("Page content changed:", message.snapshot);
-			// Process the updated page content
-		}
-
-		if (message.action === "accessionData") {
-			console.log("Accession Data:", message.data);
-			loadInfoUI(message.data);
-			// Process the updated page content
-		}
-	});
-
-	async function requestStoredPageContent() {
-		chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-			if (!tabs.length) return;
-			let tabId = tabs[0].id;
-
-			// Request data from background script
-			chrome.runtime.sendMessage({ action: "getStoredPageData", tabId }, (response) => {
-				if (response?.data) {
-					console.log("Loaded page data:", response.data);
-					loadInfoUI(response.data);
-				} else {
-					console.warn("No stored data found for tab", tabId);
-					retryFetchingPageData(tabId, 5); // Retry if data isn't available
-				}
-			});
-		});
-	}
-
-	// Retry mechanism for fetching page data if not available initially
-	function fetchPageDataWithRetry(tabId, retries = 5) {
-		if (retries === 0) return;
-		chrome.runtime.sendMessage({ action: "getStoredPageData", tabId }, (response) => {
-			if (response?.data) {
-				loadInfoUI(response.data);
-			} else {
-				setTimeout(() => fetchPageDataWithRetry(tabId, retries - 1), 500);
-			}
-		});
-	}
-
-	// Listen for updates from the background script
-	chrome.runtime.onMessage.addListener((message) => {
-		if (message.action === "pageDataUpdated") {
-			console.log(`Page data updated for tab ${message.tabId}`);
-			requestStoredPageContent();
-		}
-	});
 
 /**
  * 
@@ -202,4 +120,156 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 
 	loadSettingsUI();
-});
+/**
+ * 
+ * Information
+ * 
+ */
+
+	async function loadInfoUI(data) {
+		console.log("loadInfoUI data", data);
+		let container = PCX.getEl("#information-container");
+
+		if (!container) {
+			console.log("Error: #information-container not found.");
+			return;
+		}
+		container.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+
+		container.appendChild(PCX.createDOM("dt", {
+			classList: "infoLabel",
+			innerText: "Requisition Filename"
+		}));
+
+		container.appendChild(PCX.createDOM("dd", {
+			classList: "infoDesc",
+			innerText: data.req
+		}));
+	}
+	// Registry mapping each CMS (lims) and location code to a renderer function.
+	const templateRegistry = {
+		IATSERV: {
+			"2070": renderAccessionList,
+			"2071": renderUpdateAccession, // Requires AccessionId
+			"2011": renderCreateAccession,
+			"2078": renderPreviewResults,    // Requires AccessionId
+			"2461": renderUpdateResults,     // Requires AccessionId
+			"7006": renderPreauthorization,  // Requires PreauthorizationOrderId
+			"2006": renderNewMasterAccount,
+			"2004": renderLocations,
+		},
+		DXRESULTS: {
+			"PGX": renderPGX,
+			"CGX": renderCGX,
+			"ImmunodeficiencyReq.aspx": renderImmuno,
+			"Neurology": renderNeuro,
+		},
+	};
+
+	// Main function to choose and call the correct renderer.
+	function buildFormFromData(pageState) {
+		const { lims, location } = pageState;
+		const renderer = templateRegistry[lims] && templateRegistry[lims][location];
+		return renderer ? renderer(pageState) : renderDefault(pageState);
+	}
+
+	// Example renderer functions for IATSERV pages.
+	function renderAccessionList(pageState) {
+		return `<h1>Accession List</h1><p>Details for Accession List page.</p>`;
+	}
+
+	function renderUpdateAccession(pageState) {
+		if (!pageState.extraParams.AccessionId) {
+			return `<h1>Error</h1><p>Missing AccessionId for Update Accession.</p>`;
+		}
+		return `<h1>Update Accession</h1><p>Updating Accession: ${pageState.extraParams.AccessionId}</p>`;
+	}
+
+	function renderCreateAccession(pageState) {
+		return `<h1>Create Accession</h1>`;
+	}
+
+	function renderPreviewResults(pageState) {
+		if (!pageState.extraParams.AccessionId) {
+			return `<h1>Error</h1><p>Missing AccessionId for Preview Results.</p>`;
+		}
+		return `<h1>Preview Results</h1><p>Previewing results for Accession: ${pageState.extraParams.AccessionId}</p>`;
+	}
+
+	function renderUpdateResults(pageState) {
+		if (!pageState.extraParams.AccessionId) {
+			return `<h1>Error</h1><p>Missing AccessionId for Update Results.</p>`;
+		}
+		return `<h1>Update Results</h1><p>Updating results for Accession: ${pageState.extraParams.AccessionId}</p>`;
+	}
+
+	function renderPreauthorization(pageState) {
+		if (!pageState.extraParams.PreauthorizationOrderId) {
+			return `<h1>Error</h1><p>Missing PreauthorizationOrderId.</p>`;
+		}
+		return `<h1>Preauthorization</h1><p>Order: ${pageState.extraParams.PreauthorizationOrderId}</p>`;
+	}
+
+	function renderNewMasterAccount(pageState) {
+		return `<h1>New Master Account</h1>`;
+	}
+
+	function renderLocations(pageState) {
+		return `<h1>Locations</h1>`;
+	}
+
+	// Example renderer functions for DXRESULTS pages.
+	function renderPGX(pageState) {
+		return `<h1>PGX Page</h1>`;
+	}
+
+	function renderCGX(pageState) {
+		return `<h1>CGX Page</h1>`;
+	}
+
+	function renderImmuno(pageState) {
+		return `<h1>Immunodeficiency Request</h1>`;
+	}
+
+	function renderNeuro(pageState) {
+		return `<h1>Neurology Page</h1>`;
+	}
+
+	// Default renderer if no match is found.
+	function renderDefault(pageState) {
+		return `<h1>Default Template</h1><p>No specific template for ${pageState.lims} with location ${pageState.location}.</p>`;
+	}
+
+	// Optional: Dynamic registration for new templates.
+	function registerTemplateRenderer(lims, location, renderer) {
+		if (!templateRegistry[lims]) {
+			templateRegistry[lims] = {};
+		}
+		templateRegistry[lims][location] = renderer;
+	}
+
+	// Request the active tab's page state from the background.
+	function requestTabData() {
+		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+			if (tabs.length > 0) {
+				const activeTab = tabs[0];
+				chrome.runtime.sendMessage({ type: 'GET_PAGE_STATE', tabId: activeTab.id }, (response) => {
+					if (response) {
+						renderSidebar(response);
+					} else {
+						document.getElementById('sidebar').innerHTML = '<p>No page data available.</p>';
+					}
+				});
+			}
+		});
+	}
+
+	// Render the sidebar's content.
+	function renderSidebar(pageState) {
+		const content = buildFormFromData(pageState);
+		document.getElementById('sidebar').innerHTML = content;
+	}
+
+	// Initialize the sidebar when the panel loads.
+	document.addEventListener('DOMContentLoaded', requestTabData);
+	});

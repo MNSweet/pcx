@@ -1,5 +1,7 @@
 PCX.log("IATServ LIMS");
 
+import { Operator } from 'Operator.js';
+
 // Fix Spelling Mistake
 if(document.querySelector("#mnu_8")){
 	document.querySelector("#mnu_8").innerHTML = document.querySelector("#mnu_8").innerHTML.replace("Bach","Batch");
@@ -12,7 +14,7 @@ if(typeof replace !== "function") {
 	}
 }
 
-class IATSERV {
+class IATSERV extends Operator {
 /**
  *
  * PREP Variables/Constants
@@ -1101,3 +1103,6 @@ class IATSERV {
 		WY:{term:"WYOMING",name:"Medicare Part B Wyoming *",id:"3481"}
 	}
 }
+
+//PCX function for IATSERV Sites
+sendPageDataToBackground();

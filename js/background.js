@@ -22,40 +22,47 @@ export class ServiceWorker {
  * Side Panel
  * 
  */
-	static pageData = {}; // Store processed page data per tab
-	static MAX_TABS = 10; // Limit to avoid memory overhead
-	static lastUpdateTime = {}; // Track last update per tab
-	static THROTTLE_TIME = 500; // Minimum time between updates (ms)
+// background.js
+// Maintains page state data and acts as the message bus.
 
-	// Store processed page data per tab with timestamp
-	static async storePageData(tabId, data) {
-		const now = Date.now();
+static dataStore = {};
 
-		// Throttle updates to prevent excessive writes
-		if (ServiceWorker.lastUpdateTime[tabId] && (now - ServiceWorker.lastUpdateTime[tabId] < ServiceWorker.THROTTLE_TIME)) {
-			return;
-		}
-		ServiceWorker.lastUpdateTime[tabId] = now;
+// Initialize the background script by loading persisted data and starting a backup timer.
+static initBackground() {
+  chrome.storage.local.get('dataStore', (result) => {
+    if (result.dataStore) {
+      dataStore = result.dataStore;
+      console.log('Data loaded from storage:', dataStore);
+    }
+  });
+  // Backup data every minute.
+  setInterval(backupDataToStorage, 60000);
+}
 
-		// Add timestamp and store data
-		ServiceWorker.pageData[tabId] = { timestamp: now, data };
+// Store or update the page state in memory.
+static storeTabData(tabId, pageState) {
+  dataStore[tabId] = pageState;
+  console.log(`Data stored for tab ${tabId}:`, pageState);
+}
 
-		// Limit number of stored tabs to prevent memory overflow
-		if (Object.keys(ServiceWorker.pageData).length > ServiceWorker.MAX_TABS) {
-			const oldestTab = Object.keys(ServiceWorker.pageData).reduce((oldest, id) =>
-				ServiceWorker.pageData[id].timestamp < ServiceWorker.pageData[oldest].timestamp ? id : oldest
-			);
-			delete ServiceWorker.pageData[oldestTab];
-		}
+// Retrieve page state for a given tab.
+static getTabData(tabId) {
+  return dataStore[tabId] || null;
+}
 
-		// Notify sidebar that new data is available
-		chrome.runtime.sendMessage({ action: "pageDataUpdated", tabId });
-	}
+static removeTabData(tabId) {
+  delete dataStore[tabId];
+  backupDataToStorage(); // Update persistent storage.
+  console.log(`Data removed for tab ${tabId}`);
+}
 
-	// Retrieve stored data for a specific tab
-	static async getPageData(tabId, sendResponse) {
-		sendResponse({ data: ServiceWorker.pageData[tabId]?.data || null });
-	}
+// Back up the in-memory store to chrome.storage.
+static backupDataToStorage() {
+  chrome.storage.local.set({ dataStore: dataStore }, () => {
+    console.log('Backup complete.');
+  });
+}
+
 
 	static enableSidebar(tabId = null) {
 		let options = {
@@ -72,18 +79,19 @@ export class ServiceWorker {
 		});
 	}
 
-	static toggleSidebar() {
-		ServiceWorker.enableSidebar();
-	}
 	static async getSite(request, sender) {
 		ServiceWorker.getCurrentSite().then((site) => {
 			chrome.tabs.sendMessage(sender.tab.id, { "action": "returnSite", "site": site }, () => {
-				if (chrome.runtime.lastError) console.error("SendMessage Error:", chrome.runtime.lastError);
+				if (chrome.runtime.lastError) {
+					console.error("SendMessage Error:", chrome.runtime.lastError);
+				}
 				console.log("Message sent: returnSite", site);
 			});
 		}).catch((error) => {
 			chrome.tabs.sendMessage(sender.tab.id, { "action": "error", "note": "returnSite failed", "error": error }, () => {
-				if (chrome.runtime.lastError) console.error("SendMessage Error:", chrome.runtime.lastError);
+				if (chrome.runtime.lastError) {
+					console.error("SendMessage Error:", chrome.runtime.lastError);
+				}
 				console.error("Error sending returnSite failed:", error);
 			});
 		});
@@ -201,8 +209,8 @@ export class ServiceWorker {
 
 	static handleOpenWindow(target, url, whitelist) {
 		console.log("handleOpenWindow: target=", target, "url=", url, "whitelist=", whitelist);
-		if (tabTargets[target]) {
-			chrome.tabs.get(tabTargets[target], (tab) => {
+		if (ServiceWorker.tabTargets[target]) {
+			chrome.tabs.get(ServiceWorker.tabTargets[target], (tab) => {
 				if (chrome.runtime.lastError || !tab) {
 					console.error("Error getting tab or tab doesn't exist:", chrome.runtime.lastError);
 					ServiceWorker.createNewTab(target, url, whitelist);
@@ -213,7 +221,7 @@ export class ServiceWorker {
 					});
 				} else {
 					console.log("Switching to existing tab:", tab.id);
-					chrome.tabs.update(tabTargets[target], { active: true }, () => {
+					chrome.tabs.update(ServiceWorker.tabTargets[target], { active: true }, () => {
 						if (chrome.runtime.lastError) console.error("Update Error:", chrome.runtime.lastError);
 					});
 				}
@@ -228,8 +236,8 @@ export class ServiceWorker {
 		console.log("Creating new tab with url:", url);
 		chrome.tabs.create({ url }, (tab) => {
 			if (chrome.runtime.lastError) console.error("Create Tab Error:", chrome.runtime.lastError);
-			tabTargets[target] = tab.id;
-			tabWhitelists[tab.id] = whitelist;
+			ServiceWorker.tabTargets[target] = tab.id;
+			ServiceWorker.tabWhitelists[tab.id] = whitelist;
 			console.log("New tab created with id:", tab.id);
 		});
 	}
@@ -237,7 +245,7 @@ export class ServiceWorker {
 
 /**
  *
- * On Message Listender
+ * On Message Listener
  * 
  */
 
@@ -249,12 +257,15 @@ export class ServiceWorker {
 		}
 
 	// Side Panel
-		if (message.action === "storePageData") {
-			let tabId = sender.tab.id; // Only available in background.js
-			ServiceWorker.storePageData(tabId, message.data);
-		}
-		if (message.action === "getStoredPageData") {
-			ServiceWorker.getPageData(message.tabId, sendResponse);
+		// Listen for messages from tabs (updates) and the sidebar (data requests).
+		if (message.type === 'UPDATE_PAGE_STATE') {
+			// Store data from a tab using its tab id.
+			const tabId = sender.tab.id;
+			storeTabData(tabId, message.pageState);
+		} else if (message.type === 'GET_PAGE_STATE') {
+			// Retrieve the page state data when requested.
+			const tabId = message.tabId || sender.tab.id;
+			sendResponse(getTabData(tabId));
 		}
 
 	// Routing
@@ -289,13 +300,13 @@ export class ServiceWorker {
 
 	chrome.webNavigation.onCommitted.addListener((details) => {
 	// Key Bindings
-		const whitelist = tabWhitelists[details.tabId];
+		const whitelist = ServiceWorker.tabWhitelists[details.tabId];
 		if (!whitelist) return;
 		const isAllowed = whitelist.some(keyword => details.url.includes(keyword));
 		if (!isAllowed) {
-			delete tabWhitelists[details.tabId];
-			const targetName = Object.keys(tabTargets).find(key => tabTargets[key] === details.tabId);
-			if (targetName) delete tabTargets[targetName];
+			delete ServiceWorker.tabWhitelists[details.tabId];
+			const targetName = Object.keys(ServiceWorker.tabTargets).find(key => ServiceWorker.tabTargets[key] === details.tabId);
+			if (targetName) delete ServiceWorker.tabTargets[targetName];
 		}
 	}, { url: [{ schemes: ["http", "https"] }] });
 
@@ -307,10 +318,12 @@ export class ServiceWorker {
  * 
  */
 	chrome.tabs.onRemoved.addListener((tabId) => {
+	// Sidepanel
+		removeTabData(tabId);
 	// Key Bindings
-		delete tabWhitelists[tabId];
-		const targetName = Object.keys(tabTargets).find(key => tabTargets[key] === tabId);
-		if (targetName) delete tabTargets[targetName];
+		delete ServiceWorker.tabWhitelists[tabId];
+		const targetName = Object.keys(ServiceWorker.tabTargets).find(key => ServiceWorker.tabTargets[key] === tabId);
+		if (targetName) delete ServiceWorker.tabTargets[targetName];
 	});
 
 	// Side Panel
@@ -340,6 +353,8 @@ export class ServiceWorker {
  */
 
 	chrome.runtime.onInstalled.addListener(async () => {
+		ServiceWorker.initBackground();
+		
 		await new Promise((resolve) => {
 			chrome.storage.local.remove(["pcx_permissions"], () => {
 				resolve();

@@ -498,7 +498,8 @@ function sendPageDataToBackground(data) {
 	const whitelist = ["DIV#MainContent_ctl00_ctl00_upPanel"];
 	let elementsMutated = []
 	let timeout;
-	// Also detect changes via history API
+	
+	// Detect changes via history API
 	history.pushState = ((original) =>
 		function pushState() {
 			let result = original.apply(this, arguments);
@@ -518,10 +519,11 @@ function sendPageDataToBackground(data) {
 		chrome.runtime.sendMessage({ action: "pageUpdated", url: location.href });
 	});
 
-	chrome.runtime.sendMessage({ action: "pageData", data: data });
+	chrome.runtime.sendMessage({ action: "storePageData", data: data });
 
+	// Listen for changes to the body
 	DOMObserver.observe(document.body, { childList: true, subtree: true }, (mutations) => {
-		/*const filteredMutations = mutations.filter((m) => {
+		const filteredMutations = mutations.filter((m) => {
 			let id = m.target.id ? `#${m.target.id}` : "";
 			let classes = m.target.classList.length > 0 ? '.' + [...m.target.classList].join('.') : "";
 			m.target.elementKey = `${m.target.tagName}${id}${classes}`;
@@ -537,7 +539,6 @@ function sendPageDataToBackground(data) {
 			chrome.runtime.sendMessage({ action: "pageUpdated", url: lastUrl });
 			return;
 		}
-		//const filteredMutations = mutations.filter(m => whitelist.includes(m.target.tagName));
 		
 		console.log(filteredMutations);
 		if (filteredMutations.length > 0) {
@@ -557,8 +558,7 @@ function sendPageDataToBackground(data) {
 				console.log(`Mutation:`,processedData);
 				chrome.runtime.sendMessage({ action: "storePageData", data: processedData });
 			}, 500);
-		}*/
+		}
 
 	});
 }
-sendPageDataToBackground();
