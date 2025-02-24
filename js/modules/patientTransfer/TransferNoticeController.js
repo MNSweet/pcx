@@ -1,164 +1,199 @@
-// noticeController.js
-import { DOMHelper } from "./DOMHelper.js";
-import { Logger } from "./Logger.js";
+// /js/modules/patientTransfer/TransferSidePanelIntegration.js
+import { Logger } from "../helpers/Logger.js";
+import { TransferNoticeController } from "./TransferNoticeController.js";
+import { DestinationFormFiller } from "./DestinationFormFiller.js";
 
-export class NoticeController extends DOMHelper {
-	_handleId = "patientDataHandle";
-	_panelId = "patientDataPanel";
-	_prefillBtnId = "prefillOrderBtn";
-	_messageId = "prefillMessage";
-	_infoId = "patientInfoDisplay";
+let transferTimer = null;
 
-	constructor(patientData) {
-		super();
-		this.patientData = patientData;
-		this.validUrlPatterns = [
-			/[\?&]LinkId=2071/i,
-			/\/PGx/i,
-			/\/CGx/i,
-			/\/ImmunodeficiencyReq\.aspx/i,
-			/\/Neurology/i
-		];
-	}
-
-	isEligibleForPrefill() {
-		const currentUrl = window.location.href;
-		return this.validUrlPatterns.some(pattern => pattern.test(currentUrl));
-	}
-
-	showHandle() {
-		let handle = this.getEl(`#${this._handleId}`);
-		if (!handle) {
-			handle = this.createDOM("div", { id: this._handleId, textContent: "Patient Data" });
-			// Instead of inline styles, add the CSS class for styling.
-			handle.classList.add("notice-handle");
-
-			const sidePanel = this.getEl("#sidePanelContainer");
-			if (sidePanel) {
-				sidePanel.appendChild(handle);
-			} else {
-				document.body.appendChild(handle);
-			}
-			handle.addEventListener("click", () => this.togglePanel());
-		}
-		Logger.log("NoticeController.showHandle: Patient data handle displayed.");
-	}
-
-	showPanel() {
-		let panel = this.getEl(`#${this._panelId}`);
-		if (!panel) {
-			panel = this.createDOM("div", { id: this._panelId });
-			// Assign the pre-defined CSS class for the panel.
-			panel.classList.add("notice-panel");
-
-			// Create patient info element.
-			const infoDisplay = this.createDOM("div", { id: this._infoId });
-			infoDisplay.classList.add("patient-info");
-			infoDisplay.textContent = `Patient: ${this.patientData.lastName}, ${this.patientData.firstName} | ${this.patientData.category || ""}`;
-			infoDisplay.dataset.hash = this._hash(`${this.patientData.lastName}${this.patientData.firstName}${this.patientData.category}`);
-			panel.appendChild(infoDisplay);
-
-			// Create prefill button.
-			const prefillBtn = this.createDOM("button", { id: this._prefillBtnId, textContent: "Prefill Order Form" });
-			prefillBtn.classList.add("prefill-btn");
-			prefillBtn.disabled = !this.isEligibleForPrefill();
-			prefillBtn.addEventListener("click", () => {
-				if (this.isEligibleForPrefill()) {
-					this.prefillOrderForm();
-				} else {
-					this.showMessage("Please open a Reference Lab order page to continue.");
-				}
-			});
-			panel.appendChild(prefillBtn);
-
-			// Create message area.
-			const messageEl = this.createDOM("div", { id: this._messageId });
-			messageEl.classList.add("message");
-			panel.appendChild(messageEl);
-
-			// Append the panel to the side panel container.
-			const sidePanel = this.getEl("#sidePanelContainer");
-			if (sidePanel) {
-				sidePanel.appendChild(panel);
-			} else {
-				document.body.appendChild(panel);
-			}
-		}
-		panel.style.transform = "translateX(0)";
-		Logger.log("NoticeController.showPanel: Slide-out panel shown.");
-	}
-
-	togglePanel() {
-		const panel = this.getEl(`#${this._panelId}`);
-		if (panel) {
-			if (panel.style.transform === "translateX(0)") {
-				panel.style.transform = "translateX(100%)";
-				Logger.log("NoticeController.togglePanel: Panel hidden.");
-			} else {
-				panel.style.transform = "translateX(0)";
-				Logger.log("NoticeController.togglePanel: Panel shown.");
-			}
-		} else {
-			this.showPanel();
-		}
-	}
-
-	updatePanel(newPatientData) {
-		this.patientData = newPatientData;
-		const infoDisplay = this.getEl(`#${this._infoId}`, true);
-		if (infoDisplay) {
-			infoDisplay.textContent = `Patient: ${this.patientData.lastName}, ${this.patientData.firstName} | ${this.patientData.category || ""}`;
-		}
-		const prefillBtn = this.getEl(`#${this._prefillBtnId}`, true);
-		if (prefillBtn) {
-			prefillBtn.disabled = !this.isEligibleForPrefill();
-		}
-		Logger.log("NoticeController.updatePanel: Panel updated with new patient data.");
-	}
-
-	showMessage(message) {
-		const messageEl = this.getEl(`#${this._messageId}`, true);
-		if (messageEl) {
-			messageEl.textContent = message;
-		}
-		Logger.log("NoticeController.showMessage: Message displayed.", { message });
-	}
-
-	clear() {
-		const panel = this.getEl(`#${this._panelId}`, true);
-		if (panel) {
-			panel.remove();
-		}
-		const handle = this.getEl(`#${this._handleId}`, true);
-		if (handle) {
-			handle.remove();
-		}
-		Logger.log("NoticeController.clear: Notice panel and handle cleared.");
-	}
-
-	prefillOrderForm() {
-		Logger.log("NoticeController.prefillOrderForm: Prefill action triggered.");
-		// Example: chrome.runtime.sendMessage({ action: 'prefillOrderForm', patientData: this.patientData });
-	}
-
-	_hash(str) {
-		let hash = 0;
-		if (!str || str.length === 0) return hash;
-		for (let i = 0; i < str.length; i++) {
-			const chr = str.charCodeAt(i);
-			hash = ((hash << 5) - hash) + chr;
-			hash |= 0;
-		}
-		return hash;
+/**
+ * Clears the transfer timer if set.
+ */
+function clearTransferTimer() {
+	if (transferTimer) {
+		clearTimeout(transferTimer);
+		transferTimer = null;
 	}
 }
 
+/**
+ * Starts a 3-minute timer to purge patient data from chrome.storage.
+ */
+function startTransferTimer() {
+	clearTransferTimer();
+	transferTimer = setTimeout(() => {
+		chrome.storage.local.remove("patientData", () => {
+			Logger.log("TransferSidePanelIntegration: Patient data purged due to inactivity.");
+			// Optionally, update the notice panel to indicate expiry.
+			if (window.transferNoticeControllerInstance) {
+				window.transferNoticeControllerInstance.showMessage("Patient data expired.");
+			}
+		});
+	}, 180000); // 3 minutes = 180,000ms
+}
+
+/**
+ * Checks if the current page meets the conditions to allow a transfer.
+ * Conditions:
+ *  - The URL parameter "LinkId" equals "2071" (update Accession page).
+ *  - The performing lab container (div#dvPerformingLabContainer) is visible.
+ *  - The lab ID (from a data attribute, e.g., data-labid) is not "1012".
+ * @returns {boolean}
+ */
+function canTransfer() {
+	const urlParams = new URLSearchParams(window.location.search);
+	const linkId = urlParams.get("LinkId");
+	if (linkId !== "2071") {
+		Logger.log("TransferSidePanelIntegration: Not an update accession page (LinkId !== 2071).");
+		return false;
+	}
+
+	const labContainer = document.querySelector("div#dvPerformingLabContainer");
+	if (!labContainer || window.getComputedStyle(labContainer).display === "none") {
+		Logger.log("TransferSidePanelIntegration: Performing lab container not visible.");
+		return false;
+	}
+
+	const labId = labContainer.getAttribute("data-labid") || "";
+	if (labId === "1012") {
+		Logger.log("TransferSidePanelIntegration: Performing lab is Prince Laboratories (1012).");
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * loadPatient() – Loads the full patient data non-intrusively via a hidden iframe.
+ * It loads Pupup.aspx, captures the necessary patient fields, saves them to chrome.storage,
+ * starts the auto-purge timer, and updates (or creates) the TransferNoticeController.
+ */
+function loadPatient() {
+	const patientIdEl = document.querySelector("input#MainContent_ctl00_tbPatient_tbID");
+	const locationIdEl = document.querySelector("input#MainContent_ctl00_tbLocation_tbID");
+	if (!(patientIdEl && locationIdEl)) {
+		alert("Unable to retrieve PatientId or LocationId from the current page.");
+		return;
+	}
+	const patientId = patientIdEl.value;
+	const locationId = locationIdEl.value;
+	const url = `https://prince.iatserv.com/Pupup.aspx?LinkId=2022&PatientId=${patientId}&LocationId=${locationId}`;
+	Logger.log("TransferSidePanelIntegration.loadPatient: Loading full patient data via hidden iframe", { url });
+	
+	let iframeContainer = document.getElementById("hiddenPatientDataIframeContainer");
+	if (!iframeContainer) {
+		iframeContainer = document.createElement("div");
+		iframeContainer.id = "hiddenPatientDataIframeContainer";
+		iframeContainer.style.display = "none";
+		document.body.appendChild(iframeContainer);
+	}
+	const iframe = document.createElement("iframe");
+	iframe.src = url;
+	iframe.id = "hiddenPatientDataIframe";
+	iframe.style.width = "1px";
+	iframe.style.height = "1px";
+	iframeContainer.appendChild(iframe);
+	
+	iframe.addEventListener("load", () => {
+		setTimeout(() => {
+			try {
+				const iframeDoc = iframe.contentWindow.document;
+				const patientData = {};
+				patientData.firstName = iframeDoc.querySelector("#tbFirstName")?.value || "";
+				patientData.lastName = iframeDoc.querySelector("#tbLastName")?.value || "";
+				patientData.middleName = iframeDoc.querySelector("#MainContent_ctl00_tbMiddleName")?.value || "";
+				patientData.dob = iframeDoc.querySelector("#MainContent_ctl00_tbDOB_tbText")?.value || "";
+				patientData.gender = iframeDoc.querySelector("#MainContent_ctl00_ddGender_ddControl option:checked")?.textContent.trim() || "";
+				patientData.race = iframeDoc.querySelector("#MainContent_ctl00_ddRace_ddControl option:checked")?.textContent.trim() || "";
+				const addr1 = iframeDoc.querySelector("#MainContent_ctl00_AddressControl1_tbAddress1")?.value || "";
+				const addr2 = iframeDoc.querySelector("#MainContent_ctl00_AddressControl1_tbAddress2")?.value || "";
+				patientData.address = `${addr1} ${addr2}`.trim();
+				patientData.state = iframeDoc.querySelector("#MainContent_ctl00_AddressControl1_CountryState_ddState option:checked")?.textContent.trim() || "";
+				patientData.city = iframeDoc.querySelector("#MainContent_ctl00_AddressControl1_tbCity")?.value || "";
+				patientData.zip = iframeDoc.querySelector("#MainContent_ctl00_AddressControl1_tbZipCode")?.value || "";
+				patientData.phone = iframeDoc.querySelector("#MainContent_ctl00_AddressControl1_tbPhone")?.value || "";
+				patientData.email = iframeDoc.querySelector("#MainContent_ctl00_AddressControl1_tbEmail")?.value || "";
+				
+				Logger.log("TransferSidePanelIntegration.loadPatient: Captured full patient data", { patientData });
+				chrome.storage.local.set({ patientData }, () => {
+					Logger.log("TransferSidePanelIntegration.loadPatient: Full patient data saved to storage.");
+					startTransferTimer();
+					if (window.transferNoticeControllerInstance) {
+						window.transferNoticeControllerInstance.updatePanel(patientData);
+					} else {
+						window.transferNoticeControllerInstance = new TransferNoticeController(patientData);
+						window.transferNoticeControllerInstance.showHandle();
+					}
+				});
+				if (iframeContainer.contains(iframe)) {
+					iframeContainer.removeChild(iframe);
+				}
+			} catch (error) {
+				Logger.error("TransferSidePanelIntegration.loadPatient: Error capturing data from iframe", { error });
+				if (iframe.parentNode) {
+					iframe.parentNode.removeChild(iframe);
+				}
+			}
+		}, 500);
+	});
+}
+
+/**
+ * prefillOrderForm() – Checks if the current page is a valid reference lab order page.
+ * If so, uses DestinationFormFiller to populate the form and purges the stored patient data.
+ */
+function prefillOrderForm() {
+	let destinationId = null;
+	const currentUrl = window.location.href;
+	if (/pnc\.dxresults\.com/i.test(currentUrl)) {
+		destinationId = "pncDXResults";
+	} else if (/iatserv\.com/i.test(currentUrl)) {
+		destinationId = "reliableIATServ";
+	}
+	if (!destinationId) {
+		alert("This page is not eligible for form prefill. Please open a Reference Lab order page.");
+		return;
+	}
+	const formFiller = new DestinationFormFiller(destinationId);
+	formFiller.fillForm();
+	Logger.log("TransferSidePanelIntegration.prefillOrderForm: Form prefill triggered", { destinationId });
+	chrome.storage.local.remove("patientData", () => {
+		Logger.log("TransferSidePanelIntegration.prefillOrderForm: Patient data purged after form fill.");
+	});
+	clearTransferTimer();
+}
+
+/**
+ * Main Integration:
+ * - On DOMContentLoaded, check if transfer conditions are met.
+ * - If so, instantiate the TransferNoticeController and display the transfer handle.
+ * - Bind explicit buttons (if present) for loading full patient data and prefill action.
+ */
 document.addEventListener("DOMContentLoaded", () => {
-	const patientData = {
-		firstName: "DemoFirst",
-		lastName: "DemoLast",
-		category: "Immuno"
-	};
-	const noticeController = new NoticeController(patientData);
-	noticeController.showHandle();
+	if (canTransfer()) {
+		chrome.storage.local.get("patientData", (result) => {
+			const patientData = result.patientData || {};
+			window.transferNoticeControllerInstance = new TransferNoticeController(patientData);
+			window.transferNoticeControllerInstance.showHandle();
+			const handle = document.getElementById("patientDataHandle");
+			if (handle) {
+				handle.addEventListener("dblclick", loadPatient);
+			}
+		});
+	} else {
+		Logger.log("TransferSidePanelIntegration: Transfer conditions not met; transfer UI will not be shown.");
+	}
+	
+	const loadDataBtn = document.getElementById("loadFullPatientDataBtn");
+	if (loadDataBtn) {
+		loadDataBtn.addEventListener("click", loadPatient);
+	} else {
+		Logger.warn("TransferSidePanelIntegration: 'Load Full Patient Data' button not found.");
+	}
+	
+	const prefillBtn = document.getElementById("prefillOrderFormBtn");
+	if (prefillBtn) {
+		prefillBtn.addEventListener("click", prefillOrderForm);
+	} else {
+		Logger.warn("TransferSidePanelIntegration: 'Prefill Order Form' button not found.");
+	}
 });

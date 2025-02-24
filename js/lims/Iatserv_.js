@@ -1,6 +1,6 @@
 PCX.log("IATServ LIMS");
 
-import { Operator } from 'Operator.js';
+import { Lims } from 'Lims.js';
 
 // Fix Spelling Mistake
 if(document.querySelector("#mnu_8")){
@@ -14,7 +14,7 @@ if(typeof replace !== "function") {
 	}
 }
 
-class IATSERV extends Operator {
+class IATSERV extends Lims {
 /**
  *
  * PREP Variables/Constants

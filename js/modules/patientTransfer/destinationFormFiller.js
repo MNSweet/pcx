@@ -1,7 +1,7 @@
 // destinationFormFiller.js
 import { mapPatientDataWithTransform } from "./dataMapping.js";
-import { Logger } from "./Logger.js";
-import { DOMHelper } from "./DOMHelper.js";
+import { Logger } from "../helpers/Logger.js";
+import { DOMHelper } from "../helpers/DOMHelper.js";
 
 export class DestinationFormFiller extends DOMHelper {
 	/**

@@ -259,4 +259,19 @@ class DataHandler {
 			request.onerror = () => reject(`Error clearing table ${table} from IndexedDB`);
 		});
 	}
+
+
+	// Transfer Patient Data
+	static async getPatientData() {
+		return await DataHandler.get("chrome", "patientData", null);
+	}
+
+	static async savePatientData(data) {
+		return await DataHandler.set("chrome", "patientData", data);
+	}
+
+	static async removePatientData() {
+		return await DataHandler.remove("chrome", "patientData");
+	}
+
 }

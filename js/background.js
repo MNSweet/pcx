@@ -29,38 +29,38 @@ static dataStore = {};
 
 // Initialize the background script by loading persisted data and starting a backup timer.
 static initBackground() {
-  chrome.storage.local.get('dataStore', (result) => {
-    if (result.dataStore) {
-      dataStore = result.dataStore;
-      console.log('Data loaded from storage:', dataStore);
-    }
-  });
-  // Backup data every minute.
-  setInterval(backupDataToStorage, 60000);
+	chrome.storage.local.get('dataStore', (result) => {
+		if (result.dataStore) {
+			dataStore = result.dataStore;
+			console.log('Data loaded from storage:', dataStore);
+		}
+	});
+	// Backup data every minute.
+	setInterval(backupDataToStorage, 60000);
 }
 
 // Store or update the page state in memory.
 static storeTabData(tabId, pageState) {
-  dataStore[tabId] = pageState;
-  console.log(`Data stored for tab ${tabId}:`, pageState);
+	dataStore[tabId] = pageState;
+	console.log(`Data stored for tab ${tabId}:`, pageState);
 }
 
 // Retrieve page state for a given tab.
 static getTabData(tabId) {
-  return dataStore[tabId] || null;
+	return dataStore[tabId] || null;
 }
 
 static removeTabData(tabId) {
-  delete dataStore[tabId];
-  backupDataToStorage(); // Update persistent storage.
-  console.log(`Data removed for tab ${tabId}`);
+	delete dataStore[tabId];
+	backupDataToStorage(); // Update persistent storage.
+	console.log(`Data removed for tab ${tabId}`);
 }
 
 // Back up the in-memory store to chrome.storage.
 static backupDataToStorage() {
-  chrome.storage.local.set({ dataStore: dataStore }, () => {
-    console.log('Backup complete.');
-  });
+	chrome.storage.local.set({ dataStore: dataStore }, () => {
+		console.log('Backup complete.');
+	});
 }
 
 

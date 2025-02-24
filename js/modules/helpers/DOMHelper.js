@@ -1,9 +1,17 @@
 // DOMHelper.js
-import { Logger } from './Logger.js';
+import { Logger } from '"./Logger.js';
 
 export class DOMHelper {
 	// Private cache for DOM elements
 	_elementCache = new Map();
+
+	events = {
+		Space	: {bubbles: true, cancelable: true,	key: ' '},
+		Delete	: {bubbles: true, cancelable: true,	shiftKey: false, keyCode: 8,	code: "Backspace",	key: "Backspace"},
+		End		: {bubbles: true, cancelable: true,	shiftKey: false, keyCode: 35,	code: "END",		key: "END"},
+		Tab		: {bubbles: true, cancelable: true,	shiftKey: false, keyCode: 9,	code: "Tab",		key: "Tab"},
+		Enter	: {bubbles: true, cancelable: false,shiftKey: false, keyCode: 13,	code: "Enter",		key: "Enter"},
+	};
 
 	/**
 	 * Finds a single DOM element matching the given selector.
