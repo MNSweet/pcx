@@ -4,7 +4,7 @@ import { DOMHelper } from "../modules/helpers/DOMHelper.js";
 export class Lims extends DOMHelper {
 	constructor() {
 		super();
-		// Initialize shared properties
+		// Initialize shared properties common to all LIM implementations.
 		this.labs = {};
 		this.testCategories = {};
 		this.categoryTranslation = {};
@@ -14,7 +14,7 @@ export class Lims extends DOMHelper {
 		this.selectors = {};
 	}
 
-  	// --- Configuration setters ---
+	// --- Shared Setters ---
 	setLabs(labs) {
 		if (typeof labs === "object") {
 			this.labs = labs;
@@ -55,5 +55,14 @@ export class Lims extends DOMHelper {
 		if (typeof selector === "object") {
 			this.selectors = selector;
 		}
+	}
+
+	/**
+	 * getExtraParams can be used if any child classes require a copy of URL parameters.
+	 * For example, Iatserv can override this if needed.
+	 */
+	getExtraParams() {
+		// Default implementation: return an empty object.
+		return {};
 	}
 }

@@ -249,6 +249,11 @@ export class ServiceWorker {
 	}
 }
 
+/** 
+ * 
+ * MessageRouter
+ * 
+ */
 
 messageRouter.registerHandler("openWindow", (message, sender, sendResponse) => {
 	ServiceWorker.handleOpenWindow(message.target, message.url, message.whitelist);
@@ -280,55 +285,55 @@ messageRouter.registerHandler("getSite", (message, sender, sendResponse) => {
 /** 
  * 
  * Web Navigation Listeners
- *
+ * 
  */
 
-// --- onCommitted Listener ---
-// Fired when a navigation is committed. At least part of the new document
-// has been received from the server and the browser has decided to switch
-// to the new document.
-chrome.webNavigation.onCommitted.addListener((details) => {
-	const whitelist = ServiceWorker.tabWhitelists[details.tabId];
-	if (!whitelist) return;
-	const isAllowed = whitelist.some(keyword => details.url.includes(keyword));
-	if (!isAllowed) {
-		delete ServiceWorker.tabWhitelists[details.tabId];
+	// --- onCommitted Listener ---
+	// Fired when a navigation is committed. At least part of the new document
+	// has been received from the server and the browser has decided to switch
+	// to the new document.
+	chrome.webNavigation.onCommitted.addListener((details) => {
+		const whitelist = ServiceWorker.tabWhitelists[details.tabId];
+		if (!whitelist) return;
+		const isAllowed = whitelist.some(keyword => details.url.includes(keyword));
+		if (!isAllowed) {
+			delete ServiceWorker.tabWhitelists[details.tabId];
+			const targetName = Object.keys(ServiceWorker.tabTargets).find(
+				key => ServiceWorker.tabTargets[key] === details.tabId
+			);
+			if (targetName) delete ServiceWorker.tabTargets[targetName];
+		}
+	}, { url: [{ schemes: ["http", "https"] }] });
+
+	// --- onRemoved Listener ---
+	// A tab is deleted from the window
+	chrome.tabs.onRemoved.addListener((tabId) => {
+		ServiceWorker.removeTabData(tabId);
+		delete ServiceWorker.tabWhitelists[tabId];
 		const targetName = Object.keys(ServiceWorker.tabTargets).find(
-			key => ServiceWorker.tabTargets[key] === details.tabId
+			key => ServiceWorker.tabTargets[key] === tabId
 		);
 		if (targetName) delete ServiceWorker.tabTargets[targetName];
-	}
-}, { url: [{ schemes: ["http", "https"] }] });
-
-// --- onRemoved Listener ---
-// A tab is deleted from the window
-chrome.tabs.onRemoved.addListener((tabId) => {
-	ServiceWorker.removeTabData(tabId);
-	delete ServiceWorker.tabWhitelists[tabId];
-	const targetName = Object.keys(ServiceWorker.tabTargets).find(
-		key => ServiceWorker.tabTargets[key] === tabId
-	);
-	if (targetName) delete ServiceWorker.tabTargets[targetName];
-});
+	});
 
 /** 
  * 
  * Side Panel Behavior and Tab Update Listeners
  * 
  */
-chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(console.error);
+	chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(console.error);
 
-chrome.tabs.onActivated.addListener((info) => {
-	chrome.tabs.get(info.tabId, (tab) => {
-		ServiceWorker.handleTabUpdate(tab.id, tab.url);
+	chrome.tabs.onActivated.addListener((info) => {
+		chrome.tabs.get(info.tabId, (tab) => {
+			ServiceWorker.handleTabUpdate(tab.id, tab.url);
+		});
 	});
-});
 
-chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
-	if (change.url) {
-		ServiceWorker.handleTabUpdate(tabId, change.url);
-	}
-});
+	chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
+		if (change.url) {
+			ServiceWorker.handleTabUpdate(tabId, change.url);
+		}
+	});
 
 /** 
  * 
@@ -337,50 +342,50 @@ chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
  * Initial activation, Refresh, De-/Re-activation
  * 
  */
-chrome.runtime.onInstalled.addListener(async () => {
-	ServiceWorker.initBackground();
-	
-	await new Promise((resolve) => {
-		chrome.storage.local.remove(["pcx_permissions"], () => {
-			resolve();
-		});
-	});
-
-	try {
-		const response = await fetch(chrome.runtime.getURL("js/data/permissions.json"));
-		const permissions = await response.json();
+	chrome.runtime.onInstalled.addListener(async () => {
+		ServiceWorker.initBackground();
+		
 		await new Promise((resolve) => {
-			chrome.storage.local.set({ ["pcx_permissions"]: permissions }, () => {
+			chrome.storage.local.remove(["pcx_permissions"], () => {
 				resolve();
 			});
 		});
-		console.log("Permission Meta has been refreshed due to extension reload.");
-	} catch (error) {
-		console.error("Failed to refresh permissions.json", error);
-	}
-	await new Promise((resolve) => {
-		chrome.storage.local.get(["pcx_permissions"], (result) => {
-			if (!result) {
-				chrome.storage.local.set({ ["pcx_permissions"]: "{}" }, () => {
+
+		try {
+			const response = await fetch(chrome.runtime.getURL("js/data/permissions.json"));
+			const permissions = await response.json();
+			await new Promise((resolve) => {
+				chrome.storage.local.set({ ["pcx_permissions"]: permissions }, () => {
 					resolve();
 				});
-			} else {
-				resolve();
-			}
+			});
+			console.log("Permission Meta has been refreshed due to extension reload.");
+		} catch (error) {
+			console.error("Failed to refresh permissions.json", error);
+		}
+		await new Promise((resolve) => {
+			chrome.storage.local.get(["pcx_permissions"], (result) => {
+				if (!result) {
+					chrome.storage.local.set({ ["pcx_permissions"]: "{}" }, () => {
+						resolve();
+					});
+				} else {
+					resolve();
+				}
+			});
 		});
 	});
-});
 
 /** 
  * 
  * Storage onChanged Listener
  * 
  */
-chrome.storage.onChanged.addListener((changes, namespace) => {
-	for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
-		console.log(
-			`Storage key `,key,` in namespace `,namespace,` changed.`,
-			`Old value was `,oldValue,` new value is:`,newValue
-		);
-	}
-});
+	chrome.storage.onChanged.addListener((changes, namespace) => {
+		for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+			console.log(
+				`Storage key `,key,` in namespace `,namespace,` changed.`,
+				`Old value was `,oldValue,` new value is:`,newValue
+			);
+		}
+	});

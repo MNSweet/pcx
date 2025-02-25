@@ -253,7 +253,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 			if (tabs.length > 0) {
 				const activeTab = tabs[0];
-				chrome.runtime.sendMessage({ type: 'GET_PAGE_STATE', tabId: activeTab.id }, (response) => {
+				chrome.runtime.sendMessage({ type: 'getPageState', tabId: activeTab.id }, (response) => {
 					if (response) {
 						renderSidebar(response);
 					} else {
