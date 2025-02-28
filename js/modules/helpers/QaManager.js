@@ -1,3 +1,6 @@
+// /js/modules/helpers/QAManager.js
+Logger.log("/js/modules/helpers/QAManager.js");
+
 /**
  * QA Warning System
  */
@@ -173,6 +176,3 @@ class QAManager {
 		PCX.findEl('#stabilityNotice').classList = stabilityPhase + (existingAcs?" stabilityNoticeExistingACS":"");
 	}
 }
-
-// Expose QAManager to the window
-window.QAManager = QAManager;

@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>PCX Sidebar</title>
-	<link rel="stylesheet" href="css/sidebar.css">
+	<link rel="stylesheet" href="css/sidePanel.css">
 </head>
 <body>
 	<div class="tab-container">
@@ -29,12 +29,12 @@
 		<div id="markdown-viewer">Loading...</div>
 	</div>
 	
-	<script src="js/pcx/domobserver.js"></script>
-	<script src="js/pcx/pcx_controller.js"></script>
-	<script src="js/pcx/qa_manager.js"></script>
-	<script src="js/pcx/settings.js"></script>
-	<script src="js/pcx/data.js"></script>
-	<script src="js/sidebar.js"></script>
-	<script src="js/libs/marked.min.js"></script>
+	<script type="module" src="js/modules/helpers/DOMObserver.js"></script>
+	<script type="module" src="js/pcx/PCX.js"></script>
+	<script type="module" src="js/pcx/qa_manager.js"></script>
+	<script type="module" src="js/modules/helpers/Settings.js"></script>
+	<script type="module" src="js/modules/helpers/Data.js"></script>
+	<script type="module" src="js/sidePanel.js"></script>
+	<script type="module" src="js/libs/marked.min.js"></script>
 </body>
 </html>

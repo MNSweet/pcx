@@ -1,8 +1,6 @@
-// patientDataCapture.js
-import { DOMHelper } from '../helpers/DOMHelper.js';
-import { Logger } from '../helpers/Logger.js';
-
-export class PatientDataCapture extends DOMHelper {
+// /js/modules/patientTransfer/patientDataCapture.js
+Logger.log("/js/modules/patientTransfer/patientDataCapture.js");
+class PatientDataCapture extends DOMHelper {
 	// Mapping from normalized keys to source DOM selectors.
 	static fieldMapping = {
 		firstName: '#tbFirstName',

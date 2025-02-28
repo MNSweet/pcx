@@ -1,4 +1,5 @@
 // /js/modules/helpers/Utils.js
+Logger.log("/js/modules/helpers/Utils.js");
 
 /**
  * Merges multiple option objects into one.
@@ -6,7 +7,7 @@
  * @param {...Object} opts - Objects to merge.
  * @returns {Object} The merged object.
  */
-export function mergeOptsIntoDefaults(...opts) {
+function mergeOptsIntoDefaults(...opts) {
 	return opts.reduce((acc, obj) => {
 		if (typeof obj === 'object' && obj !== null) {
 			return Object.assign({}, acc, obj);

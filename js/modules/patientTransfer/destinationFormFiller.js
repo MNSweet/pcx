@@ -1,9 +1,6 @@
-// destinationFormFiller.js
-import { mapPatientDataWithTransform } from "./dataMapping.js";
-import { Logger } from "../helpers/Logger.js";
-import { DOMHelper } from "../helpers/DOMHelper.js";
-
-export class DestinationFormFiller extends DOMHelper {
+// /js/modules/patientTransfer/destinationFormFiller.js
+Logger.log("/js/modules/patientTransfer/destinationFormFiller.js");
+class DestinationFormFiller extends DOMHelper {
 	/**
 	 * @param {string} destinationId - Key for the destination mapping configuration (e.g., 'reliableIATServ' or 'pncDXResults').
 	 */

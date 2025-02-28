@@ -1,11 +1,12 @@
-// dataMapping.js
+// /js/modules/patientTransfer/dataMapping.js
+Logger.log("/js/modules/patientTransfer/dataMapping.js");
 
 /**
  * Mapping configuration for each destination.
  * Keys are the normalized field names (from patientDataCapture),
  * and values are the target DOM selectors (or field identifiers) expected on the destination site.
  */
-export const mappingConfigurations = {
+const mappingConfigurations = {
 	// For Reliable IATServ destination.
 	reliableIATServ: {
 		firstName: '#reliable_firstName',
@@ -44,7 +45,7 @@ export const mappingConfigurations = {
  * Modify the normalized data before populating the target fields.
  * Each transformation is optional per field.
  */
-export const mappingTransformations = {
+const mappingTransformations = {
 	reliableIATServ: {
 		firstName: (value) => value.toUpperCase(),
 		lastName: (value) => value.toUpperCase()
@@ -60,7 +61,7 @@ export const mappingTransformations = {
  * @param {Object} patientData - The normalized patient data object.
  * @returns {Object} An object where keys are target selectors and values are the corresponding data.
  */
-export function mapPatientData(destinationId, patientData) {
+function mapPatientData(destinationId, patientData) {
 	const mapping = mappingConfigurations[destinationId];
 	if (!mapping) {
 		throw new Error(`No mapping configuration found for destination: ${destinationId}`);
@@ -80,7 +81,7 @@ export function mapPatientData(destinationId, patientData) {
  * @param {Object} patientData - The normalized patient data object.
  * @returns {Object} An object where keys are target selectors and values are transformed data.
  */
-export function mapPatientDataWithTransform(destinationId, patientData) {
+function mapPatientDataWithTransform(destinationId, patientData) {
 	const mapping = mappingConfigurations[destinationId];
 	const transformations = mappingTransformations[destinationId] || {};
 	if (!mapping) {

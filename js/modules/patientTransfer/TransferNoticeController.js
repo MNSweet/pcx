@@ -1,14 +1,12 @@
 // /js/modules/patientTransfer/TransferSidePanelIntegration.js
-import { Logger } from "../helpers/Logger.js";
-import { TransferNoticeController } from "./TransferNoticeController.js";
-import { DestinationFormFiller } from "./DestinationFormFiller.js";
+Logger.log("/js/modules/patientTransfer/TransferSidePanelIntegration.js");
 
 let transferTimer = null;
 
 /**
  * Clears the transfer timer if set.
  */
-function clearTransferTimer() {
+export function clearTransferTimer() {
 	if (transferTimer) {
 		clearTimeout(transferTimer);
 		transferTimer = null;

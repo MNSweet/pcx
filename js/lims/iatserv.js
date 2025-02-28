@@ -1,15 +1,12 @@
-// /js/lims/Iatserv.js
-import { Lims } from "./Lims.js";
-import { Logger } from "../modules/helpers/Logger.js";
-import { TableEnhancer } from "../modules/helpers/TableEnhancer.js";
-import { PCX } from "../modules/PCX.js"; // Global utility module
+// /js/lims/IATSERV.js
+Logger.log('/js/lims/IATSERV.js');
 
-export class Iatserv extends Lims {
+class IATSERV extends LIMS {
 	constructor() {
 		super();
 		this.lims = "IATSERV";
 
-		// Read URL parameters specific to Iatserv.
+		// Read URL parameters specific to IATSERV.
 		const params = new URLSearchParams(window.location.search);
 		this.linkId = params.get("LinkId") || null;
 		this.orderId = params.get("OrderId") || null;
@@ -32,7 +29,7 @@ export class Iatserv extends Lims {
 			accessionConfig
 		);
 		accessionEnhancer.startObserver();
-		Logger.log("Iatserv.accessionList: Table enhancer observer started.");
+		Logger.log("IATSERV.accessionList: Table enhancer observer started.");
 	}
 
 	/**
@@ -48,7 +45,7 @@ export class Iatserv extends Lims {
 			locationConfig
 		);
 		locationEnhancer.startObserver();
-		Logger.log("Iatserv.locations: Table enhancer observer started for Locations.");
+		Logger.log("IATSERV.locations: Table enhancer observer started for Locations.");
 	}
 
 	/**
@@ -64,7 +61,7 @@ export class Iatserv extends Lims {
 			reportsConfig
 		);
 		reportsEnhancer.startObserver();
-		Logger.log("Iatserv.reports: Table enhancer observer started for Reports.");
+		Logger.log("IATSERV.reports: Table enhancer observer started for Reports.");
 	}
 
 	/**
@@ -589,6 +586,9 @@ export class Iatserv extends Lims {
 	}
 }
 
+//const IATSERV = new IATSERV();
+
+
 /* IATServ Specific Table Enhancers */
 function accessionList_AltId1_Results(cell) {
 	// cell is the cell for header "Alt ID 1"
@@ -665,3 +665,4 @@ function results_DOS_Status(cell) {
 	}
 }
 
+window.IATSERV = IATSERV;

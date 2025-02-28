@@ -1,21 +1,17 @@
-// /js/lims/lab_pl.js
-import { Iatserv } from "./Iatserv.js";
-import { Keybinding } from "../modules/KeyBinding.js";
-import { PCX } from "../modules/PCX.js";
-import { TableEnhancer } from "../modules/helpers/TableEnhancer.js";
+// /js/labs/lab_pl.js
+Logger.log('/js/labs/LabPL.js');
 
 // Log initial messages and set the lab portal
 Logger.log("Prince Laboratories");
 PCX.setLabPortal("PL");
 
-// Instantiate the Iatserv module
-const iatservInstance = new Iatserv();
-Logger.log("LinkId from URL:", iatservInstance.linkId);
+// Instantiate the IATSERV module
+Logger.log("LinkId from URL:", IATSERV.linkId);
 
 // Proceed only if the preferred user mode is active
-if (PCX.preferedUserMode()) {
+if (PCX.preferredUserMode()) {
 	// Configure lab settings
-	iatservInstance.setLabs({
+	IATSERV.setLabs({
 		2: { Code: "IP", Label: "Ipseity Diagnostics LLC", Stability: { NGS: 90 } },
 		1010: { Code: "SQ", Label: "SureQuest Diagnostics", Stability: { NGS: 90 } },
 		1011: { Code: "RR", Label: "Reliable Result Labs", Stability: { NGS: 60 } },
@@ -24,7 +20,7 @@ if (PCX.preferedUserMode()) {
 	});
 	
 	// Set test categories for Prince
-	iatservInstance.setTestCategories({
+	IATSERV.setTestCategories({
 		1: { Code: "Toxicology", Test: "", Lab: "PL", LabCode: 1012 },
 		3: { Code: "PGX", Test: "PHARMA", Lab: "PL", LabCode: 1012 },
 		4: { Code: "CGX", Test: "CANCER", Lab: "PD", LabCode: 1013 },
@@ -43,10 +39,10 @@ if (PCX.preferedUserMode()) {
 	});
 	
 	// Optionally, set additional translations if needed:
-	// iatservInstance.setCategoryTranslation({ ... });
-	// iatservInstance.setGenderTranslation({ ... });
-	// iatservInstance.setRaceTranslation({ ... });
-	// iatservInstance.setOrderDefaults({ ... });
+	// IATSERV.setCategoryTranslation({ ... });
+	// IATSERV.setGenderTranslation({ ... });
+	// IATSERV.setRaceTranslation({ ... });
+	// IATSERV.setOrderDefaults({ ... });
 	
 	// Initialize keybindings
 	const keybindings = new Keybinding({
@@ -59,23 +55,23 @@ if (PCX.preferedUserMode()) {
 // Routing logic based on the current page
 
 	// Locations
-	if (iatservInstance.linkId == "2004") {
-		PCX.processEnabled('Interface','Location List Enhanced Columns', iatservInstance.locations);
+	if (IATSERV.linkId == "2004") {
+		PCX.processEnabled('Interface','Location List Enhanced Columns', IATSERV.locations);
 	}
 
 	// Reports
-	if (iatservInstance.linkId == "6001") {
-		PCX.processEnabled('Interface','Reports Enhanced Columns', iatservInstance.reports);
+	if (IATSERV.linkId == "6001") {
+		PCX.processEnabled('Interface','Reports Enhanced Columns', IATSERV.reports);
 	}
 
 	// Accession List(LinkId "2070")
-	if (iatservInstance.linkId === "2070") {
-		PCX.processEnabled("Interface", "Accession List Enhanced Columns",iatservInstance.accessionList);
+	if (IATSERV.linkId === "2070") {
+		PCX.processEnabled("Interface", "Accession List Enhanced Columns",IATSERV.accessionList);
 	}
 
 	// Create Accession (LinkId "2011" and type "acs")
-	if (iatservInstance.linkId === "2011" && iatservInstance.type === "acs") {
-		iatservInstance.setSelectors({
+	if (IATSERV.linkId === "2011" && IATSERV.type === "acs") {
+		IATSERV.setSelectors({
 			DOS: ".dos",
 			BillType: "#MainContent_ctl00_ctl00_ddBillType_ddControl",
 			locationInput: "#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbLocation_tbText",
@@ -182,25 +178,25 @@ if (PCX.preferedUserMode()) {
 		});
 		
 		PCX.processEnabled("SOP", "New Accession Workflow", () => {
-			iatservInstance.createAccession(() => {
+			IATSERV.createAccession(() => {
 				// On order creation, add a clickable element for "Paste Patient Data" 
 				// into the transfer notice panel.
-				const cloneBtn = iatservInstance.createDOM("span", {
+				const cloneBtn = IATSERV.createDOM("span", {
 					textContent: "Paste Patient Data",
 					id: "patientDataClone"
 				});
-				iatservInstance.getEl("#noticeDisplay").appendChild(cloneBtn);
-				iatservInstance.getEl("#patientDataClone").addEventListener("click", () => {
-					iatservInstance.pastePatientData();
+				IATSERV.getEl("#noticeDisplay").appendChild(cloneBtn);
+				IATSERV.getEl("#patientDataClone").addEventListener("click", () => {
+					IATSERV.pastePatientData();
 				});
 			});
 		});
 	}
 	
 	// Update Accession (LinkId "2071")
-	if (iatservInstance.linkId == "2071") {
+	if (IATSERV.linkId == "2071") {
 
-		iatservInstance.setSelectors({
+		IATSERV.setSelectors({
 			DOS				: ".dos",
 			DOC				: "#MainContent_ctl00_tbCollectionDateTime_tbDate_tbText",
 			newPatientBtn	: "#lblAddPatientTitle",
@@ -226,42 +222,42 @@ if (PCX.preferedUserMode()) {
 		});
 		PCX.processEnabled('Interface','Show Stablity Notice',
 			()=>{QAManager.setStablityNotice(
-				iatservInstance.selectors.DOS,
-				iatservInstance.getEl(iatservInstance.selectors.DOC).value,
+				IATSERV.selectors.DOS,
+				IATSERV.getEl(IATSERV.selectors.DOC).value,
 				true
 			)}
 		);
 
 		// Add BTN to copy PT data
-		PCX.processEnabled('SOP','Patient Referrence Lab Transfer',iatservInstance.capturePTData);
+		PCX.processEnabled('SOP','Patient Referrence Lab Transfer',IATSERV.capturePTData);
 
 		PCX.processEnabled('Interface','Enabled FileDrop',
-			()=>{iatservInstance.fileDrop({
+			()=>{IATSERV.fileDrop({
 				enabled	: true,
-				acsNum	: iatservInstance.getEl("#MainContent_ctl00_tbAccession").value,
-				acsID	: iatservInstance.getEl("#tbAccessionId").value,
-				patient	: iatservInstance.getEl("#MainContent_ctl00_tbPatient_tbText").value.toUpperCase().split(', ')
+				acsNum	: IATSERV.getEl("#MainContent_ctl00_tbAccession").value,
+				acsID	: IATSERV.getEl("#tbAccessionId").value,
+				patient	: IATSERV.getEl("#MainContent_ctl00_tbPatient_tbText").value.toUpperCase().split(', ')
 			},false,false,"#dvFooter")}
 		);
 
-		PCX.processEnabled('SOP','REQ Filename to Clipboard on Scan',iatservInstance.scanFilenamer);
+		PCX.processEnabled('SOP','REQ Filename to Clipboard on Scan',IATSERV.scanFilenamer);
 
 
 		
 		let files = [];
-			iatservInstance.getEls('[id^="MainContent_ctl00_ObjectDocuments1_ObjectDocuments_Exists_GridView1_lblTitle_"]').forEach((file)=>{files.push(file.innerText);});
+			IATSERV.getEls('[id^="MainContent_ctl00_ObjectDocuments1_ObjectDocuments_Exists_GridView1_lblTitle_"]').forEach((file)=>{files.push(file.innerText);});
 		let data = {
-			acsNum	: iatservInstance.getEl("#MainContent_ctl00_tbAccession").value,
-			acsID	: iatservInstance.getEl("#tbAccessionId").value,
-			location: iatservInstance.getEl("#MainContent_ctl00_tbLocation_tbText").value,
-			req		: iatservInstance.scanFilenamer(true)+".pdf",
-			patient	: iatservInstance.getEl("#MainContent_ctl00_tbPatient_tbText").value.toUpperCase().split(', '),
-			ptID	: iatservInstance.getEl("#MainContent_ctl00_tbPatient_tbID").value,
-			dob		: iatservInstance.getEl("#tbPatientDOB").value,
-			doc		: iatservInstance.getEl("#MainContent_ctl00_tbCollectionDateTime_tbDate_tbText").value,
-			rd		: iatservInstance.getEl("#MainContent_ctl00_tbReceivedDateTime_tbDate_tbText").value,
-			lab		: iatservInstance.getEl("#ddPerformingLabId option:checked").innerText,
-			test	: iatservInstance.getEl("#MainContent_ctl00_ctrlOrderTestCategoryControl_ddTestCategory option:checked").innerText,
+			acsNum	: IATSERV.getEl("#MainContent_ctl00_tbAccession").value,
+			acsID	: IATSERV.getEl("#tbAccessionId").value,
+			location: IATSERV.getEl("#MainContent_ctl00_tbLocation_tbText").value,
+			req		: IATSERV.scanFilenamer(true)+".pdf",
+			patient	: IATSERV.getEl("#MainContent_ctl00_tbPatient_tbText").value.toUpperCase().split(', '),
+			ptID	: IATSERV.getEl("#MainContent_ctl00_tbPatient_tbID").value,
+			dob		: IATSERV.getEl("#tbPatientDOB").value,
+			doc		: IATSERV.getEl("#MainContent_ctl00_tbCollectionDateTime_tbDate_tbText").value,
+			rd		: IATSERV.getEl("#MainContent_ctl00_tbReceivedDateTime_tbDate_tbText").value,
+			lab		: IATSERV.getEl("#ddPerformingLabId option:checked").innerText,
+			test	: IATSERV.getEl("#MainContent_ctl00_ctrlOrderTestCategoryControl_ddTestCategory option:checked").innerText,
 			files	: files
 		};
 		PCX.sendPageDataToBackground(data);
@@ -270,19 +266,19 @@ if (PCX.preferedUserMode()) {
 			if (request.action === "getPageContent") {
 				// Extract relevant data from the page		
 				let liveFiles = [];
-					iatservInstance.getEls('[id^="MainContent_ctl00_ObjectDocuments1_ObjectDocuments_Exists_GridView1_lblTitle_"]',true).forEach((file)=>{files.push(file.innerText);});
+					IATSERV.getEls('[id^="MainContent_ctl00_ObjectDocuments1_ObjectDocuments_Exists_GridView1_lblTitle_"]',true).forEach((file)=>{files.push(file.innerText);});
 				let liveData = {
-					acsNum	: iatservInstance.getEl("#MainContent_ctl00_tbAccession",true).value,
-					acsID	: iatservInstance.getEl("#tbAccessionId",true).value,
-					location: iatservInstance.getEl("#MainContent_ctl00_tbLocation_tbText",true).value,
-					req		: iatservInstance.scanFilenamer(true)+".pdf",
-					patient	: iatservInstance.getEl("#MainContent_ctl00_tbPatient_tbText",true).value.toUpperCase().split(', '),
-					ptID	: iatservInstance.getEl("#MainContent_ctl00_tbPatient_tbID",true).value,
-					dob		: iatservInstance.getEl("#tbPatientDOB",true).value,
-					doc		: iatservInstance.getEl("#MainContent_ctl00_tbCollectionDateTime_tbDate_tbText",true).value,
-					rd		: iatservInstance.getEl("#MainContent_ctl00_tbReceivedDateTime_tbDate_tbText",true).value,
-					lab		: iatservInstance.getEl("#ddPerformingLabId option:checked",true).innerText,
-					test	: iatservInstance.getEl("#MainContent_ctl00_ctrlOrderTestCategoryControl_ddTestCategory option:checked",true).innerText,
+					acsNum	: IATSERV.getEl("#MainContent_ctl00_tbAccession",true).value,
+					acsID	: IATSERV.getEl("#tbAccessionId",true).value,
+					location: IATSERV.getEl("#MainContent_ctl00_tbLocation_tbText",true).value,
+					req		: IATSERV.scanFilenamer(true)+".pdf",
+					patient	: IATSERV.getEl("#MainContent_ctl00_tbPatient_tbText",true).value.toUpperCase().split(', '),
+					ptID	: IATSERV.getEl("#MainContent_ctl00_tbPatient_tbID",true).value,
+					dob		: IATSERV.getEl("#tbPatientDOB",true).value,
+					doc		: IATSERV.getEl("#MainContent_ctl00_tbCollectionDateTime_tbDate_tbText",true).value,
+					rd		: IATSERV.getEl("#MainContent_ctl00_tbReceivedDateTime_tbDate_tbText",true).value,
+					lab		: IATSERV.getEl("#ddPerformingLabId option:checked",true).innerText,
+					test	: IATSERV.getEl("#MainContent_ctl00_ctrlOrderTestCategoryControl_ddTestCategory option:checked",true).innerText,
 					files	: files
 				};
 
@@ -293,18 +289,18 @@ if (PCX.preferedUserMode()) {
 	}
 
 	// Results
-	if (iatservInstance.linkId == "2461") {
-		iatservInstance.setSelectors({
+	if (IATSERV.linkId == "2461") {
+		IATSERV.setSelectors({
 			UploadTable	: '#uploadTable',
 			UploadSpan	: '.upload span'
 		});
 
 		PCX.processEnabled('Interface','Enabled FileDrop',
-			()=>{iatservInstance.fileDrop({
+			()=>{IATSERV.fileDrop({
 				enabled	: true,
-				acsNum	: iatservInstance.getEl("#lblAccession a").textContent,
-				acsID	: iatservInstance.getEl("#lblAccession a").href.match(/(\d*)$/gm)[0],
-				patient	: iatservInstance.getEl("#lblPatient").textContent.toUpperCase().split(' '),
+				acsNum	: IATSERV.getEl("#lblAccession a").textContent,
+				acsID	: IATSERV.getEl("#lblAccession a").href.match(/(\d*)$/gm)[0],
+				patient	: IATSERV.getEl("#lblPatient").textContent.toUpperCase().split(' '),
 				result	: true
 			},false,false,"#dvFooter")}
 		);
@@ -313,15 +309,15 @@ if (PCX.preferedUserMode()) {
 
 
 if (PCX.currentUser() === "Joel") {
-	if (iatservInstance.linkId === "2011" && iatservInstance.type === "acs") {
+	if (IATSERV.linkId === "2011" && IATSERV.type === "acs") {
 		if (Math.random() > 0.9) { // 10% chance
-			iatservInstance.getEl("#MainContent_ctl00_ctl00_ctl01_btnCreateAccession", true)
+			IATSERV.getEl("#MainContent_ctl00_ctl00_ctl01_btnCreateAccession", true)
 				.addEventListener("click", () => {
-					const easterEgg = iatservInstance.createDOM("img", {
+					const easterEgg = IATSERV.createDOM("img", {
 						src: "https://i.giphy.com/VgGpnYeMVljm1vRA6g.webp",
 						id: "easterEgg"
 					});
-					const btnRect = iatservInstance.getEl("#MainContent_ctl00_ctl00_ctl01_btnCreateAccession")
+					const btnRect = IATSERV.getEl("#MainContent_ctl00_ctl00_ctl01_btnCreateAccession")
 						.getBoundingClientRect();
 					easterEgg.setAttribute(
 						"style",

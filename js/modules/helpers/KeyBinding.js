@@ -1,3 +1,5 @@
+// /js/modules/helpers/Keybinding.js
+Logger.log("/js/modules/helpers/Keybinding.js");
 class Keybinding {
 	constructor(bindings = {}) {
 		this.bindings = bindings;

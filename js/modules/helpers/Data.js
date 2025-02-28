@@ -1,3 +1,6 @@
+// /js/modules/helpers/DataHandler.js
+Logger.log("/js/modules/helpers/DataHandler.js");
+
 class DataHandler {
 	static IndexDB = "pxc";
 	static AccessionTable = "Accessions";

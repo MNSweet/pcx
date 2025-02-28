@@ -1,8 +1,6 @@
 // /js/modules/helpers/TableEnhancer.js
-import { Logger } from "./Logger.js";
-import { DOMObserver } from "./DOMObserver.js";
-
-export class TableEnhancer {
+Logger.log("/js/modules/helpers/TableEnhancer.js");
+class TableEnhancer {
 	/**
 	 * @param {string} headerSelector - CSS selector for the header row.
 	 * @param {string} rowSelector - CSS selector for the data rows.

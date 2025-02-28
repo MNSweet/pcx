@@ -1,21 +1,20 @@
-// /js/modules/PXC.js
+// /js/modules/PCX.js
+Logger.log("/js/modules/PCX.js");
 
-import { Logger } from "./helpers/Logger.js";
-
-export class PXC {
+class PCX {
 	// Static property to track the currently active lab portal.
 	static activeLabPortal = "";
 
 	static setLabPortal(lab) {
-		PXC.activeLabPortal = lab;
+		PCX.activeLabPortal = lab;
 	}
 
 	// Determines the preferred user mode based on the active lab portal.
 	static preferredUserMode() {
-		if (PXC.activeLabPortal === "PL") {
-			return PXC.currentUser() === "Max";
+		if (PCX.activeLabPortal === "PL") {
+			return PCX.currentUser() === "Max";
 		}
-		if (PXC.activeLabPortal === "PD" || PXC.activeLabPortal === "RR") {
+		if (PCX.activeLabPortal === "PD" || PCX.activeLabPortal === "RR") {
 			return true;
 		}
 		return false;
@@ -72,5 +71,5 @@ export class PXC {
 	}
 }
 
-// Expose PXC to the global window if needed.
-window.PXC = PXC;
+// Expose PCX to the global window if needed.
+window.PCX = PCX;

@@ -1,7 +1,7 @@
-// /js/lims/Lims.js
-import { DOMHelper } from "../modules/helpers/DOMHelper.js";
+// /js/lims/LIMS.js
+Logger.log('/js/lims/LIMS.js')
 
-export class Lims extends DOMHelper {
+class LIMS extends DOMHelper {
 	constructor() {
 		super();
 		// Initialize shared properties common to all LIM implementations.
@@ -59,10 +59,12 @@ export class Lims extends DOMHelper {
 
 	/**
 	 * getExtraParams can be used if any child classes require a copy of URL parameters.
-	 * For example, Iatserv can override this if needed.
+	 * For example, IATSERV can override this if needed.
 	 */
 	getExtraParams() {
 		// Default implementation: return an empty object.
 		return {};
 	}
 }
+
+window.LIMS = LIMS;

@@ -1,6 +1,4 @@
-import { messageRouter } from "./modules/MessageRouter.js";
-
-export class ServiceWorker {
+class ServiceWorker {
 	// --- Configuration Options ---
 	static options = {
 		debug: true,
@@ -62,10 +60,10 @@ export class ServiceWorker {
 	}
 
 	// --- Side Panel Functions ---
-	static enableSidebar(tabId = null) {
+	static enableSidePanel(tabId = null) {
 		let options = {
 			enabled: true,
-			path: "sidebar.html"
+			path: "sidePanel.html"
 		};
 		if (tabId) {
 			options.tabId = tabId;
@@ -129,7 +127,7 @@ export class ServiceWorker {
 			await chrome.sidePanel.setOptions({ tabId, enabled: false });
 		} else {
 			ServiceWorker.changeExtensionIcon(true);
-			ServiceWorker.enableSidebar(tabId);
+			ServiceWorker.enableSidePanel(tabId);
 		}
 	}
 

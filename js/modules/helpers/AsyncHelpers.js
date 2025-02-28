@@ -1,24 +1,28 @@
 // /js/modules/helpers/AsyncHelpers.js
+Logger.log("/js/modules/helpers/AsyncHelpers.js");
 
 /**
  * Waits for a DOM element matching the selector to appear.
  * @param {string} selector - The CSS selector.
  * @returns {Promise<Element>} Resolves with the element once it is found.
  */
-export function waitForElm(selector) {
+function waitForElm(selector) {
 	return new Promise(resolve => {
-		const el = document.querySelector(selector);
-		if (el) {
-			return resolve(el);
-		}
-		const observer = new MutationObserver((mutations, obs) => {
+		try {
 			const el = document.querySelector(selector);
 			if (el) {
-				obs.disconnect();
-				resolve(el);
+				return resolve(el);
 			}
-		});
-		observer.observe(document.body, { childList: true, subtree: true });
+			DOMObserver.observe(document.body, { childList: true, subtree: true }, (mutations) => {
+				const el = document.querySelector(selector);
+				if (el) {
+					resolve(el);
+					DOMObserver.removeObserver(document.body, { childList: true, subtree: true }); // Disconnect after resolve
+				}
+			});
+		} catch (error) {
+			console.error("Failed to observe node:", error);
+		}
 	});
 }
 
@@ -28,16 +32,22 @@ export function waitForElm(selector) {
  * @param {string} selector - The CSS selector for the element inside the iframe.
  * @returns {Promise<Element>} Resolves with the element once found.
  */
-export function waitForIframeElm(frameSelector, selector) {
+function waitForIframeElm(frame, selector) {
 	return new Promise(resolve => {
-		const frame = document.querySelector(frameSelector);
-		if (frame && frame.contentWindow && frame.contentWindow.document) {
-			const el = frame.contentWindow.document.querySelector(selector);
-			if (el) {
-				return resolve(el);
+		try {
+			const frameDoc = document.querySelector(frame)?.contentWindow.document;
+			if (frameDoc && frameDoc.querySelector(selector)) {
+				return resolve(frameDoc.querySelector(selector));
 			}
-			const observer = new MutationObserver((mutations, obs) => {
-				const el = frame.contentWindow.document.querySelector(selector);
-				if (el) {
-					obs.disconnect();
+			DOMObserver.observe(frameDoc.body, { childList: true, subtree: true }, (mutations) => {
+				if (frameDoc.querySelector(selector)) {
+					resolve(frameDoc.querySelector(selector));
+					DOMObserver.removeObserver(frameDoc.body, { childList: true, subtree: true }); // Disconnect after resolve
+				}
+			});
+		} catch (error) {
+			console.error("Failed to observe iframe node:", error);
+		}
+	});
+}
 	

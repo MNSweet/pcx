@@ -1,7 +1,7 @@
-// DOMHelper.js
-import { Logger } from '"./Logger.js';
+// /js/modules/helpers/DOMHelper.js
+Logger.log("/js/modules/helpers/DOMHelper.js");
 
-export class DOMHelper {
+class DOMHelper {
 	// Private cache for DOM elements
 	_elementCache = new Map();
 
@@ -217,3 +217,5 @@ export class DOMHelper {
 		return hash;
 	}
 }
+
+window.DOMHelper = DOMHelper;

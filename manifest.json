@@ -34,22 +34,55 @@
 	},
 	"content_scripts": [
 		{
+			"matches": [
+				"https://prince.iatserv.com/*",
+				"https://reliable.iatserv.com/*",
+				"https://pnc.dxresults.com/*"
+			],
+			"js": [
+				"js/modules/helpers/Logger.js",
+				"js/modules/helpers/DOMHelper.js",
+				"js/modules/PCX.js",
+				"js/lims/LIMS.js",
+				"js/modules/MessageRouter.js",
+				"js/modules/helpers/QaManager.js",
+				"js/modules/helpers/AsyncHelpers.js",
+				"js/modules/helpers/Data.js",
+				"js/modules/helpers/DOMObserver.js",
+				"js/modules/helpers/KeyBinding.js",
+				"js/modules/helpers/Settings.js",
+				"js/modules/helpers/TableEnhancer.js",
+				"js/modules/helpers/Utils.js"
+			],
+			"run_at": "document_end",
+			"all_frames": true
+		},
+		{
 			"matches": ["https://prince.iatserv.com/*"],
-			"js": ["js/pcx/domobserver.js", "js/pcx/pcx_controller.js", "js/pcx/qa_manager.js", "js/pcx/settings.js", "js/pcx/data.js", "js/pcx/keybinding.js", "js/lims/iatserv.js", "js/labs/lab_pl.js"],
+			"js": [
+				"js/lims/IATSERV.js",
+				"js/labs/LabPL.js"
+			],
 			"css": ["css/content_pl.css"],
 			"run_at": "document_end",
 			"all_frames": true
 		},
 		{
 			"matches": ["https://reliable.iatserv.com/*"],
-			"js": ["js/pcx/domobserver.js", "js/pcx/pcx_controller.js", "js/pcx/qa_manager.js", "js/pcx/settings.js", "js/pcx/data.js", "js/pcx/keybinding.js", "js/lims/iatserv.js", "js/labs/lab_rr.js"],
+			"js": [
+				"js/lims/IATSERV.js",
+				"js/labs/LabRR.js"
+			],
 			"css": ["css/content_rr.css"],
 			"run_at": "document_end",
 			"all_frames": true
 		},
 		{
 			"matches": ["https://pnc.dxresults.com/*"],
-			"js": ["js/pcx/domobserver.js", "js/pcx/pcx_controller.js", "js/pcx/qa_manager.js", "js/pcx/settings.js", "js/pcx/data.js", "js/pcx/keybinding.js", "js/lims/dxresults.js", "js/labs/lab_pd.js"],
+			"js": [
+				"js/lims/DXRESULTS.js",
+				"js/labs/LabPD.js"
+			],
 			"css": ["css/content_pd.css"],
 			"run_at": "document_end",
 			"all_frames": true
@@ -67,18 +100,40 @@
 				"css/content_pr.css",
 				"css/content_rr.css",
 				"css/content_pd.css",
-				"js/pcx/pcx_controller.js",
-				"js/lims/dxresults.js",
-				"js/lims/iatserv.js",
-				"js/labs/lab_pl.js",
-				"js/labs/lab_rr.js",
-				"js/labs/lab_pd.js",
-				"js/pcx/qa_manager.js",
+
+				"js/labs/PLBoot.js",
+				"js/labs/PDBoot.js",
+				"js/labs/RRBoot.js",
+				"js/labs/LabPL.js",
+				/*"js/labs/LabPD.js",*/
+				/*"js/labs/LabRR.js",*/
+
 				"js/libs/marked.min.js",
-				"js/pcx/data.js",
-				"js/pcx/keybinding.js",
-				"js/pcx/settings.js",
-				"js/pcx/domobserver.js",
+
+				"js/lims/LIMS.js",
+				"js/lims/IATSERV.js",
+				"js/lims/DXRESULTS.js",
+
+				"js/modules/MessageRouter.js",
+				"js/modules/PCX.js",
+
+					"js/modules/helpers/AsyncHelpers.js",
+					"js/modules/helpers/Data.js",
+					"js/modules/helpers/DOMHelper.js",
+					"js/modules/helpers/DOMObserver.js",
+					"js/modules/helpers/KeyBinding.js",
+					"js/modules/helpers/Logger.js",
+					"js/modules/helpers/Settings.js",
+					"js/modules/helpers/TableEnhancer.js",
+					"js/modules/helpers/Utils.js",
+					"js/modules/helpers/QaManager.js",
+
+					"js/modules/patientTransfer/DataMapping.js",
+					"js/modules/patientTransfer/DestinationFormFiller.js",
+					"js/modules/patientTransfer/PatientData.js",
+					"js/modules/patientTransfer/TranserNoticeControler.js",
+
+				"js/data/sidePanel.js",
 				"js/data/permissions.js"
 			],
 			"matches": [

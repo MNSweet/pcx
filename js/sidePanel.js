@@ -255,21 +255,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 				const activeTab = tabs[0];
 				chrome.runtime.sendMessage({ type: 'getPageState', tabId: activeTab.id }, (response) => {
 					if (response) {
-						renderSidebar(response);
+						renderSidePanel(response);
 					} else {
-						document.getElementById('sidebar').innerHTML = '<p>No page data available.</p>';
+						document.getElementById('sidePanel').innerHTML = '<p>No page data available.</p>';
 					}
 				});
 			}
 		});
 	}
 
-	// Render the sidebar's content.
-	function renderSidebar(pageState) {
+	// Render the sidePanel's content.
+	function renderSidePanel(pageState) {
 		const content = buildFormFromData(pageState);
-		document.getElementById('sidebar').innerHTML = content;
+		document.getElementById('sidePanel').innerHTML = content;
 	}
 
-	// Initialize the sidebar when the panel loads.
+	// Initialize the sidePanel when the panel loads.
 	document.addEventListener('DOMContentLoaded', requestTabData);
 	});

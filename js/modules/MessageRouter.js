@@ -1,13 +1,23 @@
 // /js/modules/MessageRouter.js
-import { Logger } from "./helpers/Logger.js";
-
+Logger.log("/js/modules/MessageRouter.js");
+(function (root, factory) {
+	if (typeof define === 'function' && define.amd) {
+		define([], factory);
+	} else if (typeof exports === 'object') {
+		module.exports = factory();
+	} else {
+		root.MessageRouter = factory();
+	}
+}(this, function () {
+"use strict";
 class MessageRouter {
-	constructor() {
-		// Map actions to arrays of handler functions.
-		this.handlers = new Map();
+	// Map actions to arrays of handler functions.
+	static handlers = new Map();
+
+	static {
 		// Bind the listener once.
 		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-			this.handleMessage(message, sender, sendResponse);
+			MessageRouter.handleMessage(message, sender, sendResponse);
 			// Return true to indicate that the response may be sent asynchronously.
 			return true;
 		});
@@ -18,11 +28,11 @@ class MessageRouter {
 	 * @param {string} action - The message action to listen for.
 	 * @param {function} callback - The function to call when a message with this action is received.
 	 */
-	registerHandler(action, callback) {
-		if (!this.handlers.has(action)) {
-			this.handlers.set(action, []);
+	static registerHandler(action, callback) {
+		if (!MessageRouter.handlers.has(action)) {
+			MessageRouter.handlers.set(action, []);
 		}
-		this.handlers.get(action).push(callback);
+		MessageRouter.handlers.get(action).push(callback);
 		Logger.log(`MessageRouter: Registered handler for action "${action}"`);
 	}
 
@@ -31,9 +41,9 @@ class MessageRouter {
 	 * @param {string} action - The message action.
 	 * @param {function} callback - The function to remove.
 	 */
-	unregisterHandler(action, callback) {
-		if (this.handlers.has(action)) {
-			const arr = this.handlers.get(action);
+	static unregisterHandler(action, callback) {
+		if (MessageRouter.handlers.has(action)) {
+			const arr = MessageRouter.handlers.get(action);
 			const index = arr.indexOf(callback);
 			if (index !== -1) {
 				arr.splice(index, 1);
@@ -48,13 +58,13 @@ class MessageRouter {
 	 * @param {Object} sender - Information about the sender.
 	 * @param {function} sendResponse - Function to send a response.
 	 */
-	handleMessage(message, sender, sendResponse) {
+	static handleMessage(message, sender, sendResponse) {
 		if (!message || !message.action) {
 			Logger.warn("MessageRouter: Received message with no action", { message });
 			return;
 		}
 		const action = message.action;
-		const callbacks = this.handlers.get(action);
+		const callbacks = MessageRouter.handlers.get(action);
 		if (callbacks && callbacks.length > 0) {
 			Logger.log(`MessageRouter: Handling action "${action}"`, { message, sender });
 			// Invoke all handlers for this action.
@@ -75,7 +85,7 @@ class MessageRouter {
 	 * @param {Object} message - The message to send.
 	 * @returns {Promise} Resolves with the response or rejects with an error.
 	 */
-	sendMessage(message) {
+	static sendMessage(message) {
 		return new Promise((resolve, reject) => {
 			chrome.runtime.sendMessage(message, (response) => {
 				if (chrome.runtime.lastError) {
@@ -87,5 +97,5 @@ class MessageRouter {
 		});
 	}
 }
-
-export const messageRouter = new MessageRouter();
+  return MessageRouter;
+}));
