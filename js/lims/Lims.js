@@ -2,58 +2,57 @@
 Logger.log('LIMS Loaded',"INIT")
 
 class LIMS extends DOMHelper {
-	constructor() {
-		super();
+	static {
 		// Initialize shared properties common to all LIM implementations.
-		this.labs = {};
-		this.testCategories = {};
-		this.categoryTranslation = {};
-		this.genderTranslation = {};
-		this.raceTranslation = {};
-		this.orderDefaults = {};
-		this.selectors = {};
+		LIMS.labs = {};
+		LIMS.testCategories = {};
+		LIMS.categoryTranslation = {};
+		LIMS.genderTranslation = {};
+		LIMS.raceTranslation = {};
+		LIMS.orderDefaults = {};
+		LIMS.selectors = {};
 	}
 
 	// --- Shared Setters ---
-	setLabs(labs) {
+	static setLabs(labs) {
 		if (typeof labs === "object") {
-			this.labs = labs;
+			LIMS.labs = labs;
 		}
 	}
 
-	setTestCategories(testCats) {
+	static setTestCategories(testCats) {
 		if (typeof testCats === "object") {
-			this.testCategories = testCats;
+			LIMS.testCategories = testCats;
 		}
 	}
 
-	setCategoryTranslation(catTranslation) {
+	static setCategoryTranslation(catTranslation) {
 		if (typeof catTranslation === "object") {
-			this.categoryTranslation = catTranslation;
+			LIMS.categoryTranslation = catTranslation;
 		}
 	}
 
-	setGenderTranslation(genderTranslation) {
+	static setGenderTranslation(genderTranslation) {
 		if (typeof genderTranslation === "object") {
-			this.genderTranslation = genderTranslation;
+			LIMS.genderTranslation = genderTranslation;
 		}
 	}
 
-	setRaceTranslation(raceTranslation) {
+	static setRaceTranslation(raceTranslation) {
 		if (typeof raceTranslation === "object") {
-			this.raceTranslation = raceTranslation;
+			LIMS.raceTranslation = raceTranslation;
 		}
 	}
 
-	setOrderDefaults(orderDefaults) {
+	static setOrderDefaults(orderDefaults) {
 		if (typeof orderDefaults === "object") {
-			this.orderDefaults = orderDefaults;
+			LIMS.orderDefaults = orderDefaults;
 		}
 	}
 
-	setSelectors(selector) {
+	static setSelectors(selector) {
 		if (typeof selector === "object") {
-			this.selectors = selector;
+			LIMS.selectors = selector;
 		}
 	}
 
@@ -61,10 +60,8 @@ class LIMS extends DOMHelper {
 	 * getExtraParams can be used if any child classes require a copy of URL parameters.
 	 * For example, IATSERV can override this if needed.
 	 */
-	getExtraParams() {
+	static getExtraParams() {
 		// Default implementation: return an empty object.
 		return {};
 	}
 }
-
-window.LIMS = LIMS;

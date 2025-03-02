@@ -73,7 +73,7 @@ class Logger {
 		config = config || {};
 		let params = new URLSearchParams(window.location.search);
 		Logger.enabled = true;//(params.get('debug') === 'true') || config.enabled || false;
-		Logger.outputBrowserConsole = true;// (params.get('console') === 'true') || config.outputBrowserConsole || false;
+		Logger.outputBrowserConsole = (params.get('console') === 'true') || config.outputBrowserConsole || false;
 		if (Logger.enabled) {
 			Logger.createDevLog();
 		}
@@ -89,7 +89,6 @@ class Logger {
 			let err = new Error();
 			if (!err.stack) { return ''; }
 			let stackLines = err.stack.split('\n');
-			console.log("getCallerInfo",stackLines);
 			// Typically:
 			// stackLines[0] is "Error"
 			// stackLines[1] is getCallerInfo
@@ -515,8 +514,6 @@ class Logger {
 
 // Automatically initialize if debug is enabled via URL, otherwise require manual init.
 Logger.init();
-
-console.log(Logger);
 
 /*
 // Example usage:

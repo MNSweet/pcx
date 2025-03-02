@@ -3,9 +3,9 @@ Logger.log("DOMHelper Loaded","INIT");
 
 class DOMHelper {
 	// Private cache for DOM elements
-	_elementCache = new Map();
+	static _elementCache = new Map();
 
-	events = {
+	static events = {
 		Space	: {bubbles: true, cancelable: true,	key: ' '},
 		Delete	: {bubbles: true, cancelable: true,	shiftKey: false, keyCode: 8,	code: "Backspace",	key: "Backspace"},
 		End		: {bubbles: true, cancelable: true,	shiftKey: false, keyCode: 35,	code: "END",		key: "END"},
@@ -18,13 +18,13 @@ class DOMHelper {
 	 * @param {string} selector - The CSS selector.
 	 * @returns {Element|null} - The first matching element or null if not found.
 	 */
-	findEl(selector) {
+	static findEl(selector) {
 		try {
 			const el = document.querySelector(selector);
-			Logger.log(`DOMHelper.findEl("${selector}") succeeded`, { element: el });
+			Logger.log(`findEl located "${selector}"`,"Scan", { element: el });
 			return el;
 		} catch (error) {
-			Logger.error(`DOMHelper.findEl: Error querying selector "${selector}"`, { error });
+			Logger.error(`findEl: Error querying selector "${selector}"`,"Scan", { error });
 			return null;
 		}
 	}
@@ -34,13 +34,13 @@ class DOMHelper {
 	 * @param {string} selector - The CSS selector.
 	 * @returns {NodeListOf<Element>} - The list of matching elements.
 	 */
-	findEls(selector) {
+	static findEls(selector) {
 		try {
 			const els = document.querySelectorAll(selector);
-			Logger.log(`DOMHelper.findEls("${selector}") succeeded`, { elements: els });
+			Logger.log(`findEls located "${selector.length}" elements`,"Scan", { elements: els });
 			return els;
 		} catch (error) {
-			Logger.error(`DOMHelper.findEls: Error querying selector "${selector}"`, { error });
+			Logger.error(`findEls: Error querying selector "${JSON.stringify(selector)}"`,"Scan", { error });
 			return [];
 		}
 	}
@@ -51,13 +51,13 @@ class DOMHelper {
 	 * @param {boolean} [requery=false] - If true, bypass the cache and query again.
 	 * @returns {Element|null} - The found element or null if not found.
 	 */
-	getEl(selector, requery = false) {
-		if (!requery && this._elementCache.has(selector)) {
-			Logger.log(`DOMHelper.getEl("${selector}") retrieved from cache`);
-			return this._elementCache.get(selector);
+	static getEl(selector, requery = false) {
+		if (!requery && DOMHelper._elementCache.has(selector)) {
+			Logger.log(`getEl retrieved "${selector}" from cache`,"Scan");
+			return DOMHelper._elementCache.get(selector);
 		}
-		const el = this.findEl(selector);
-		this._elementCache.set(selector, el);
+		const el = DOMHelper.findEl(selector);
+		DOMHelper._elementCache.set(selector, el);
 		return el;
 	}
 
@@ -67,13 +67,13 @@ class DOMHelper {
 	 * @param {boolean} [requery=false] - If true, bypass the cache and query again.
 	 * @returns {NodeListOf<Element>} - The found elements.
 	 */
-	getEls(selector, requery = false) {
-		if (!requery && this._elementCache.has(selector)) {
-			Logger.log(`DOMHelper.getEls("${selector}") retrieved from cache`);
-			return this._elementCache.get(selector);
+	static getEls(selector, requery = false) {
+		if (!requery && DOMHelper._elementCache.has(selector)) {
+			Logger.log(`getEls retrieved "${selector.length}" elements from cache`,"Scan");
+			return DOMHelper._elementCache.get(selector);
 		}
-		const els = this.findEls(selector);
-		this._elementCache.set(selector, els);
+		const els = DOMHelper.findEls(selector);
+		DOMHelper._elementCache.set(selector, els);
 		return els;
 	}
 
@@ -81,13 +81,13 @@ class DOMHelper {
 	 * Clears the entire cache or a specific selector from the cache.
 	 * @param {string} [selector] - Optional CSS selector to clear from cache.
 	 */
-	clearCache(selector) {
+	static clearCache(selector) {
 		if (selector) {
-			this._elementCache.delete(selector);
-			Logger.log(`DOMHelper.clearCache: Cleared cache for selector "${selector}"`);
+			DOMHelper._elementCache.delete(selector);
+			Logger.log(`clearCache: Cleared cache for selector "${JSON.stringify(selector)}"`,"Scan");
 		} else {
-			this._elementCache.clear();
-			Logger.log(`DOMHelper.clearCache: Cleared entire cache`);
+			DOMHelper._elementCache.clear();
+			Logger.log(`clearCache: Cleared entire cache`,"Scan");
 		}
 	}
 
@@ -97,14 +97,14 @@ class DOMHelper {
 	 * @param {Object} properties - An object of properties to assign to the element.
 	 * @returns {Element|null} - The newly created element, or null if creation fails.
 	 */
-	createDOM(domType, properties = {}) {
+	static createDOM(domType, properties = {}) {
 		try {
 			const element = document.createElement(domType);
 			Object.assign(element, properties);
-			Logger.log(`DOMHelper.createDOM: Created "${domType}"`, { properties });
+			Logger.log(`createDOM: Created "${domType}"`, "Modify", { properties });
 			return element;
 		} catch (error) {
-			Logger.error(`DOMHelper.createDOM: Error creating element "${domType}"`, { error, properties });
+			Logger.error(`createDOM: Error creating element "${domType}"`, "Modify", { error, properties });
 			return null;
 		}
 	}
@@ -116,9 +116,9 @@ class DOMHelper {
 	 * @param {string} [type='keydown'] - The type of event to simulate.
 	 * @returns {boolean} - True if the event was dispatched; false otherwise.
 	 */
-	simulateUserKey(element, opts, type = 'keydown') {
+	static simulateUserKey(element, opts, type = 'keydown') {
 		if (!element || typeof opts !== 'object') {
-			Logger.warn(`DOMHelper.simulateUserKey: Invalid element or options`, { element, opts });
+			Logger.warn(`simulateUserKey: Invalid element or options`,"Interact", { element, opts });
 			return false;
 		}
 		const defaults = { bubbles: true, cancelable: true, key: "", shiftKey: false, keyCode: 0 };
@@ -126,10 +126,10 @@ class DOMHelper {
 		try {
 			const event = new KeyboardEvent(type, options);
 			element.dispatchEvent(event);
-			Logger.log(`DOMHelper.simulateUserKey: Simulated "${options.key}" on element "${element.id || element.tagName}"`, { options });
+			Logger.log(`simulateUserKey: Simulated "${options.key}" on element "${element.id || element.tagName}"`,"Interact", { options });
 			return true;
 		} catch (error) {
-			Logger.error(`DOMHelper.simulateUserKey: Error dispatching event on element "${element.id || element.tagName}"`, { error, options });
+			Logger.error(`simulateUserKey: Error dispatching event on element "${element.id || element.tagName}"`,"Interact", { error, options });
 			return false;
 		}
 	}
@@ -139,12 +139,12 @@ class DOMHelper {
 	 * @param {string} text - The text to copy.
 	 * @returns {Promise<void>}
 	 */
-	async copyToClipboard(text) {
+	static async copyToClipboard(text) {
 		try {
 			await navigator.clipboard.writeText(text);
-			Logger.log(`DOMHelper.copyToClipboard: Copied text successfully`, { text });
+			Logger.log(`copyToClipboard: Copied text successfully`,"Interact", { text });
 		} catch (error) {
-			Logger.error(`DOMHelper.copyToClipboard: Failed to copy text`, { error, text });
+			Logger.error(`copyToClipboard: Failed to copy text`,"Interact", { error, text });
 		}
 	}
 
@@ -152,13 +152,13 @@ class DOMHelper {
 	 * Reads text from the clipboard.
 	 * @returns {Promise<string|null>} - The text from the clipboard or null on error.
 	 */
-	async readFromClipboard() {
+	static async readFromClipboard() {
 		try {
 			const text = await navigator.clipboard.readText();
-			Logger.log(`DOMHelper.readFromClipboard: Read text successfully`, { text });
+			Logger.log(`readFromClipboard: Read text successfully`,"Interact", { text });
 			return text;
 		} catch (error) {
-			Logger.error(`DOMHelper.readFromClipboard: Failed to read clipboard`, { error });
+			Logger.error(`readFromClipboard: Failed to read clipboard`,"Interact", { error });
 			return null;
 		}
 	}
@@ -167,16 +167,16 @@ class DOMHelper {
 	 * Retrieves URL parameters as a plain object.
 	 * @returns {Object} - An object mapping query parameter keys to values.
 	 */
-	getUrlParams() {
+	static getUrlParams() {
 		const params = {};
 		try {
 			const urlParams = new URLSearchParams(window.location.search);
 			for (const [key, value] of urlParams.entries()) {
 				params[key] = value;
 			}
-			Logger.log(`DOMHelper.getUrlParams: Retrieved parameters`, { params });
+			Logger.log(`getUrlParams: Retrieved parameters`,"URL", { params });
 		} catch (error) {
-			Logger.error(`DOMHelper.getUrlParams: Error parsing URL parameters`, { error });
+			Logger.error(`getUrlParams: Error parsing URL parameters`,"URL", { error });
 		}
 		return params;
 	}
@@ -185,13 +185,13 @@ class DOMHelper {
 	 * Splits the current pathname into segments, excluding empty segments.
 	 * @returns {string[]} - An array of non-empty path segments.
 	 */
-	getUrlDirectory() {
+	static getUrlDirectory() {
 		try {
 			const directory = window.location.pathname.split('/').filter(segment => segment);
-			Logger.log(`DOMHelper.getUrlDirectory: Retrieved directory segments`, { directory });
+			Logger.log(`getUrlDirectory: Retrieved directory segments`,"URL", { directory });
 			return directory;
 		} catch (error) {
-			Logger.error(`DOMHelper.getUrlDirectory: Error splitting pathname`, { error });
+			Logger.error(`getUrlDirectory: Error splitting pathname`,"URL", { error });
 			return [];
 		}
 	}
@@ -201,7 +201,7 @@ class DOMHelper {
 	 * @param {string} string - The input string.
 	 * @returns {number} - The resulting hash code.
 	 */
-	hashCode(string) {
+	static hashCode(string) {
 		let hash = 0;
 		if (!string || string.length === 0) return hash;
 		try {
@@ -210,11 +210,28 @@ class DOMHelper {
 				hash = ((hash << 5) - hash) + chr;
 				hash |= 0; // Convert to 32bit integer
 			}
-			Logger.log(`DOMHelper.hashCode: Generated hash`, { string, hash });
+			Logger.log(`hashCode: Generated hash`,"ID", { string, hash });
 		} catch (error) {
-			Logger.error(`DOMHelper.hashCode: Error generating hash for "${string}"`, { error });
+			Logger.error(`hashCode: Error generating hash for "${string}"`,"ID", { error });
 		}
 		return hash;
+	}
+
+	/**
+	 * Generates a hash code from the given string.
+	 * @param {Array} elements - Array of input selectors.
+	 * @param {string} iframe - If applicable, the iframe selector.
+	 */
+	static disableTabIndex(elements,iframe="") {
+		elements.forEach((selector) => {
+			if(iframe!="") {
+				Logger.log(`Removing tabindex for ${elements.length} inputs from iframe ${iframe}`,"Modify", elements);
+				DOMHelper.getEl(iframe).contentWindow.document.querySelector(selector).setAttribute("tabindex","-1");
+			} else {
+				Logger.log(`Removing tabindex for ${elements.length} inputs`,"Modify", elements);
+				DOMHelper.getEl(selector).setAttribute("tabindex","-1");
+			}
+		});
 	}
 }
 

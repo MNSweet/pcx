@@ -20,6 +20,7 @@ class ServiceWorker {
 	static updateCountdownNotice = null;
 	static tabWhitelists = {};
 	static tabTargets = {};
+	static sidePanelState = false;
 
 	// --- Background Initialization & Data Backup ---
 	static initBackground() {
@@ -67,8 +68,24 @@ class ServiceWorker {
 			options.tabId = tabId;
 		}
 		chrome.sidePanel.setOptions(options).then(() => {
-			chrome.runtime.sendMessage({ action: "sidePanelOpened" });
+			//SWMessageRouter.sendMessage({ action: "sidePanelOpened" });
 		});
+	}
+	static updateSidePanel(data) {
+		try {
+			SWMessageRouter.sendMessage(data, (response) => {
+				if (chrome.runtime.lastError || !response) {
+					SWLogger.log("Side panel not available; marking as closed.");
+					ServiceWorker.sidePanelState.open = false;
+				} else {
+					SWLogger.log("Side panel update successful:", response);
+					ServiceWorker.sidePanelState.open = true;
+				}
+			});
+		} catch (err) {
+			SWLogger.error("Error sending update message to side panel:", err);
+			ServiceWorker.sidePanelState.open = false;
+		}
 	}
 
 	// --- Site Detection ---
@@ -278,6 +295,13 @@ class ServiceWorker {
 		ServiceWorker.getSite(message, sender);
 	});
 
+	SWMessageRouter.registerHandler("sidePanelReady",(message, sender, sendResponse) => {
+		ServiceWorker.sidePanelState.open = true;
+	});
+
+	SWMessageRouter.registerHandler("sidePanelClosed",(message, sender, sendResponse) => {
+		ServiceWorker.sidePanelState.open = false;
+	});
 /** 
  * 
  * Web Navigation Listeners
@@ -318,7 +342,7 @@ class ServiceWorker {
  * 
  */
 	chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(console.error);
-
+		
 	chrome.tabs.onActivated.addListener((info) => {
 		chrome.tabs.get(info.tabId, (tab) => {
 			ServiceWorker.handleTabUpdate(tab.id, tab.url);

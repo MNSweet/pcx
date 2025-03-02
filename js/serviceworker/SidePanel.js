@@ -1,14 +1,15 @@
 document.addEventListener("DOMContentLoaded", async () => {
+	MessageRouter.sendMessage({ action: "sidePanelReady" });
 
 /**
  * 
  * Tab navigation
  * 
  */
-	document.querySelectorAll(".tab-button").forEach(button => {
+	DOMHelper.getEls(".tab-button").forEach(button => {
 		button.addEventListener("click", () => {
-			document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
-			document.querySelectorAll(".tab-content").forEach(content => content.classList.remove("active"));
+			DOMHelper.getEls(".tab-button").forEach(btn => btn.classList.remove("active"));
+			DOMHelper.getEls(".tab-content").forEach(content => content.classList.remove("active"));
 			
 			button.classList.add("active");
 			document.getElementById(button.dataset.tab).classList.add("active");
@@ -254,11 +255,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 			if (tabs.length > 0) {
 				const activeTab = tabs[0];
-				chrome.runtime.sendMessage({ type: 'getPageState', tabId: activeTab.id }, (response) => {
+				MessageRouter.sendMessage({ type: 'getPageState', tabId: activeTab.id }, (response) => {
 					if (response) {
 						renderSidePanel(response);
 					} else {
-						document.getElementById('sidePanel').innerHTML = '<p>No page data available.</p>';
+						DOMHelper.getEl('#sidePanel').innerHTML = '<p>No page data available.</p>';
 					}
 				});
 			}
@@ -268,11 +269,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 	// Render the sidePanel's content.
 	function renderSidePanel(pageState) {
 		const content = buildFormFromData(pageState);
-		document.getElementById('sidePanel').innerHTML = content;
+		DOMHelper.getEl('#sidePanel').innerHTML = content;
 	}
 
 	// Initialize the sidePanel when the panel loads.
 	document.addEventListener('DOMContentLoaded', requestTabData);
+});
+
+window.addEventListener("unload", () => {
+	chrome.runtime.sendMessage({ action: "sidePanelClosed" });
 });
 
 MessageRouter.registerHandler("sidePanelOpened", (message, sender, sendResponse) => {

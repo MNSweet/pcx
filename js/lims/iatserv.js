@@ -2,16 +2,15 @@
 Logger.log('IATSERV Loaded',"INIT");
 
 class IATSERV extends LIMS {
-	constructor() {
-		super();
-		this.lims = "IATSERV";
+	static  {
+		IATSERV.lims = "IATSERV";
 
 		// Read URL parameters specific to IATSERV.
 		const params = new URLSearchParams(window.location.search);
-		this.linkId = params.get("LinkId") || null;
-		this.orderId = params.get("OrderId") || null;
-		this.type = params.get("type") || null;
-		this.extraParams = Object.fromEntries(params.entries());
+		IATSERV.linkId = params.get("LinkId") || null;
+		IATSERV.orderId = params.get("OrderId") || null;
+		IATSERV.type = params.get("type") || null;
+		IATSERV.extraParams = Object.fromEntries(params.entries());
 	}
 
 	// --- Page-specific functionality ---
@@ -19,7 +18,7 @@ class IATSERV extends LIMS {
 	/**
 	 * Enhances the Accession List page (LinkId "2070") by applying table enhancements.
 	 */
-	accessionList() {
+	static accessionList() {
 		const accessionConfig = {
 			"Alt ID 1": accessionList_AltId1_Results
 		};
@@ -35,7 +34,7 @@ class IATSERV extends LIMS {
 	/**
 	 * Enhances the Locations page (LinkId "2004").
 	 */
-	locations() {
+	static locations() {
 		const locationConfig = {
 			"ID1": location_ID1_Delivery
 		};
@@ -51,7 +50,7 @@ class IATSERV extends LIMS {
 	/**
 	 * Enhances the Reports page (LinkId "6001").
 	 */
-	reports() {
+	static reports() {
 		const reportsConfig = {
 			"DOS": results_DOS_Status
 		};
@@ -68,41 +67,40 @@ class IATSERV extends LIMS {
 	 * Handles the Create Accession workflow (LinkId "2011", type "acs").
 	 * Sets defaults, binds event handlers, and invokes a callback when complete.
 	 */
-	createAccession(callback = () => {}) {
-		const self = this;
-		const el = this.selectors;
+	static createAccession(callback = () => {}) {
+		const el = super.selectors;
 		// Set default inputs.
-		self.getEl(el.BillType).value = 1;
-		self.getEl(el.Status).value = "Received";
-		self.getEl(el.newPatientBtn, true).addEventListener("click", this.newPatientBtn);
-		self.getEl(el.newPatientBtn).classList.add("disabled");
-		self.getEl(el.locationInput).addEventListener("blur", (event) => {
-			if (event.target.value !== "" && self.getEl(el.newPatientBtn).classList.contains("disabled")) {
+		super.getEl(el.BillType).value = 1;
+		super.getEl(el.Status).value = "Received";
+		super.getEl(el.newPatientBtn, true).addEventListener("click", IATSERV.newPatientBtn);
+		super.getEl(el.newPatientBtn).classList.add("disabled");
+		super.getEl(el.locationInput).addEventListener("blur", (event) => {
+			if (event.target.value !== "" && super.getEl(el.newPatientBtn).classList.contains("disabled")) {
 				if (event.target.value.match("^(AM-|CTD-).*")) {
 					waitForElm(el.PhysicianOptions).then(() => {
-						self.getEl(el.Physician, true).innerHTML =
+						super.getEl(el.Physician, true).innerHTML =
 							`<option value="0" disabled selected hidden>Select a Physician</option>` +
-							self.getEl(el.Physician).innerHTML;
-						self.getEl(el.PhysicianId, true).value = "";
-						self.getEl(el.PhysicianName, true).value = "";
+							super.getEl(el.Physician).innerHTML;
+						super.getEl(el.PhysicianId, true).value = "";
+						super.getEl(el.PhysicianName, true).value = "";
 					});
 				}
-				self.getEl(el.newPatientBtn).classList.remove("disabled");
-			} else if (event.target.value === "" && !self.getEl(el.newPatientBtn).classList.contains("disabled")) {
-				self.getEl(el.newPatientBtn).classList.add("disabled");
+				super.getEl(el.newPatientBtn).classList.remove("disabled");
+			} else if (event.target.value === "" && !super.getEl(el.newPatientBtn).classList.contains("disabled")) {
+				super.getEl(el.newPatientBtn).classList.add("disabled");
 			}
 		});
-		self.getEl(el.UpPanel).addEventListener("change", this.upPanelChange);
-		self.getEl(el.UpPanel).addEventListener("blur", (e) => {
+		super.getEl(el.UpPanel).addEventListener("change", IATSERV.upPanelChange);
+		super.getEl(el.UpPanel).addEventListener("blur", (e) => {
 			if (e.target && "#" + e.target.id === el.DOC) {
 				let attempt = 0;
 				let lastValue = "";
 				const intervalId = setInterval(() => {
-					if (self.getEl(el.DOC, true).value !== lastValue) {
+					if (super.getEl(el.DOC, true).value !== lastValue) {
 						PCX.processEnabled("Interface", "Show Stablity Notice", () => {
-							QAManager.setStablityNotice(el.DOS, self.getEl(el.DOC).value, true);
+							QAManager.setStablityNotice(el.DOS, super.getEl(el.DOC).value, true);
 						});
-						lastValue = self.getEl(el.DOC).value;
+						lastValue = super.getEl(el.DOC).value;
 						clearInterval(intervalId);
 					}
 					if (++attempt >= 5) {
@@ -112,15 +110,15 @@ class IATSERV extends LIMS {
 			}
 		}, true);
 		PCX.processEnabled("Interface", "ICD Code Previewer", () => {
-			self.getEl(el.ICDCodesInput + "~.body", true).insertAdjacentHTML("afterbegin", `<div id="icdCodePreviewer"></div>`);
+			super.getEl(el.ICDCodesInput + "~.body", true).insertAdjacentHTML("afterbegin", `<div id="icdCodePreviewer"></div>`);
 			let observer = new MutationObserver(() => {});
-			self.getEl(el.UpPanel, true).addEventListener("keydown", async (e) => {
+			super.getEl(el.UpPanel, true).addEventListener("keydown", async (e) => {
 				if (e.target && "#" + e.target.id === el.ICDCodesInput && (e.key === "Enter" || e.key === "Tab")) {
-					const targetElement = self.getEl(el.ICDCodesInput + "~#dvCount #lblCount", true);
+					const targetElement = super.getEl(el.ICDCodesInput + "~#dvCount #lblCount", true);
 					observer.disconnect();
 					observer = new MutationObserver((mutations) => {
-						let icdCodes = Array.from(self.getEls(el.ICDCodesInput + "~.body #dvSelectedItems #xv_param", true)).reverse();
-						self.getEl("#icdCodePreviewer", true).innerHTML =
+						let icdCodes = Array.from(super.getEls(el.ICDCodesInput + "~.body #dvSelectedItems #xv_param", true)).reverse();
+						super.getEl("#icdCodePreviewer", true).innerHTML =
 							`<span class="icdCode">` + icdCodes.map(element => element.value).join(`</span><span class="icdCode">`) + `</span>`;
 					});
 					observer.observe(targetElement, { childList: true });
@@ -135,39 +133,37 @@ class IATSERV extends LIMS {
 				el.Quantity, el.Requisition, el.DOCTime, el.ReceivedDate, el.ReceivedTime, el.ClearBTN, el.Medication,
 				el.MedicationBTN, el.OtherMedication, el.PhySigCaptured, el.PTSigCaptured, el.SigSuccess, el.SigClear, el.SigToggle
 			];
-			PCX.disableTabIndex(removeTabIndexSelectors);
+			super.disableTabIndex(removeTabIndexSelectors);
 		});
 		callback();
 	}
 
-	upPanelChange(e) {
-		const self = this;
-		const el = this.selectors;
+	static upPanelChange(e) {
+		const el = super.selectors;
 		// Check if the event target corresponds to the Category element
 		if (e.target && ("#" + e.target.id) === el.Category) {
 			// Call checkTestCat using instance data:
-			this.checkTestCat(
-				self.getEl(`${el.Category} option:checked`),
+			IATSERV.checkTestCat(
+				super.getEl(`${el.Category} option:checked`),
 				{
-					Input: self.getEl(el.TestCodesInput, true),
-					Output: self.getEl(el.TestCodesOutput, true)
+					Input: super.getEl(el.TestCodesInput, true),
+					Output: super.getEl(el.TestCodesOutput, true)
 				},
-				this.testCategories
+				super.testCategories
 			);
 			// Process enabling "Hide Signatures" functionality
-			PCX.processEnabled("Interface", "Hide Signatures", this.showSignaturesBTN.bind(this));
+			PCX.processEnabled("Interface", "Hide Signatures", IATSERV.showSignaturesBTN.bind(this));
 			// Bind newPatientBtn click handler, if needed
-			self.getEl(el.newPatientBtn, true).addEventListener("click", this.newPatientBtn.bind(this));
+			super.getEl(el.newPatientBtn, true).addEventListener("click", IATSERV.newPatientBtn.bind(this));
 		}
 	}
 
 	// Creates a toggle button to show/hide the signature section.
-	showSignaturesBTN() {
-		const self = this;
+	static showSignaturesBTN() {
 		// Add a class to mark the page as not showing signatures
 		document.body.classList.add("nosignature");
 		// Create the toggle button
-		let showSignatureBTN = self.createDOM("div", {
+		let showSignatureBTN = super.createDOM("div", {
 			id: "showSignature",
 			innerText: "Show Signature Section",
 			classList: "form-group col-lg-1 new-row btn btn-default"
@@ -178,11 +174,11 @@ class IATSERV extends LIMS {
 			document.body.classList.add("signature");
 		});
 		// Find the target element where the button should be inserted
-		const targetEl = self.getEl("#MainContent_ctl00_ctl00_PlacePhysicianAuthorizeText", true);
+		const targetEl = super.getEl("#MainContent_ctl00_ctl00_PlacePhysicianAuthorizeText", true);
 		if (targetEl) {
 			targetEl.insertAdjacentElement("beforebegin", showSignatureBTN);
 			// Append a style block to manage the signature section visibility
-			const styleEl = self.createDOM("style", {
+			const styleEl = super.createDOM("style", {
 				innerText: `
 	.nosignature #MainContent_ctl00_ctl00_PlacePhysicianAuthorizeText,
 	.nosignature #MainContent_ctl00_ctl00_PlacePatientAuthorizeText,
@@ -210,29 +206,28 @@ class IATSERV extends LIMS {
 		max-height: 190px;
 	}`
 			});
-			self.getEl("#MainContent_ctl00_ctl00_PlacePhysicianAuthorizeText").append(styleEl);
+			super.getEl("#MainContent_ctl00_ctl00_PlacePhysicianAuthorizeText").append(styleEl);
 		}
 	}
 
 	// Handles file drop functionality on the page.
-	fileDrop(qa = { enabled: false, acsNum: null, acsID: null, patient: null, result: false }, target = false, targetSpan = false, scrollTo = false) {
-		const self = this;
+	static fileDrop(qa = { enabled: false, acsNum: null, acsID: null, patient: null, result: false }, target = false, targetSpan = false, scrollTo = false) {
 		let isDragging = false;
-		const el = this.selectors;
+		const el = super.selectors;
 		// Determine drop area, scroll target, accept types, etc.
 		el.DropArea = target ? target : el.UploadTable;
 		el.ScrollTo = scrollTo ? scrollTo : el.DropArea;
 		el.AcceptTypes = el.DropArea + " input[type='file']";
 		el.TargetSpan = targetSpan ? targetSpan : el.UploadSpan;
-		const dropArea = self.getEl(el.DropArea).closest("*");
-		const acceptTypes = self.getEl(el.AcceptTypes).getAttribute("accept").split(",");
+		const dropArea = super.getEl(el.DropArea).closest("*");
+		const acceptTypes = super.getEl(el.AcceptTypes).getAttribute("accept").split(",");
 
 		// Helper functions for maintaining drop zone state
 		const dropZoneKeepAlive = (e) => {
 			isDragging = true;
 			if (!document.body.classList.contains("dropZoneKeepAlive")) {
 				document.body.classList.add("dropZoneKeepAlive");
-				self.getEl(el.TargetSpan).textContent = "Drop File";
+				super.getEl(el.TargetSpan).textContent = "Drop File";
 			}
 		};
 		
@@ -241,7 +236,7 @@ class IATSERV extends LIMS {
 				isDragging = false;
 				if (document.body.classList.contains("dropZoneKeepAlive")) {
 					document.body.classList.remove("dropZoneKeepAlive");
-					self.getEl(el.TargetSpan).textContent = "Choose File";
+					super.getEl(el.TargetSpan).textContent = "Choose File";
 				}
 			}
 		};
@@ -257,15 +252,15 @@ class IATSERV extends LIMS {
 			isDragging = false;
 			if (document.body.classList.contains("dropZoneKeepAlive")) {
 				document.body.classList.remove("dropZoneKeepAlive");
-				if (self.getEl(el.TargetSpan).textContent === "Drop File") {
-					self.getEl(el.TargetSpan).textContent = "Choose File";
+				if (super.getEl(el.TargetSpan).textContent === "Drop File") {
+					super.getEl(el.TargetSpan).textContent = "Choose File";
 				}
 			}
 			if (e.dataTransfer.files.length > 0) {
 				for (const [i, file] of Object.entries(e.dataTransfer.files)) {
 					let fileExt = file.name.split(".").pop();
 					let fileName = file.name.replace("." + fileExt, "");
-					self.getEl(el.ScrollTo).scrollIntoView({ behavior: "instant", block: "end" });
+					super.getEl(el.ScrollTo).scrollIntoView({ behavior: "instant", block: "end" });
 					if (acceptTypes.findIndex(a => a.toLowerCase() === ("." + fileExt).toLowerCase()) === -1) {
 						return; // File not accepted
 					}
@@ -306,8 +301,7 @@ class IATSERV extends LIMS {
 		});
 	}
 
-	scanFilenamer(output = false) {
-		const self = this;
+	static scanFilenamer(output = false) {
 		// Define keywords and corresponding suffixes.
 		let type = "REQ";
 		const fs = " FS";
@@ -323,7 +317,7 @@ class IATSERV extends LIMS {
 		
 		// Function to generate the label.
 		const generateLabel = () => {
-			// Use a fixed selector for the LOCATION field (or consider moving to this.selectors if appropriate)
+			// Use a fixed selector for the LOCATION field (or consider moving to super.selectors if appropriate)
 			const locationField = document.querySelector("#MainContent_ctl00_tbLocation_tbText");
 			const location = locationField ? locationField.value : "";
 			
@@ -337,12 +331,12 @@ class IATSERV extends LIMS {
 			}
 			
 			// Get the PATIENT field via PCX helper.
-			const patientField = self.getEl("#MainContent_ctl00_tbPatient_tbText", true);
+			const patientField = super.getEl("#MainContent_ctl00_tbPatient_tbText", true);
 			const patient = patientField ? patientField.value : "";
 			const name = patient.replace(/,/g, "");
 			
 			// Get the Accession number.
-			const acsField = self.getEl("#MainContent_ctl00_tbAccession", true);
+			const acsField = super.getEl("#MainContent_ctl00_tbAccession", true);
 			const acsNum = acsField ? acsField.value : "";
 			
 			const labelString = `${type} ${acsNum} ${name}`;
@@ -366,16 +360,15 @@ class IATSERV extends LIMS {
 	}
 
 
-	async newPatientBtn(eventPtBtnClick) {
-		const self = this;
-		const el = this.selectors; // instance property holding selectors
+	static async newPatientBtn(eventPtBtnClick) {
+		const el = super.selectors;
 		// Wait for the FancyBox iframe to load.
 		await waitForElm(el.FancyBox);
 		await waitForIframeElm(el.FancyBox, el.IframeDOB);
 		
 		// Enable QA Manager to check Date of Birth.
 		PCX.processEnabled("QA Manager", "Check Date of Birth", () => {
-			const fancyDoc = self.getEl(el.FancyBox, true).contentWindow.document;
+			const fancyDoc = super.getEl(el.FancyBox, true).contentWindow.document;
 			const inputDOB = fancyDoc.querySelector(el.IframeDOB);
 			const minorDate = new Date();
 			minorDate.setFullYear(minorDate.getFullYear() - 18);
@@ -407,7 +400,7 @@ class IATSERV extends LIMS {
 		});
 		
 		// Update the State dropdown options.
-		const fancyDoc = self.getEl(el.FancyBox, true).contentWindow.document;
+		const fancyDoc = super.getEl(el.FancyBox, true).contentWindow.document;
 		fancyDoc.querySelectorAll(el.StateDropdown + " option").forEach((option) => {
 			if (["", "AA", "AE", "AP"].includes(option.value)) return;
 			option.innerText = `${option.value} - ${option.innerText}`;
@@ -415,7 +408,7 @@ class IATSERV extends LIMS {
 		
 		// Enable Insurance Provider suggestion.
 		PCX.processEnabled("Interface", "Insurance Provider Suggestion", () => {
-			const fancyDoc = self.getEl(el.FancyBox, true).contentWindow.document;
+			const fancyDoc = super.getEl(el.FancyBox, true).contentWindow.document;
 			const stateDropdown = fancyDoc.querySelector(el.StateDropdown);
 			const insuranceLookup = fancyDoc.querySelector(el.InsuranceLookup);
 			if (insuranceLookup) {
@@ -455,7 +448,7 @@ class IATSERV extends LIMS {
 				el.Seconddress1, el.Seconddress2, el.SeconState, el.SeconCity, el.SeconZip, el.SeconPhone,
 				el.SeconFax, el.SeconEmail, el.Cancel
 			];
-			PCX.disableTabIndex(removeSelectors, el.FancyBox);
+			super.disableTabIndex(removeSelectors, el.FancyBox);
 		});
 		
 		// Bind form submit event to trigger QA Manager notifications.
@@ -468,10 +461,9 @@ class IATSERV extends LIMS {
 	}
 
 
-	async checkTestCat(elCategory, elTestCodes, testCategories) {
-		const self = this;
+	static async checkTestCat(elCategory, elTestCodes, testCategories) {
 		PCX.processEnabled("SOP", "Use Preset Test Category Codes", () => {
-			const el = this.selectors;
+			const el = super.selectors;
 			// Remove old autocomplete menus.
 			[...document.querySelectorAll('.ui-menu.ui-widget.ui-widget-content.ui-autocomplete.ui-front.autocomplete-ul')]
 				.forEach((ul) => {
@@ -482,22 +474,22 @@ class IATSERV extends LIMS {
 					ul.remove();
 				});
 			// Add a one-time load event listener on the UpPanel.
-			const upPanel = document.querySelector("#MainContent_ctl00_ctl00_upPanel");
+			const upPanel = super.getEl("#MainContent_ctl00_ctl00_upPanel",true);
 			if (upPanel) {
 				const watchForLaterNode = (evt) => {
 					if (evt.target.nodeName === "STYLE") {
-						elTestCodes.Input = self.getEl("#" + elTestCodes.Input.id, true);
+						elTestCodes.Input = super.getEl("#" + elTestCodes.Input.id, true);
 						elTestCodes.Input.value = testCategories[elCategory.value].Test;
-						self.simulateUserKey(elTestCodes.Input, self.events.End, "keydown");
+						super.simulateUserKey(elTestCodes.Input, super.events.End, "keydown");
 						waitForElm('[id^="ui-id-"][style^="z-index"].autocomplete-ul')
 							.then(() => {
-								self.simulateUserKey(elTestCodes.Input, self.events.Tab, "keydown");
+								super.simulateUserKey(elTestCodes.Input, super.events.Tab, "keydown");
 								PCX.processEnabled("SOP", "Set Lab By Test Category", () => {
-									self.getEl(el.PreformingLab, true).value = testCategories[elCategory.value].LabCode;
-									self.getEl(el.PreformingLab, true).dispatchEvent(new Event("change"));
+									super.getEl(el.PreformingLab, true).value = testCategories[elCategory.value].LabCode;
+									super.getEl(el.PreformingLab, true).dispatchEvent(new Event("change"));
 								});
-								self.getEl(el.ICDCodesInput + "~.body", true).insertAdjacentHTML("afterbegin", `<div id="icdCodePreviewer"></div>`);
-								self.getEl(el.UpPanel).addEventListener("change", this.upPanelChange.bind(this));
+								super.getEl(el.ICDCodesInput + "~.body", true).insertAdjacentHTML("afterbegin", `<div id="icdCodePreviewer"></div>`);
+								super.getEl(el.UpPanel).addEventListener("change", this.upPanelChange.bind(this));
 							});
 						upPanel.removeEventListener("load", watchForLaterNode, true);
 					}
@@ -507,11 +499,11 @@ class IATSERV extends LIMS {
 			PCX.processEnabled("Interface", "Show Stablity Notice", () => {
 				QAManager.setStablityNotice(
 					el.DOS,
-					self.getEl(el.DOC, true).value,
+					super.getEl(el.DOC, true).value,
 					true
 				);
 			});
-			self.getEl(el.ICDCodesInput + "~.body", true).insertAdjacentHTML("afterbegin", `<div id="icdCodePreviewer"></div>`);
+			super.getEl(el.ICDCodesInput + "~.body", true).insertAdjacentHTML("afterbegin", `<div id="icdCodePreviewer"></div>`);
 		});
 	}
 
@@ -531,7 +523,7 @@ class IATSERV extends LIMS {
 	 *  }
 	 * 
 	 */
-	insuranceLookUp = {
+	static insuranceLookUp = {
 		AL:{term:"ALABAMA",name:"Medicare Part B Alabama *",id:"3426"},
 		AK:{term:"ALASKA",name:"Medicare Part B Alaska",id:"3427"},
 		AZ:{term:"ARIZONA",name:"Medicare Part B Arizona *",id:"3428"},
@@ -585,8 +577,6 @@ class IATSERV extends LIMS {
 		WY:{term:"WYOMING",name:"Medicare Part B Wyoming *",id:"3481"}
 	}
 }
-
-//const IATSERV = new IATSERV();
 
 
 /* IATServ Specific Table Enhancers */

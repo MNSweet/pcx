@@ -31,13 +31,13 @@ class QAManager {
 
 	static addNotice(code, message) {
 		QAManager.notices[code] = message;
-		PCX.log(`Notice added with code ${code}: ${message}`);
+		Logger.log(`Notice added with code ${code}: ${message}`);
 	}
 
 	static removeNotice(code) {
 		if (QAManager.notices[code]) {
 			delete QAManager.notices[code];
-			PCX.log(`Notice removed with code ${code}`);
+			Logger.log(`Notice removed with code ${code}`);
 		}
 	}
 
@@ -59,7 +59,7 @@ class QAManager {
 
 	static clearNotices() {
 		QAManager.notices = {};
-		PCX.log("All notices cleared.");
+		Logger.log("All notices cleared.");
 	}
 	static getRandomPhrase() {
 		return QAManager.noticePhrases[Math.floor(Math.random() * QAManager.noticePhrases.length)];
@@ -70,14 +70,14 @@ class QAManager {
 		let noticeItems = "";
 
 		// Load external CSS file
-		if (!PCX.findEl("#pcx-modal-style")) {
-			const link = PCX.createDOM("link", {id: "pcx-modal-style", rel: "stylesheet", href: chrome.runtime.getURL("css/modal.css")});
+		if (!DOMHelper.getEl("#pcx-modal-style")) {
+			const link = DOMHelper.createDOM("link", {id: "pcx-modal-style", rel: "stylesheet", href: chrome.runtime.getURL("css/modal.css")});
 			document.head.appendChild(link);
 		}
-		if (!PCX.findEl("#pcx-qa-modal-container")) {
-			const modalContainer = PCX.createDOM("div", {id: "pcx-qa-modal-container"});
-			  const modal = PCX.createDOM("div", {id: "pcx-qa-modal"});
-				const modalTitle = PCX.createDOM("div", {
+		if (!DOMHelper.getEl("#pcx-qa-modal-container")) {
+			const modalContainer = DOMHelper.createDOM("div", {id: "pcx-qa-modal-container"});
+			  const modal = DOMHelper.createDOM("div", {id: "pcx-qa-modal"});
+				const modalTitle = DOMHelper.createDOM("div", {
 					innerHTML: "<span>Prince Lab Manager</span>" + QAManager.getRandomPhrase(),
 					id: "pcx-qa-modal-heading"
 				})
@@ -95,17 +95,17 @@ class QAManager {
 				noticeItems += noticeItem;
 			}
 
-			const modalMessage = PCX.createDOM("div", {innerHTML: noticeItems, id: "noticeContainer"});
-			const buttonContainer = PCX.createDOM("div", {id: "pcx-qa-modal-buttons"});
+			const modalMessage = DOMHelper.createDOM("div", {innerHTML: noticeItems, id: "noticeContainer"});
+			const buttonContainer = DOMHelper.createDOM("div", {id: "pcx-qa-modal-buttons"});
 			modal.appendChild(modalMessage);
 			modal.appendChild(buttonContainer);
 
-			const okButton = PCX.createDOM("button", {
+			const okButton = DOMHelper.createDOM("button", {
 				textContent: "Close to fix errors",
 				id: "pcx-qa-modal-close",
 				onclick: ()=>{
 					document.body.removeChild(modalContainer);
-					PCX.log("Modal dismissed");
+					Logger.log("Modal dismissed");
 				}
 			})
 			buttonContainer.appendChild(okButton);
@@ -135,7 +135,7 @@ class QAManager {
 	}
 	
 	static setStablityNotice(parentElement,stabilityDate,existingAcs = false) {
-		PCX.log("setStablityNotice: ",parentElement,stabilityDate,existingAcs);
+		Logger.log("setStablityNotice: ",parentElement,stabilityDate,existingAcs);
 		if(stabilityDate == "") {return;}
 		let stabilityAge = Math.floor(
 			(new Date() - new Date(stabilityDate)) / (1000 * 60 * 60 * 24)
@@ -161,18 +161,18 @@ class QAManager {
 		}
 
 		if(IATSERV.linkId == "2011" && IATSERV.type == "acs" && stabilityAge <= 90 && stabilityAge >= 60){
-			PCX.getEl(IATSERV.selectors.PreformingLab,true).value = 1013; // Principle's ID
-			PCX.getEl(IATSERV.selectors.PreformingLab,true).dispatchEvent(new Event('change'));
+			DOMHelper.getEl(IATSERV.selectors.PreformingLab,true).value = 1013; // Principle's ID
+			DOMHelper.getEl(IATSERV.selectors.PreformingLab,true).dispatchEvent(new Event('change'));
 		}
 
-		if(!PCX.findEl('#stabilityNotice')) {
-			const stabilityNotice = PCX.createDOM("div", {
+		if(!DOMHelper.getEl('#stabilityNotice')) {
+			const stabilityNotice = DOMHelper.createDOM("div", {
 				innerHTML: `<span class="QAManagerSubHeading">Sample Stability</span><span id="stabilityNoticeAge"></span>`,
 				id: "stabilityNotice"
 			})
-			PCX.findEl(parentElement).appendChild(stabilityNotice);
+			DOMHelper.getEl(parentElement).appendChild(stabilityNotice);
 		}
-		PCX.findEl('#stabilityNoticeAge').textContent = stabilityText;
-		PCX.findEl('#stabilityNotice').classList = stabilityPhase + (existingAcs?" stabilityNoticeExistingACS":"");
+		DOMHelper.getEl('#stabilityNoticeAge').textContent = stabilityText;
+		DOMHelper.getEl('#stabilityNotice').classList = stabilityPhase + (existingAcs?" stabilityNoticeExistingACS":"");
 	}
 }

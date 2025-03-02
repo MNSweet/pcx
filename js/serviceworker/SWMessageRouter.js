@@ -14,13 +14,13 @@ export class SWMessageRouter {
 				try {
 					SWMessageRouter.handleMessage(message, sender, sendResponse);
 				} catch (err) {
-					SWLogger.error("SWMessageRouter: Error handling message", { error: err, message, sender });
+					SWLogger.error("SWMessageRouter: Error handling message",message.action, { error: err, message, sender });
 				}
 				// Return true to indicate that the response may be sent asynchronously.
 				return true;
 			});
 		} catch (err) {
-			SWLogger.error("SWMessageRouter: Failed to initialize message listener", { error: err });
+			SWLogger.error("SWMessageRouter: Failed to initialize message listener",message.action, { error: err });
 		}
 	}
 
@@ -35,9 +35,9 @@ export class SWMessageRouter {
 				SWMessageRouter.handlers.set(action, []);
 			}
 			SWMessageRouter.handlers.get(action).push(callback);
-			SWLogger.log(`SWMessageRouter: Registered handler for action "${action}"`);
+			SWLogger.log(`SWMessageRouter: Registered handler for action "${action}"`,action);
 		} catch (err) {
-			SWLogger.error(`SWMessageRouter: Error registering handler for action "${action}"`, { error: err });
+			SWLogger.error(`SWMessageRouter: Error registering handler for action "${action}"`, action ,{ error: err });
 		}
 	}
 
@@ -53,11 +53,11 @@ export class SWMessageRouter {
 				const index = arr.indexOf(callback);
 				if (index !== -1) {
 					arr.splice(index, 1);
-					SWLogger.log(`SWMessageRouter: Unregistered handler for action "${action}"`);
+					SWLogger.log(`SWMessageRouter: Unregistered handler for action "${action}"`,action);
 				}
 			}
 		} catch (err) {
-			SWLogger.error(`SWMessageRouter: Error unregistering handler for action "${action}"`, { error: err });
+			SWLogger.error(`SWMessageRouter: Error unregistering handler for action "${action}"`,action, { error: err });
 		}
 	}
 
@@ -69,23 +69,23 @@ export class SWMessageRouter {
 	 */
 	static handleMessage(message, sender, sendResponse) {
 		if (!message || !message.action) {
-			SWLogger.warn("SWMessageRouter: Received message with no action", { message });
+			SWLogger.warn("SWMessageRouter: Received message with no action", { message },'NullAction');
 			return;
 		}
 		const action = message.action;
 		const callbacks = SWMessageRouter.handlers.get(action);
 		if (callbacks && callbacks.length > 0) {
-			SWLogger.log(`SWMessageRouter: Handling action "${action}"`, { message, sender });
+			SWLogger.log(`SWMessageRouter: Handling action "${action}"`,action, { message, sender });
 			// Invoke all handlers for this action.
 			callbacks.forEach((cb) => {
 				try {
 					cb(message, sender, sendResponse);
 				} catch (error) {
-					SWLogger.error(`SWMessageRouter: Error in handler for action "${action}"`, { error });
+					SWLogger.error(`SWMessageRouter: Error in handler for action "${action}"`,action, { error });
 				}
 			});
 		} else {
-			SWLogger.warn(`SWMessageRouter: No handler registered for action "${action}"`);
+			SWLogger.warn(`SWMessageRouter: No handler registered for action "${action}"`,action);
 		}
 	}
 
@@ -99,8 +99,8 @@ export class SWMessageRouter {
 			try {
 				chrome.runtime.sendMessage(message, (response) => {
 					if (chrome.runtime.lastError) {
-						SWLogger.error("SWMessageRouter.sendMessage: Error sending message", { error: chrome.runtime.lastError });
-						return reject(chrome.runtime.lastError);
+						SWLogger.error(`SWMessageRouter.sendMessage: Error sending message "${JSON.stringify(chrome.runtime.lastError.message)}"; Message: ${JSON.stringify(message)}`, { error: chrome.runtime.lastError });
+						return reject(chrome.runtime.lastError.message);
 					}
 					resolve(response);
 				});

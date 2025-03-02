@@ -175,20 +175,9 @@ if (PCX.preferredUserMode()) {
 			SeconEmail		: '#MainContent_ctl00_SecondaryInsurance_AddressControl1_tbEmail',
 			Cancel			: '#MainContent_ctl00_btnCancel'
 		});
-		
+
 		PCX.processEnabled("SOP", "New Accession Workflow", () => {
-			IATSERV.createAccession(() => {
-				// On order creation, add a clickable element for "Paste Patient Data" 
-				// into the transfer notice panel.
-				const cloneBtn = IATSERV.createDOM("span", {
-					textContent: "Paste Patient Data",
-					id: "patientDataClone"
-				});
-				IATSERV.getEl("#noticeDisplay").appendChild(cloneBtn);
-				IATSERV.getEl("#patientDataClone").addEventListener("click", () => {
-					IATSERV.pastePatientData();
-				});
-			});
+			IATSERV.createAccession();
 		});
 	}
 	
