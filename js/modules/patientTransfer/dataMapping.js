@@ -1,5 +1,5 @@
 // /js/modules/patientTransfer/dataMapping.js
-Logger.log("/js/modules/patientTransfer/dataMapping.js");
+Logger.log("dataMapping Loaded","INIT");
 
 /**
  * Mapping configuration for each destination.

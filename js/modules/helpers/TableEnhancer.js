@@ -1,5 +1,5 @@
 // /js/modules/helpers/TableEnhancer.js
-Logger.log("/js/modules/helpers/TableEnhancer.js");
+Logger.log("TableEnhancer loaded","INIT");
 class TableEnhancer {
 	/**
 	 * @param {string} headerSelector - CSS selector for the header row.

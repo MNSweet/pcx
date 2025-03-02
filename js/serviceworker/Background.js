@@ -1,3 +1,8 @@
+// js/Background.js
+import SWLogger from './SWLogger.js';
+import SWMessageRouter from './SWMessageRouter.js';
+SWLogger.log("Background service worker loaded");
+
 class ServiceWorker {
 	// --- Configuration Options ---
 	static options = {
@@ -15,13 +20,6 @@ class ServiceWorker {
 	static updateCountdownNotice = null;
 	static tabWhitelists = {};
 	static tabTargets = {};
-
-	// --- Logging ---
-	static log(message) {
-		if (ServiceWorker.options.debug) {
-			console.log(message);
-		}
-	}
 
 	// --- Background Initialization & Data Backup ---
 	static initBackground() {
@@ -63,7 +61,7 @@ class ServiceWorker {
 	static enableSidePanel(tabId = null) {
 		let options = {
 			enabled: true,
-			path: "sidePanel.html"
+			path: "SidePanel.html"
 		};
 		if (tabId) {
 			options.tabId = tabId;
@@ -134,9 +132,9 @@ class ServiceWorker {
 	static changeExtensionIcon(change = false) {
 		chrome.action.setIcon({
 			path: {
-				"16": change ? "../icons/alt-icon-16.png" : "../icons/default-icon-16.png",
-				"48": change ? "../icons/alt-icon-48.png" : "../icons/default-icon-48.png",
-				"128": change ? "../icons/alt-icon-128.png" : "../icons/default-icon-128.png"
+				"16": change ? "../../icons/alt-icon-16.png" : "../../icons/default-icon-16.png",
+				"48": change ? "../../icons/alt-icon-48.png" : "../../icons/default-icon-48.png",
+				"128": change ? "../../icons/alt-icon-128.png" : "../../icons/default-icon-128.png"
 			}
 		});
 	}
@@ -253,32 +251,32 @@ class ServiceWorker {
  * 
  */
 
-messageRouter.registerHandler("openWindow", (message, sender, sendResponse) => {
-	ServiceWorker.handleOpenWindow(message.target, message.url, message.whitelist);
-	sendResponse({ status: "window open request processed" });
-});
+	SWMessageRouter.registerHandler("openWindow", (message, sender, sendResponse) => {
+		ServiceWorker.handleOpenWindow(message.target, message.url, message.whitelist);
+		sendResponse({ status: "window open request processed" });
+	});
 
-messageRouter.registerHandler("initPatientTransfer", (message, sender, sendResponse) => {
-	ServiceWorker.initPatientTransfer(message);
-	sendResponse({ status: "patient transfer initiated" });
-});
+	SWMessageRouter.registerHandler("initPatientTransfer", (message, sender, sendResponse) => {
+		ServiceWorker.initPatientTransfer(message);
+		sendResponse({ status: "patient transfer initiated" });
+	});
 
-messageRouter.registerHandler("clearPTData", (message, sender, sendResponse) => {
-	ServiceWorker.clearPTData();
-	sendResponse({ status: "patient data cleared" });
-});
+	SWMessageRouter.registerHandler("clearPTData", (message, sender, sendResponse) => {
+		ServiceWorker.clearPTData();
+		sendResponse({ status: "patient data cleared" });
+	});
 
-messageRouter.registerHandler("setNotification", (message, sender, sendResponse) => {
-	ServiceWorker.setNotification(message, sendResponse);
-});
+	SWMessageRouter.registerHandler("setNotification", (message, sender, sendResponse) => {
+		ServiceWorker.setNotification(message, sendResponse);
+	});
 
-messageRouter.registerHandler("clearReminder", (message, sender, sendResponse) => {
-	ServiceWorker.clearReminder(message, sendResponse);
-});
+	SWMessageRouter.registerHandler("clearReminder", (message, sender, sendResponse) => {
+		ServiceWorker.clearReminder(message, sendResponse);
+	});
 
-messageRouter.registerHandler("getSite", (message, sender, sendResponse) => {
-	ServiceWorker.getSite(message, sender);
-});
+	SWMessageRouter.registerHandler("getSite", (message, sender, sendResponse) => {
+		ServiceWorker.getSite(message, sender);
+	});
 
 /** 
  * 

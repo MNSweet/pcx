@@ -1,5 +1,5 @@
 // /js/modules/patientTransfer/patientDataCapture.js
-Logger.log("/js/modules/patientTransfer/patientDataCapture.js");
+Logger.log("patientDataCapture Loaded","INIT");
 class PatientDataCapture extends DOMHelper {
 	// Mapping from normalized keys to source DOM selectors.
 	static fieldMapping = {

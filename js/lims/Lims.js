@@ -1,5 +1,5 @@
 // /js/lims/LIMS.js
-Logger.log('/js/lims/LIMS.js')
+Logger.log('LIMS Loaded',"INIT")
 
 class LIMS extends DOMHelper {
 	constructor() {

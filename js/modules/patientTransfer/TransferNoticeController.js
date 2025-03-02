@@ -1,5 +1,5 @@
 // /js/modules/patientTransfer/TransferSidePanelIntegration.js
-Logger.log("/js/modules/patientTransfer/TransferSidePanelIntegration.js");
+Logger.log("TransferSidePanelIntegration Loaded","INIT");
 
 let transferTimer = null;
 

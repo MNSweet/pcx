@@ -1,0 +1,60 @@
+/* css/Logger.css */
+
+#debug-table {
+	width: 100%;
+	table-layout: auto;  /* Columns will adapt to their content */
+	border-collapse: collapse;
+}
+
+/* Basic cell styling */
+#debug-table th,
+#debug-table td {
+	border: 1px solid #ddd;
+	padding: 4px;
+	vertical-align: middle;
+}
+
+#debug-table thead th {
+	text-align: left;
+	background-color: #ffffff;
+	position: sticky;
+	top:0;
+	border-bottom: 1px solid #cccccc;
+	z-index: 1;
+}
+
+/* Columns */
+col.colDate {
+	width: 100px;
+	white-space: nowrap;
+}
+col.colType,
+col.colLoc {
+	width: 1px;/* Force Text Width */
+	white-space: nowrap;
+}
+
+col.colMsg {
+	width: auto;
+}
+
+
+th.colDate,
+th.colType,
+th.colLoc,
+th.colMsg {
+	font-weight: bold;
+}
+
+#debug-table thead th.colDate,
+td.colDate {
+	text-align: center;
+}
+td.colType {
+}
+td.colLoc {
+	font-style: italic;
+}
+td.colMsg {
+	font-weight: bold;
+}

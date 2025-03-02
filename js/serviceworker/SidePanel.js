@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", async () => {
+
 /**
  * 
  * Tab navigation
@@ -55,21 +56,21 @@ document.addEventListener("DOMContentLoaded", async () => {
  */
 	async function loadSettingsUI() {
 		let settings = await Settings.get()
-		let container = PCX.getEl("#settings-container");
+		let container = DOMHelper.getEl("#settings-container");
 
 		if (!container) {
-			PCX.log("Error: #settings-container not found.");
+			Logger.log("Error: #settings-container not found.");
 			return;
 		}
 
 		container.innerHTML = ""; // Clear existing UI
 
 		for (const [category, permissions] of Object.entries(settings)) {
-			let categoryDiv = PCX.createDOM("div", {
+			let categoryDiv = DOMHelper.createDOM("div", {
 				classList: "settings-category"
 			});
 
-			let categoryHeader = PCX.createDOM("h3", {
+			let categoryHeader = DOMHelper.createDOM("h3", {
 				innerText: category
 			});
 			categoryDiv.appendChild(categoryHeader);
@@ -85,11 +86,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 			for (const [key, value] of sortedPermissions) {
 				let metadata = Settings.PERMISSION_STRUCTURE[category]?.[key] || { description: "", priority: 10, tags:['Unsorted'] };
 
-				let settingLabel = PCX.createDOM("label", {
+				let settingLabel = DOMHelper.createDOM("label", {
 					classList: "settingsField"
 				});
 
-				let inputCheckbox = PCX.createDOM("input", {
+				let inputCheckbox = DOMHelper.createDOM("input", {
 					type: "checkbox",
 					classList: "settingsFieldInput toggle-switch",
 					"data-category": category,
@@ -97,7 +98,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 					checked: value
 				});
 
-				let contentDiv = PCX.createDOM("div", {
+				let contentDiv = DOMHelper.createDOM("div", {
 					classList: "settingsFieldContent",
 					innerHTML: `
 						<span class="settingsFieldText">${key}</span>
@@ -119,7 +120,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		}
 	}
 
-	loadSettingsUI();
+	document.addEventListener('DOMContentLoaded', loadSettingsUI);
 /**
  * 
  * Information
@@ -128,7 +129,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	async function loadInfoUI(data) {
 		console.log("loadInfoUI data", data);
-		let container = PCX.getEl("#information-container");
+		let container = DOMHelper.getEl("#information-container");
 
 		if (!container) {
 			console.log("Error: #information-container not found.");
@@ -136,12 +137,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 		}
 		container.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
 
-		container.appendChild(PCX.createDOM("dt", {
+		container.appendChild(DOMHelper.createDOM("dt", {
 			classList: "infoLabel",
 			innerText: "Requisition Filename"
 		}));
 
-		container.appendChild(PCX.createDOM("dd", {
+		container.appendChild(DOMHelper.createDOM("dd", {
 			classList: "infoDesc",
 			innerText: data.req
 		}));
@@ -272,4 +273,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	// Initialize the sidePanel when the panel loads.
 	document.addEventListener('DOMContentLoaded', requestTabData);
-	});
+});
+
+MessageRouter.registerHandler("sidePanelOpened", (message, sender, sendResponse) => {
+	ServiceWorker.handleOpenWindow(message.target, message.url, message.whitelist);
+	sendResponse({ status: "SidePanel pened request processed" });
+});

@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>PCX Sidebar</title>
-	<link rel="stylesheet" href="css/sidePanel.css">
+	<link rel="stylesheet" href="css/SidePanel.css">
 </head>
 <body>
 	<div class="tab-container">
@@ -29,12 +29,15 @@
 		<div id="markdown-viewer">Loading...</div>
 	</div>
 	
-	<script type="module" src="js/modules/helpers/DOMObserver.js"></script>
-	<script type="module" src="js/pcx/PCX.js"></script>
-	<script type="module" src="js/pcx/qa_manager.js"></script>
-	<script type="module" src="js/modules/helpers/Settings.js"></script>
-	<script type="module" src="js/modules/helpers/Data.js"></script>
-	<script type="module" src="js/sidePanel.js"></script>
-	<script type="module" src="js/libs/marked.min.js"></script>
+	<script src="js/modules/helpers/Logger.js">console.log(Logger);</script>
+	<script src="js/modules/MessageRouter.js"></script>
+	<script src="js/modules/helpers/DOMHelper.js"></script>
+	<script src="js/modules/helpers/DOMObserver.js"></script>
+	<script src="js/modules/helpers/QAManager.js"></script>
+	<script src="js/modules/helpers/Settings.js"></script>
+	<script src="js/modules/helpers/Data.js"></script>
+	<script src="js/libs/marked.min.js"></script>
+	<script src="js/modules/PCX.js"></script>
+	<script src="js/serviceworker/SidePanel.js"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 // /js/lims/IATSERV.js
-Logger.log('/js/lims/IATSERV.js');
+Logger.log('IATSERV Loaded',"INIT");
 
 class IATSERV extends LIMS {
 	constructor() {

@@ -1,12 +1,11 @@
 // /js/labs/lab_pl.js
-Logger.log('/js/labs/LabPL.js');
+Logger.log('Viewing Prince Laboratories | LabPL Loaded',"INIT");
 
 // Log initial messages and set the lab portal
-Logger.log("Prince Laboratories");
 PCX.setLabPortal("PL");
 
 // Instantiate the IATSERV module
-Logger.log("LinkId from URL:", IATSERV.linkId);
+Logger.log("LinkId from URL: "+ (IATSERV.linkId ? IATSERV.linkId : "Login"),"Status");
 
 // Proceed only if the preferred user mode is active
 if (PCX.preferredUserMode()) {

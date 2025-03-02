@@ -23,7 +23,7 @@
 	},
 	"background": {
 		"type": "module",
-		"service_worker": "js/background.js"
+		"service_worker": "js/serviceworker/Background.js"
 	},
 	"action": {
 		"default_icon": {
@@ -45,7 +45,7 @@
 				"js/modules/PCX.js",
 				"js/lims/LIMS.js",
 				"js/modules/MessageRouter.js",
-				"js/modules/helpers/QaManager.js",
+				"js/modules/helpers/QAManager.js",
 				"js/modules/helpers/AsyncHelpers.js",
 				"js/modules/helpers/Data.js",
 				"js/modules/helpers/DOMObserver.js",
@@ -54,6 +54,7 @@
 				"js/modules/helpers/TableEnhancer.js",
 				"js/modules/helpers/Utils.js"
 			],
+			"css":["css/modal.css","css/Logger.css"],
 			"run_at": "document_end",
 			"all_frames": true
 		},
@@ -97,16 +98,15 @@
 		{
 			"resources": [
 				"css/modal.css",
+				"css/Logger.css",
 				"css/content_pr.css",
 				"css/content_rr.css",
 				"css/content_pd.css",
+				"css/SidePanel.css",
 
-				"js/labs/PLBoot.js",
-				"js/labs/PDBoot.js",
-				"js/labs/RRBoot.js",
 				"js/labs/LabPL.js",
-				/*"js/labs/LabPD.js",*/
-				/*"js/labs/LabRR.js",*/
+				"js/labs/LabPD.js",
+				"js/labs/LabRR.js",
 
 				"js/libs/marked.min.js",
 
@@ -126,14 +126,14 @@
 					"js/modules/helpers/Settings.js",
 					"js/modules/helpers/TableEnhancer.js",
 					"js/modules/helpers/Utils.js",
-					"js/modules/helpers/QaManager.js",
+					"js/modules/helpers/QAManager.js",
 
 					"js/modules/patientTransfer/DataMapping.js",
 					"js/modules/patientTransfer/DestinationFormFiller.js",
 					"js/modules/patientTransfer/PatientData.js",
 					"js/modules/patientTransfer/TranserNoticeControler.js",
 
-				"js/data/sidePanel.js",
+				"js/serviceworker/SidePanel.js",
 				"js/data/permissions.js"
 			],
 			"matches": [

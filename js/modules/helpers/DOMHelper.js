@@ -1,5 +1,5 @@
 // /js/modules/helpers/DOMHelper.js
-Logger.log("/js/modules/helpers/DOMHelper.js");
+Logger.log("DOMHelper Loaded","INIT");
 
 class DOMHelper {
 	// Private cache for DOM elements

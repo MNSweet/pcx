@@ -1,5 +1,5 @@
 // /js/modules/patientTransfer/destinationFormFiller.js
-Logger.log("/js/modules/patientTransfer/destinationFormFiller.js");
+Logger.log("destinationFormFiller Loaded","INIT");
 class DestinationFormFiller extends DOMHelper {
 	/**
 	 * @param {string} destinationId - Key for the destination mapping configuration (e.g., 'reliableIATServ' or 'pncDXResults').

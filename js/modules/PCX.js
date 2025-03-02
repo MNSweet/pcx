@@ -1,5 +1,5 @@
 // /js/modules/PCX.js
-Logger.log("/js/modules/PCX.js");
+Logger.log("PCX Loaded","INIT");
 
 class PCX {
 	// Static property to track the currently active lab portal.
