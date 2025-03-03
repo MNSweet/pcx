@@ -11,6 +11,7 @@ class IATSERV extends LIMS {
 		IATSERV.orderId = params.get("OrderId") || null;
 		IATSERV.type = params.get("type") || null;
 		IATSERV.extraParams = Object.fromEntries(params.entries());
+		IATSERV.blacklistUpPanel = [];
 	}
 
 	// --- Page-specific functionality ---
@@ -90,7 +91,12 @@ class IATSERV extends LIMS {
 				super.getEl(el.newPatientBtn).classList.add("disabled");
 			}
 		});
-		super.getEl(el.UpPanel).addEventListener("change", IATSERV.upPanelChange);
+
+		IATSERV.observeUpPanelChanges((mutations) => {
+			console.log(mutations);
+			IATSERV.upPanelChange(mutations);
+		});
+/*
 		super.getEl(el.UpPanel).addEventListener("blur", (e) => {
 			if (e.target && "#" + e.target.id === el.DOC) {
 				let attempt = 0;
@@ -109,6 +115,7 @@ class IATSERV extends LIMS {
 				}, 100);
 			}
 		}, true);
+/*
 		PCX.processEnabled("Interface", "ICD Code Previewer", () => {
 			super.getEl(el.ICDCodesInput + "~.body", true).insertAdjacentHTML("afterbegin", `<div id="icdCodePreviewer"></div>`);
 			let observer = new MutationObserver(() => {});
@@ -124,7 +131,8 @@ class IATSERV extends LIMS {
 					observer.observe(targetElement, { childList: true });
 				}
 			}, true);
-		});
+		});*/
+
 		PCX.processEnabled("Interface", "Reduce Tabable Inputs", () => {
 			const removeTabIndexSelectors = [
 				el.SearchPatient, el.PatientCode, el.PatientDOB, el.PatientAddress, el.PatientPhone,
@@ -138,11 +146,10 @@ class IATSERV extends LIMS {
 		callback();
 	}
 
-	static upPanelChange(e) {
+	static upPanelChange(mutations) {
+		console.log("upPanelChange");
 		const el = super.selectors;
-		// Check if the event target corresponds to the Category element
-		if (e.target && ("#" + e.target.id) === el.Category) {
-			// Call checkTestCat using instance data:
+		if(`#${mutations[0].target.id}` == el.UpPanel){
 			IATSERV.checkTestCat(
 				super.getEl(`${el.Category} option:checked`),
 				{
@@ -152,10 +159,22 @@ class IATSERV extends LIMS {
 				super.testCategories
 			);
 			// Process enabling "Hide Signatures" functionality
-			PCX.processEnabled("Interface", "Hide Signatures", IATSERV.showSignaturesBTN.bind(this));
+			PCX.processEnabled("Interface", "Hide Signatures", IATSERV.showSignaturesBTN);
+
 			// Bind newPatientBtn click handler, if needed
-			super.getEl(el.newPatientBtn, true).addEventListener("click", IATSERV.newPatientBtn.bind(this));
+			super.getEl(el.newPatientBtn, true).addEventListener("click", IATSERV.newPatientBtn);
+/*
+			PCX.processEnabled("Interface", "Show Stablity Notice", () => {
+				if (super.getEl(el.DOC, true).value !== "") {
+					QAManager.setStablityNotice(el.DOS, super.getEl(el.DOC).value, true);
+				}
+			});*/
+		}else{
+			console.log(`Skip Target: ${mutations.target.id}`);
 		}
+		return;
+
+
 	}
 
 	// Creates a toggle button to show/hide the signature section.
@@ -163,6 +182,7 @@ class IATSERV extends LIMS {
 		// Add a class to mark the page as not showing signatures
 		document.body.classList.add("nosignature");
 		// Create the toggle button
+		IATSERV.blacklistUpPanel.pushNew('#showSignature');
 		let showSignatureBTN = super.createDOM("div", {
 			id: "showSignature",
 			innerText: "Show Signature Section",
@@ -178,7 +198,10 @@ class IATSERV extends LIMS {
 		if (targetEl) {
 			targetEl.insertAdjacentElement("beforebegin", showSignatureBTN);
 			// Append a style block to manage the signature section visibility
+
+			IATSERV.blacklistUpPanel.pushNew('#showSignatureStyles');
 			const styleEl = super.createDOM("style", {
+				id: "showSignatureStyles",
 				innerText: `
 	.nosignature #MainContent_ctl00_ctl00_PlacePhysicianAuthorizeText,
 	.nosignature #MainContent_ctl00_ctl00_PlacePatientAuthorizeText,
@@ -462,7 +485,9 @@ class IATSERV extends LIMS {
 
 
 	static async checkTestCat(elCategory, elTestCodes, testCategories) {
+		console.log('checkTestCat');
 		PCX.processEnabled("SOP", "Use Preset Test Category Codes", () => {
+		console.log('has perms');
 			const el = super.selectors;
 			// Remove old autocomplete menus.
 			[...document.querySelectorAll('.ui-menu.ui-widget.ui-widget-content.ui-autocomplete.ui-front.autocomplete-ul')]
@@ -472,40 +497,129 @@ class IATSERV extends LIMS {
 						sibling.remove();
 					}
 					ul.remove();
+				}
+			);
+		console.log('garbage collection');
+			elTestCodes.Input = super.getEl("#" + elTestCodes.Input.id, true);
+			elTestCodes.Input.value = testCategories[elCategory.value].Test;
+			super.simulateUserKey(elTestCodes.Input, super.events.End, "keydown");
+			super.simulateUserKey(elTestCodes.Input, super.events.Tab, "keydown");
+		console.log('fill in and keydown');
+			waitForElm('[id^="ui-id-"][style^="z-index"].autocomplete-ul').then(() => {
+				super.simulateUserKey(elTestCodes.Input, super.events.Tab, "keydown");
+				PCX.processEnabled("SOP", "Set Lab By Test Category", () => {
+					super.getEl(el.PreformingLab, true).value = testCategories[elCategory.value].LabCode;
+					super.getEl(el.PreformingLab, true).dispatchEvent(new Event("change"));
 				});
-			// Add a one-time load event listener on the UpPanel.
-			const upPanel = super.getEl("#MainContent_ctl00_ctl00_upPanel",true);
-			if (upPanel) {
-				const watchForLaterNode = (evt) => {
-					if (evt.target.nodeName === "STYLE") {
-						elTestCodes.Input = super.getEl("#" + elTestCodes.Input.id, true);
-						elTestCodes.Input.value = testCategories[elCategory.value].Test;
-						super.simulateUserKey(elTestCodes.Input, super.events.End, "keydown");
-						waitForElm('[id^="ui-id-"][style^="z-index"].autocomplete-ul')
-							.then(() => {
-								super.simulateUserKey(elTestCodes.Input, super.events.Tab, "keydown");
-								PCX.processEnabled("SOP", "Set Lab By Test Category", () => {
-									super.getEl(el.PreformingLab, true).value = testCategories[elCategory.value].LabCode;
-									super.getEl(el.PreformingLab, true).dispatchEvent(new Event("change"));
-								});
-								super.getEl(el.ICDCodesInput + "~.body", true).insertAdjacentHTML("afterbegin", `<div id="icdCodePreviewer"></div>`);
-								super.getEl(el.UpPanel).addEventListener("change", this.upPanelChange.bind(this));
-							});
-						upPanel.removeEventListener("load", watchForLaterNode, true);
-					}
-				};
-				upPanel.addEventListener("load", watchForLaterNode, true);
-			}
-			PCX.processEnabled("Interface", "Show Stablity Notice", () => {
-				QAManager.setStablityNotice(
-					el.DOS,
-					super.getEl(el.DOC, true).value,
-					true
-				);
+				super.getEl(el.ICDCodesInput + "~.body", true).insertAdjacentHTML("afterbegin", `<div id="icdCodePreviewer"></div>`);
 			});
 			super.getEl(el.ICDCodesInput + "~.body", true).insertAdjacentHTML("afterbegin", `<div id="icdCodePreviewer"></div>`);
 		});
 	}
+
+/**
+ * Observes mutations on the upPanel element and invokes the provided callback.
+ * The observer is temporarily disconnected while the callback is executed to avoid loops,
+ * then reattached once processing is complete.
+ *
+ * @param {Function} callback - A function that receives the mutation records.
+ * @returns {number|null} The observer ID, or null if the upPanel element was not found.
+ * /
+	static async observeUpPanelChanges(callback) {
+		console.log('observeUpPanelChanges init');
+		const upPanelEl = super.getEl(super.selectors.UpPanel, true);
+		if (!upPanelEl) {
+			Logger.warn("observeUpPanelChanges: upPanel element not found.");
+			return null;
+		}
+		let observerId = null;
+		
+		const wrappedCallback = async (mutations) => {
+			console.log('OUPC Callback init',IATSERV.UpPanelFreeze);
+
+			if (IATSERV.UpPanelFreeze) {return;}
+			
+			try {
+				await callback(mutations);
+			} catch (err) {
+				Logger.error("Error in upPanel change handler", "Scan", { error: err });
+			}finally{
+			}
+		};
+		observerId = DOMObserver.observe(
+			upPanelEl,
+			{ childList: true, characterData: false, attributes: false, subtree: false },
+			wrappedCallback
+		);
+		return observerId;
+	}*/
+/**
+ * Observes mutations on the upPanel element and invokes the provided callback.
+ * The observer is temporarily disconnected while the callback is executed to avoid loops,
+ * then reattached once processing is complete. Debouncing is used to throttle rapid events.
+ *
+ * @param {Function} callback - A function that receives the mutation records.
+ * @returns {number|null} The observer ID, or null if the upPanel element was not found.
+ */
+	static observeUpPanelChanges(callback) {
+		console.log('observeUpPanelChanges init');
+		const upPanelEl = super.getEl(super.selectors.UpPanel, true);
+		if (!upPanelEl) {
+			Logger.warn("observeUpPanelChanges: upPanel element not found.");
+			return null;
+		}
+
+		let observerId = null;
+		let debounceTimeout = null;
+
+		const wrappedCallback = (mutations) => {
+			if(IATSERV.blacklistUpPanel.length){
+				const addedNodes = mutations.flatMap(mutation => Array.from(mutation.addedNodes));
+
+				// Filter out any nodes that match any selector in the blacklist
+				for (const addedNode of addedNodes) {
+					let skip = false;
+					for (const selector of IATSERV.blacklistUpPanel) {
+						if (addedNode.matches?.(selector)) {
+							skip = true;
+							break;
+						}
+					}
+					if (skip) { continue;}
+				}
+				return;
+			}
+
+			clearTimeout(debounceTimeout);
+			debounceTimeout = setTimeout(() => {
+				if (observerId !== null) {
+					DOMObserver.removeObserver(observerId);
+				}
+
+				try {
+					callback(mutations);
+				} catch (err) {
+					Logger.error("Error in upPanel change handler", { error: err });
+				} finally {
+					// Reattach the observer after processing.
+					observerId = DOMObserver.observe(
+						upPanelEl,
+						{ childList: true, characterData: false, attributes: false, subtree: false },
+						wrappedCallback
+					);
+				}
+			}, 300); // Debounce delay in milliseconds.
+		};
+
+		observerId = DOMObserver.observe(
+			upPanelEl,
+			{ childList: true, characterData: false, attributes: false, subtree: false },
+			wrappedCallback
+		);
+		return observerId;
+	}
+
+
 
 	/**
 	 * insuranceLookUp

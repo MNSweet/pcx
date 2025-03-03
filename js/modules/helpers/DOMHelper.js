@@ -7,10 +7,10 @@ class DOMHelper {
 
 	static events = {
 		Space	: {bubbles: true, cancelable: true,	key: ' '},
-		Delete	: {bubbles: true, cancelable: true,	shiftKey: false, keyCode: 8,	code: "Backspace",	key: "Backspace"},
+		Delete	: {bubbles: true, cancelable: true,	shiftKey: false, keyCode: 8,	code: "BACKSPACE",	key: "BACKSPACE"},
 		End		: {bubbles: true, cancelable: true,	shiftKey: false, keyCode: 35,	code: "END",		key: "END"},
-		Tab		: {bubbles: true, cancelable: true,	shiftKey: false, keyCode: 9,	code: "Tab",		key: "Tab"},
-		Enter	: {bubbles: true, cancelable: false,shiftKey: false, keyCode: 13,	code: "Enter",		key: "Enter"},
+		Tab		: {bubbles: true, cancelable: true,	shiftKey: false, keyCode: 9,	code: "TAB",		key: "TAB"},
+		Enter	: {bubbles: true, cancelable: false,shiftKey: false, keyCode: 13,	code: "ENTER",		key: "ENTER"},
 	};
 
 	/**

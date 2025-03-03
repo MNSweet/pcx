@@ -173,6 +173,6 @@ class QAManager {
 			DOMHelper.getEl(parentElement).appendChild(stabilityNotice);
 		}
 		DOMHelper.getEl('#stabilityNoticeAge').textContent = stabilityText;
-		DOMHelper.getEl('#stabilityNotice').classList = stabilityPhase + (existingAcs?" stabilityNoticeExistingACS":"");
+		DOMHelper.getEl('#stabilityNotice',true).classList = stabilityPhase + (existingAcs?" stabilityNoticeExistingACS":"");
 	}
 }

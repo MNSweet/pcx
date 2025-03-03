@@ -15,3 +15,11 @@ function mergeOptsIntoDefaults(...opts) {
 		return acc;
 	}, {});
 }
+
+if (!Array.prototype.pushNew) {
+  Array.prototype.pushNew = function(element) {
+    if (!this.includes(element)) {
+      this.push(element);
+    }
+  };
+}
