@@ -665,12 +665,7 @@ class IATSERV {
 						// Send a message to the service worker to notify all relevant tabs
 						//if(chrome.runtime.id == undefined) return;
 						chrome.runtime.sendMessage({
-							action: 'initPatientTransfer',
-							patientData: {
-								FirstName:	patientData.FirstName,
-								LastName:	patientData.LastName,
-								Category:	patientData.Category
-							}
+							action: 'initPatientTransfer'
 						});
 					});
 
@@ -778,17 +773,6 @@ class IATSERV {
 	static createOrder(callback=()=>{return;}) {
 		const el = IATSERV.selectors;
 		el.orderDefaults = IATSERV.orderDefaults;
-
-		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-			//if(chrome.runtime.id == undefined) return;
-			if (message.action === 'noticeDisplay') {
-				// If the notice is already present, don't recreate it
-				if (PCX.getEl(IATSERV.noticeDisplay)) {
-					PCX.getEl(IATSERV.noticeDisplay).remove();
-				}
-				PCX.noticeUpdate(message.patientData,message.timer,callback);
-			}
-		});
 
 		// Prefill Location and Physician
 		waitForElm(el.Location).then((elm) => {
@@ -1058,3 +1042,21 @@ class IATSERV {
 		WY:{term:"WYOMING",name:"Medicare Part B Wyoming *",id:"3481"}
 	}
 }
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+	console.log('IATSERV',message, sender, sendResponse);
+	if (message.action === 'noticePing') {
+		// If the notice is already present, don't recreate it
+		PCX.noticeUpdate();
+	}
+});
+(new Promise(async resolve => {
+	await chrome.storage.local.get(['noticeTimerState'], ( noticeTimerState ) => {
+		PCX.patientTimer = noticeTimerState.noticeTimerState;
+		return resolve()
+	});
+})).then((resolve)=>{
+	if(PCX.patientTimer > 8){
+		PCX.noticeUpdate();
+	}
+});

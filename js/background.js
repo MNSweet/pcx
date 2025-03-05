@@ -9,8 +9,8 @@ class ServiceWorker {
 		}
 	};
 
-	static timer = 0;
-	static timerState = false;
+	static timer = 36;
+	static timerState = 0;
 
 	static log(message) {
 		if (ServiceWorker.options.debug) {
@@ -26,45 +26,42 @@ class ServiceWorker {
 			'*://reliable.iatserv.com/*',
 			'*://pnc.dxresults.com/*'
 		];
-		ServiceWorker.timer = 30;
+		ServiceWorker.timerState = ServiceWorker.timer;
 
-		chrome.tabs.query({ url: matchUrls }, (tabs) => {
-			tabs.forEach(tab => {
-				// Send the message to each matching tab to start the countdown
-				chrome.tabs.sendMessage(tab.id, { action: 'noticeDisplay', patientData: request.patientData, timer:ServiceWorker.timer});
-
-			});
-		});
 		clearInterval(ServiceWorker.updateCountdownNotice);
-		chrome.storage.local.set({ noticeTimerState: true });
+		chrome.storage.local.set({ noticeTimerState: ServiceWorker.timerState });
 
 		console.log("Init:", ServiceWorker.timerState);
-		
-		ServiceWorker.updateCountdownNotice = setInterval(()=>{
-			chrome.storage.local.get(["noticeTimerState"], (state) => {
-				console.log("Before:", state, ServiceWorker.timerState);
-				ServiceWorker.timerState = state;
-				console.log("After:", state, ServiceWorker.timerState);
-			});
-			chrome.tabs.query({ url: matchUrls }, (tabs) => {
-				ServiceWorker.log(ServiceWorker.timer,tabs);
-				ServiceWorker.timer--;
-				tabs.forEach(tab => {
-					// Send the message to each matching tab to start the countdown
-					chrome.tabs.sendMessage(tab.id, { action: 'noticePing', patientData: request.patientData, timer:ServiceWorker.timer});
+		ServiceWorker.updateCountdownNotice = setInterval(async ()=>{
+			(new Promise(async resolve => {
+				chrome.storage.local.get(["noticeTimerState"], ({noticeTimerState}) => {
+					ServiceWorker.timerState = noticeTimerState;
+					return resolve();
 				});
-				if (ServiceWorker.timer <= 0 || !ServiceWorker.timerState) {
-					console.log("Timer:", ServiceWorker.timer, " | State: ", ServiceWorker.timerState);
+			})).then((resolve)=>{
+				ServiceWorker.timerState--;
+				if (ServiceWorker.timerState <= 0) {
 					clearInterval(ServiceWorker.updateCountdownNotice);
-					if(ServiceWorker.timerState) {
-						ServiceWorker.timerState = false;
-						chrome.storage.local.set({ noticeTimerState: false });
-					}
 					chrome.storage.local.set({ patientData: {} }, () => {
 						ServiceWorker.log('Patient data cleared after timeout');
 					});
+					chrome.tabs.query({ url: matchUrls }, (tabs) => {
+						tabs.forEach(tab => {
+							// Send the message to each matching tab to halt the countdown
+							console.log('haltPing: ',tab);
+							chrome.tabs.sendMessage(tab.id, { action: 'haltPing' });
+						});
+					});
 				}
-		})}, 1000);
+				chrome.storage.local.set({ noticeTimerState: ServiceWorker.timerState });
+			});
+		}, 1000);
+		chrome.tabs.query({ url: matchUrls }, (tabs) => {
+			tabs.forEach(tab => {
+				console.log('noticePing: ',tab);
+				chrome.tabs.sendMessage(tab.id, { action: 'noticePing'});
+			});
+		});
 	}
 
 	static clearPTData(request) {
@@ -141,9 +138,10 @@ class ServiceWorker {
 
 	static async getSite(request,sender) {
 		ServiceWorker.getCurrentSite().then((site) => {
-			console.log(site)
+			console.log("getSite: ",site);
         	chrome.tabs.sendMessage(sender.tab.id, {"action":"returnSite", "site": site});
 		}).catch((error) => {
+			console.log("getSite: ",site);
         	chrome.tabs.sendMessage(sender.tab.id, {"action":"error", "note": "returnSite failed", "error": error});
 		});
 		return true; // Indicates the response will be sent asynchronously

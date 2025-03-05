@@ -55,39 +55,37 @@ class DXRESULTS {
 		}
 	}
 
-	static createOrder(callback=()=>{return;}) {
+	static createOrder(callback=()=>{return;}) {}
+	static noticePing(callback=()=>{return;}) {
 		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-			//if(chrome.runtime.id == undefined) return;
-			if (message.action === 'noticeDisplay') {
-				// If the notice is already present, don't recreate it
-				if (PCX.getEl(DXRESULTS.noticeDisplay)) {
-					PCX.getEl(DXRESULTS.noticeDisplay).remove();
-				}
-				message.patientData.Category = DXRESULTS.categoryTranslation[message.patientData.Category]
-				PCX.noticeUpdate(message.patientData,message.timer,callback);
-
-				if(message.patientData.Category == DXRESULTS.getLocation()) {
-					PCX.getEl(DXRESULTS.noticeDisplay).appendChild(
-						Object.assign(PCX.createDOM('span', {
-							textContent: 'Paste Patient Data',
-							id: 'patientDataClone'
-						}))
-					);
-
-					PCX.getEl("#patientDataClone").addEventListener('click', function(event) {
-						DXRESULTS.pastePatientData();
-
-						/*chrome.runtime.sendMessage({
-							action: 'clearPTData',
-						});*/
-
-					});
-				};
-			}
+			console.log('DXRESULTS',message, sender, sendResponse);
 			if (message.action === 'noticePing') {
-				console.log(message);
-				message.patientData.Category = DXRESULTS.categoryTranslation[message.patientData.Category]
-				PCX.noticeUpdate(message.patientData,message.timer,callback);
+				PCX.noticeUpdate((patientData)=>{
+					console.log(patientData);
+					patientData.Category = DXRESULTS.categoryTranslation[patientData.Category]
+					let transferBTN = PCX.createDOM('span', {
+						textContent: 'Transfer Accession',
+						id: 'patientDataClone'
+					})
+					console.log([transferBTN]);
+
+					if(patientData.Category == DXRESULTS.getLocation()) {
+						transferBTN.addEventListener('click', function(event) {
+							DXRESULTS.pastePatientData();
+						});
+						console.log('addEventListener');
+					} else {
+						transferBTN.disabled = true;
+						let transferMSG = PCX.createDOM('span', {
+							textContent: 'Invalid Order Page',
+							id: 'transferMSG'
+						})
+						PCX.getEl(DXRESULTS.noticeDisplay).appendChild(transferMSG);
+						console.log('disabled and msg');
+
+					}
+					PCX.getEl(DXRESULTS.noticeDisplay).appendChild(transferBTN);
+				});
 			}
 		});
 	};
@@ -163,3 +161,4 @@ class DXRESULTS {
 		});
 	}
 }
+DXRESULTS.noticePing();
