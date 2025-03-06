@@ -34,9 +34,18 @@ if(PCX.preferedUserMode()) {
 		"n"			: { type: "open", target: "_accessionNew", 	url: "https://prince.iatserv.com/?LinkId=2011&type=acs&_ml=7&_mlp=5", whitelist: ["LinkId=2011","LinkId=2071"] },
 		"shift+n"	: { type: "open", target: "_accessionList",	url: "https://prince.iatserv.com/?LinkId=2070&_ml=9&_mlp=5", whitelist: ["LinkId=2070"] },
 		"d"			: { type: "open", target: "_locationNew",	url: "https://prince.iatserv.com/?LinkId=2006&_ml=30&_mlp=12", whitelist: ["LinkId=2006"] },
-		"shift+d"	: { type: "open", target: "_locationList",	url: "https://prince.iatserv.com/?LinkId=2004&_ml=31&_mlp=12", whitelist: ["LinkId=2004"] }//,
+		"shift+d"	: { type: "open", target: "_locationList",	url: "https://prince.iatserv.com/?LinkId=2004&_ml=31&_mlp=12", whitelist: ["LinkId=2004"] },
 		//"s"			: { type: "click", selector: "button.submit" },
-		//"c": { type: "callback", callback: () => alert("Custom callback executed!") }
+		"ESC": { type: "callback", callback: () => {
+			var frame = window;
+			try {
+				while (frame.parent.document !== frame.document) {frame = frame.parent;}
+			} catch(e){}
+			console.log(frame.document.querySelectorAll('.fancybox-close'));
+			if(frame.document.querySelectorAll('.fancybox-close').length>0){
+				frame.document.querySelectorAll('.fancybox-close').forEach((close)=>{console.log([close]);close.click()});
+			}
+		}}
 	});
 
 	// Accession List
@@ -213,7 +222,7 @@ if(PCX.preferedUserMode()) {
 		IATSERV.setSelectors({
 			UploadTable	: '#uploadTable',
 			UploadSpan	: '.upload span'
-		},false,false,"#dvFooter");
+		});
 
 		IATSERV.fileDrop({
 			enabled	: true,
@@ -221,12 +230,29 @@ if(PCX.preferedUserMode()) {
 			acsID	: PCX.getEl("#lblAccession a").href.match(/(\d*)$/gm)[0],
 			patient	: PCX.getEl("#lblPatient").textContent.toUpperCase().split(' '),
 			result	: true
-		});
+		},false,false,"#dvFooter");
 	}
 
 	// Locations
 	if (IATSERV.linkId == "2004") {
 		const intervalLocationID = setInterval(IATSERV.columnLocationParser, 500);
+		
+		
+	}
+	if (IATSERV.linkId == "2001") {
+		checkAndReplaceIframe();
+	}
+	function checkAndReplaceIframe(){
+		waitForElm(".fancybox-iframe").then((iframe)=> {
+			waitForIframeElm(".fancybox-iframe","#MainContent_ctl00_tbName").then((input)=> {
+				input.value=input.value.replace(/[,.\"]/,"");
+				waitForElm(".fancybox-close").then((close)=> {
+					close.addEventListener('click', ()=>{
+						delay(1000).then(checkAndReplaceIframe);
+					});
+				});
+			});
+		})
 	}
 
 	// Reports
