@@ -152,11 +152,7 @@ class DXRESULTS {
 	
 			if (patientData) {
 				// Clear the patient data after usage
-				chrome.storage.local.set({ noticeTimerState: false });
-				chrome.storage.local.set({ patientData: {} }, () => {
-					PCX.log('Patient data cleared after use');
-					PCX.getEl(DXRESULTS.noticeDisplay).remove();
-				});
+				chrome.storage.local.set({ noticeTimerState: 1 });
 			}
 		});
 	}
