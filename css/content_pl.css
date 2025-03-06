@@ -217,10 +217,18 @@
     color: #767676;
 }
 
+/* Tests */
 .Neuro, .Immuno, .CGX, .Wound, .UTI, .COVIDFluRSVPlus, .STI {
 	font-weight: bold;
 }
 
+
+/* Physicians */
+.DEMARCHIWILLIAM {
+    background-color: #ff9f69;
+}
+
+/* Labs  */
 .PrinceLaboratories {
 	background-color: #edd2ff;
 }
@@ -237,6 +245,15 @@
 	background-color: #ffbbbb;
 }
 
+.IpseityDiagnosticsLLC {
+	background-color: #e1f8ff;
+}
+
+.rGENLaboratory {
+	background-color: #c7dfc7;
+}
+
+/* DOC Age */
 .ngsDate {
 	font-weight: bold;
 }

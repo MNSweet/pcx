@@ -32,4 +32,37 @@
 
 #patientDataTimer {
 	font-size: 16px;
+
+#ViewActiveRequsitions [role="row"]>:nth-child(2),
+#ViewActiveRequsitions [role="row"]>:nth-child(3),
+#ViewActiveRequsitions [role="row"]>:nth-child(4),
+#ViewActiveRequsitions [role="row"]>:nth-child(5),
+#ViewActiveRequsitions [role="row"]>:nth-child(6),
+#ViewActiveRequsitions [role="row"]>:nth-child(7),
+#ViewActiveRequsitions [role="row"]>:nth-child(11),
+#ViewActiveRequsitions [role="row"]>:nth-child(13),
+#ViewActiveRequsitions [role="row"]>:nth-child(15),
+#ViewActiveRequsitions [role="row"]>:nth-child(16),
+#ViewActiveRequsitions [role="row"]>:nth-child(18),
+#ViewActiveRequsitions [role="row"]>:nth-child(19) {
+    display: none;
+}
+
+#ViewActiveRequsitions thead {
+    position: sticky;
+    top: 0;
+    background-color: #ffffff;
+    z-index: 1001;
+    box-shadow: 0px 1px 1px 0px #ececec;
+}
+
+#ViewActiveRequsitions {
+    overflow-x: scroll;
+    max-height: calc(100vh - 400px);
+    position: relative;
+    min-height: 500px;
+}
+
+#ViewActiveRequsitions thead tr {
+    box-shadow: 0px -2px 0px 0px #ededed;
 }
