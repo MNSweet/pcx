@@ -51,4 +51,13 @@ function waitForIframeElm(frame, selector) {
 		}
 	});
 }
+
+/**
+ * Waits X amount of time.
+ * @param {int} millseconds 
+ * @returns {Promise<Element>} Resolves with the element once found.
+ */
+function delay(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
 	
