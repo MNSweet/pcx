@@ -39,10 +39,11 @@ function waitForIframeElm(frame, selector) {
 			if (frameDoc && frameDoc.querySelector(selector)) {
 				return resolve(frameDoc.querySelector(selector));
 			}
-			DOMObserver.observe(frameDoc.body, { childList: true, subtree: true }, (mutations) => {
+			// If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
+			DOMObserver.observe(document.body, { childList: true, subtree: true }, (mutations) => {
 				if (frameDoc.querySelector(selector)) {
 					resolve(frameDoc.querySelector(selector));
-					DOMObserver.removeObserver(frameDoc.body, { childList: true, subtree: true }); // Disconnect after resolve
+					DOMObserver.removeObserver(document.body, { childList: true, subtree: true }); // Disconnect after resolve
 				}
 			});
 		} catch (error) {

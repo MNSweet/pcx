@@ -91,12 +91,18 @@ class IATSERV extends LIMS {
 				super.getEl(el.newPatientBtn).classList.add("disabled");
 			}
 		});
+		super.getEl(el.UpPanel).addEventListener('change', (e) => {
+			// Ping reloaded Elements
+			if (e.target && e.target.id === el.Category.replace('#','')) {
+				IATSERV.checkTestCat(super.getEl(`${el.Category} option:checked`,true),{Input: super.getEl(el.TestCodesInput,true),Output: super.getEl(el.TestCodesOutput,true)},super.testCategories);
+			}
+		});
 
 		IATSERV.observeUpPanelChanges((mutations) => {
 			console.log(mutations);
 			IATSERV.upPanelChange(mutations);
 		});
-/*
+
 		super.getEl(el.UpPanel).addEventListener("blur", (e) => {
 			if (e.target && "#" + e.target.id === el.DOC) {
 				let attempt = 0;
@@ -115,7 +121,7 @@ class IATSERV extends LIMS {
 				}, 100);
 			}
 		}, true);
-/*
+
 		PCX.processEnabled("Interface", "ICD Code Previewer", () => {
 			super.getEl(el.ICDCodesInput + "~.body", true).insertAdjacentHTML("afterbegin", `<div id="icdCodePreviewer"></div>`);
 			let observer = new MutationObserver(() => {});
@@ -131,7 +137,7 @@ class IATSERV extends LIMS {
 					observer.observe(targetElement, { childList: true });
 				}
 			}, true);
-		});*/
+		});
 
 		PCX.processEnabled("Interface", "Reduce Tabable Inputs", () => {
 			const removeTabIndexSelectors = [
@@ -150,6 +156,10 @@ class IATSERV extends LIMS {
 		console.log("upPanelChange");
 		const el = super.selectors;
 		if(`#${mutations[0].target.id}` == el.UpPanel){
+			console.log(`Target:`, super.getEl(`${el.Category} option:checked`));
+			console.log(`Input:`, super.getEl(el.TestCodesInput, true));
+			console.log(`Output:`, super.getEl(el.TestCodesOutput, true));
+			console.log(`testCategories:`, super.testCategories);
 			IATSERV.checkTestCat(
 				super.getEl(`${el.Category} option:checked`),
 				{
@@ -163,14 +173,14 @@ class IATSERV extends LIMS {
 
 			// Bind newPatientBtn click handler, if needed
 			super.getEl(el.newPatientBtn, true).addEventListener("click", IATSERV.newPatientBtn);
-/*
+
 			PCX.processEnabled("Interface", "Show Stablity Notice", () => {
 				if (super.getEl(el.DOC, true).value !== "") {
 					QAManager.setStablityNotice(el.DOS, super.getEl(el.DOC).value, true);
 				}
-			});*/
+			});
 		}else{
-			console.log(`Skip Target: ${mutations.target.id}`);
+			console.log(`Skip Targets: ${mutations}`);
 		}
 		return;
 
@@ -457,7 +467,7 @@ class IATSERV extends LIMS {
 				});
 			}
 		});
-		
+		/*
 		// Reduce tab indices for elements inside the FancyBox.
 		PCX.processEnabled("Interface", "Reduce Tabable Inputs", () => {
 			const removeSelectors = [
@@ -472,7 +482,7 @@ class IATSERV extends LIMS {
 				el.SeconFax, el.SeconEmail, el.Cancel
 			];
 			super.disableTabIndex(removeSelectors, el.FancyBox);
-		});
+		});*/
 		
 		// Bind form submit event to trigger QA Manager notifications.
 		fancyDoc.querySelector(el.IframeForm).addEventListener("submit", (eventSubmit) => {
@@ -485,74 +495,27 @@ class IATSERV extends LIMS {
 
 
 	static async checkTestCat(elCategory, elTestCodes, testCategories) {
-		console.log('checkTestCat');
 		PCX.processEnabled("SOP", "Use Preset Test Category Codes", () => {
-		console.log('has perms');
+
 			const el = super.selectors;
-			// Remove old autocomplete menus.
-			[...document.querySelectorAll('.ui-menu.ui-widget.ui-widget-content.ui-autocomplete.ui-front.autocomplete-ul')]
-				.forEach((ul) => {
-					const sibling = ul.nextSibling;
-					if (sibling && sibling.classList.contains("ui-helper-hidden-accessible")) {
-						sibling.remove();
-					}
-					ul.remove();
-				}
-			);
-		console.log('garbage collection');
 			elTestCodes.Input = super.getEl("#" + elTestCodes.Input.id, true);
+			console.log(testCategories, elCategory.value);
 			elTestCodes.Input.value = testCategories[elCategory.value].Test;
 			super.simulateUserKey(elTestCodes.Input, super.events.End, "keydown");
 			super.simulateUserKey(elTestCodes.Input, super.events.Tab, "keydown");
-		console.log('fill in and keydown');
+
 			waitForElm('[id^="ui-id-"][style^="z-index"].autocomplete-ul').then(() => {
 				super.simulateUserKey(elTestCodes.Input, super.events.Tab, "keydown");
+				elTestCodes.Input.value = "";
 				PCX.processEnabled("SOP", "Set Lab By Test Category", () => {
 					super.getEl(el.PreformingLab, true).value = testCategories[elCategory.value].LabCode;
 					super.getEl(el.PreformingLab, true).dispatchEvent(new Event("change"));
 				});
-				super.getEl(el.ICDCodesInput + "~.body", true).insertAdjacentHTML("afterbegin", `<div id="icdCodePreviewer"></div>`);
 			});
 			super.getEl(el.ICDCodesInput + "~.body", true).insertAdjacentHTML("afterbegin", `<div id="icdCodePreviewer"></div>`);
 		});
 	}
 
-/**
- * Observes mutations on the upPanel element and invokes the provided callback.
- * The observer is temporarily disconnected while the callback is executed to avoid loops,
- * then reattached once processing is complete.
- *
- * @param {Function} callback - A function that receives the mutation records.
- * @returns {number|null} The observer ID, or null if the upPanel element was not found.
- * /
-	static async observeUpPanelChanges(callback) {
-		console.log('observeUpPanelChanges init');
-		const upPanelEl = super.getEl(super.selectors.UpPanel, true);
-		if (!upPanelEl) {
-			Logger.warn("observeUpPanelChanges: upPanel element not found.");
-			return null;
-		}
-		let observerId = null;
-		
-		const wrappedCallback = async (mutations) => {
-			console.log('OUPC Callback init',IATSERV.UpPanelFreeze);
-
-			if (IATSERV.UpPanelFreeze) {return;}
-			
-			try {
-				await callback(mutations);
-			} catch (err) {
-				Logger.error("Error in upPanel change handler", "Scan", { error: err });
-			}finally{
-			}
-		};
-		observerId = DOMObserver.observe(
-			upPanelEl,
-			{ childList: true, characterData: false, attributes: false, subtree: false },
-			wrappedCallback
-		);
-		return observerId;
-	}*/
 /**
  * Observes mutations on the upPanel element and invokes the provided callback.
  * The observer is temporarily disconnected while the callback is executed to avoid loops,
@@ -573,6 +536,7 @@ class IATSERV extends LIMS {
 		let debounceTimeout = null;
 
 		const wrappedCallback = (mutations) => {
+			console.log(mutations);
 			if(IATSERV.blacklistUpPanel.length){
 				const addedNodes = mutations.flatMap(mutation => Array.from(mutation.addedNodes));
 
@@ -589,6 +553,7 @@ class IATSERV extends LIMS {
 				}
 				return;
 			}
+			console.log("passed blacklistUpPanel")
 
 			clearTimeout(debounceTimeout);
 			debounceTimeout = setTimeout(() => {

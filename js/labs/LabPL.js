@@ -276,6 +276,72 @@ if (PCX.preferredUserMode()) {
 		});
 	}
 
+	// Patient
+	if (IATSERV.linkId == "2022") {	
+		Logger.log('IATSERV 2022','Note');
+		// Reduce tab indices for elements inside the FancyBox.
+		PCX.processEnabled("Interface", "Reduce Tabable Inputs", () => {
+			const el = {
+			SSN				: '#MainContent_ctl00_tbSSN',
+			LicenseState	: '#MainContent_ctl00_ddDriverLicenseState',
+			LicenseNumber	: '#MainContent_ctl00_tbDriverLicenseNumber',
+			CopyColumnBTN1	: '.copy-pat1 a',
+			CopyColumnBTN2	: '.copy-pat2 a',
+			CopyColumnBTN3	: '.copy-adrs1 a',
+			CopyColumnBTN4	: '.copy-adrs2 a',
+			PrimeRelation	: '#MainContent_ctl00_PrimaryInsurance_ddInsuredRelationShip_ddControl',
+			PrimeFirstName	: '#MainContent_ctl00_PrimaryInsurance_tbFirstName',
+			PrimeLastName	: '#MainContent_ctl00_PrimaryInsurance_tbLastName',
+			PrimeMiddleName	: '#MainContent_ctl00_PrimaryInsurance_tbMiddleName',
+			PrimeDOB		: '#MainContent_ctl00_PrimaryInsurance_tbDOB_tbText',
+			PrimeSSN		: '#MainContent_ctl00_PrimaryInsurance_tbSSN',
+			PrimeGender		: '#MainContent_ctl00_PrimaryInsurance_ddGender_ddControl',
+			PrimeGroupNo	: '#MainContent_ctl00_PrimaryInsurance_tbGroupNo',
+			PrimeCovStart	: '#MainContent_ctl00_PrimaryInsurance_tbCoverageStartDate_tbText',
+			PrimeCovEnd		: '#MainContent_ctl00_PrimaryInsurance_tbCoverageEndDate_tbText',
+			PrimeAddress1	: '#MainContent_ctl00_PrimaryInsurance_AddressControl1_tbAddress1',
+			PrimeAddress2	: '#MainContent_ctl00_PrimaryInsurance_AddressControl1_tbAddress2',
+			PrimeState		: '#MainContent_ctl00_PrimaryInsurance_AddressControl1_CountryState_ddState',
+			PrimeCity		: '#MainContent_ctl00_PrimaryInsurance_AddressControl1_tbCity',
+			PrimeZip		: '#MainContent_ctl00_PrimaryInsurance_AddressControl1_tbZipCode',
+			PrimePhone		: '#MainContent_ctl00_PrimaryInsurance_AddressControl1_tbPhone',
+			PrimeFax		: '#MainContent_ctl00_PrimaryInsurance_AddressControl1_tbFax',
+			PrimeEmail		: '#MainContent_ctl00_PrimaryInsurance_AddressControl1_tbEmail',
+			SeconRelation	: '#MainContent_ctl00_SecondaryInsurance_ddInsuredRelationShip_ddControl',
+			SeconFirstName	: '#MainContent_ctl00_SecondaryInsurance_tbFirstName',
+			SeconLastName	: '#MainContent_ctl00_SecondaryInsurance_tbLastName',
+			SeconMiddleName	: '#MainContent_ctl00_SecondaryInsurance_tbMiddleName',
+			SeconDOB		: '#MainContent_ctl00_SecondaryInsurance_tbDOB_tbText',
+			SeconSSN		: '#MainContent_ctl00_SecondaryInsurance_tbSSN',
+			SeconGender		: '#MainContent_ctl00_SecondaryInsurance_ddGender_ddControl',
+			SeconGroupNo	: '#MainContent_ctl00_SecondaryInsurance_tbGroupNo',
+			SeconCovStart	: '#MainContent_ctl00_SecondaryInsurance_tbCoverageStartDate_tbText',
+			SeconCovEnd		: '#MainContent_ctl00_SecondaryInsurance_tbCoverageEndDate_tbText',
+			Seconddress1	: '#MainContent_ctl00_SecondaryInsurance_AddressControl1_tbAddress1',
+			Seconddress2	: '#MainContent_ctl00_SecondaryInsurance_AddressControl1_tbAddress2',
+			SeconState		: '#MainContent_ctl00_SecondaryInsurance_AddressControl1_CountryState_ddState',
+			SeconCity		: '#MainContent_ctl00_SecondaryInsurance_AddressControl1_tbCity',
+			SeconZip		: '#MainContent_ctl00_SecondaryInsurance_AddressControl1_tbZipCode',
+			SeconPhone		: '#MainContent_ctl00_SecondaryInsurance_AddressControl1_tbPhone',
+			SeconFax		: '#MainContent_ctl00_SecondaryInsurance_AddressControl1_tbFax',
+			SeconEmail		: '#MainContent_ctl00_SecondaryInsurance_AddressControl1_tbEmail',
+			Cancel			: '#MainContent_ctl00_btnCancel'};
+			const removeSelectors = [
+				el.SSN, el.LicenseState, el.LicenseNumber, el.CopyColumnBTN1, el.CopyColumnBTN2,
+				el.CopyColumnBTN3, el.CopyColumnBTN4, el.PrimeRelation,
+				el.PrimeFirstName, el.PrimeLastName, el.PrimeMiddleName, el.PrimeDOB, el.PrimeSSN,
+				el.PrimeGender, el.PrimeGroupNo, el.PrimeCovStart, el.PrimeCovEnd, el.PrimeAddress1,
+				el.PrimeAddress2, el.PrimeState, el.PrimeCity, el.PrimeZip, el.PrimePhone, el.PrimeFax,
+				el.PrimeEmail, el.SeconRelation, el.SeconFirstName, el.SeconLastName, el.SeconMiddleName,
+				el.SeconDOB, el.SeconSSN, el.SeconGender, el.SeconGroupNo, el.SeconCovStart, el.SeconCovEnd,
+				el.Seconddress1, el.Seconddress2, el.SeconState, el.SeconCity, el.SeconZip, el.SeconPhone,
+				el.SeconFax, el.SeconEmail, el.Cancel
+			];
+			IATSERV.disableTabIndex(removeSelectors);
+		});
+	}
+
+
 	// Results
 	if (IATSERV.linkId == "2461") {
 		IATSERV.setSelectors({
