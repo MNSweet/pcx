@@ -261,6 +261,38 @@
 	padding-bottom: 165px;
 }
 
+#noticeDisplay {
+	position: fixed;
+	top: 0px;
+	width: 100%;
+	background-color: #f3f3f3;
+	z-index: 1000;
+	padding: 0 10px;
+	display: flex;
+	justify-content: space-between;
+	height: 59px;
+	align-items: center;
+	box-shadow: 0 1px 3px 1px #cccccc;
+}
+
+#patientInfo {
+	font-weight: bold;
+	font-size: 20px;
+}
+
+#patientDataClone {
+	border: 1px solid #ffffff;
+    padding: 7px 14px;
+    font-size: 14px;
+    color: #ffffff;
+    font-weight: bold;
+    background-color: #8775a7;
+}
+
+#patientDataTimer {
+	font-size: 16px;
+}
+
 /*#page-wrapper .container-fluid {
 	padding-bottom: 70px;
 	position: relative;

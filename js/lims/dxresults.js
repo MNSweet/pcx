@@ -60,35 +60,29 @@ class DXRESULTS {
 		chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			console.log('DXRESULTS',message, sender, sendResponse);
 			if (message.action === 'noticePing') {
-				PCX.noticeUpdate((patientData)=>{
-					console.log(patientData);
-					patientData.Category = DXRESULTS.categoryTranslation[patientData.Category]
-					let transferBTN = PCX.createDOM('span', {
-						textContent: 'Transfer Accession',
-						id: 'patientDataClone'
-					})
-					console.log([transferBTN]);
-
-					if(patientData.Category == DXRESULTS.getLocation()) {
-						transferBTN.addEventListener('click', function(event) {
-							DXRESULTS.pastePatientData();
-						});
-						console.log('addEventListener');
-					} else {
-						transferBTN.disabled = true;
-						let transferMSG = PCX.createDOM('span', {
-							textContent: 'Invalid Order Page',
-							id: 'transferMSG'
-						})
-						PCX.getEl(DXRESULTS.noticeDisplay).appendChild(transferMSG);
-						console.log('disabled and msg');
-
-					}
-					PCX.getEl(DXRESULTS.noticeDisplay).appendChild(transferBTN);
-				});
+				PCX.noticeUpdate(DXRESULTS.noticeUpdateCallback);
 			}
 		});
 	};
+
+	static noticeUpdateCallback(patientData){
+		patientData.Category = DXRESULTS.categoryTranslation[patientData.Category]
+		let transferBTN = PCX.createDOM('button', {
+			id: 'patientDataClone'
+		})
+
+		if(patientData.Category == DXRESULTS.getLocation()) {
+			transferBTN.addEventListener('click', function(event) {
+				DXRESULTS.pastePatientData();
+			});
+			transferBTN.textContent = 'Transfer Accession';
+		} else {
+			transferBTN.disabled = true;
+			transferBTN.textContent = 'Incorrect Test Category';
+
+		}
+		PCX.getEl(`#${PCX.patientTransfer.Info}`).insertAdjacentElement("afterend",transferBTN);
+	}
 	/**
 	 *
 	 * Reference Lab Transfer Assist - Fill
@@ -149,6 +143,12 @@ class DXRESULTS {
 			PCX.getEl(el.Physician,true).value		= orderDefaults.Physician;
 			PCX.getEl(el.ICDCode,true).value		= orderDefaults.ICDCode;
 			PCX.getEl(el.ICDCodeAdd,true).click();
+			if(!PCX.getEl("#cbseesig").checked){PCX.getEl("#cbseesig").click();}
+			if(!PCX.getEl("#cbseesigpatient").checked){PCX.getEl("#cbseesigpatient").click();}
+			if(PCX.getEl('#ContentPlaceHolder1_hfTable').value != "!Z00.00:Encounter for genera"){
+				PCX.getEl('#tblICD10').style.background = "#ffcbcb";
+			}
+			PCX.getEl('#ContentPlaceHolder1_txtReqnotes').value = 'MS';
 	
 			if (patientData) {
 				// Clear the patient data after usage
@@ -162,3 +162,13 @@ class DXRESULTS {
 	}
 }
 DXRESULTS.noticePing();
+(new Promise(async resolve => {
+	await chrome.storage.local.get(['noticeTimerState'], ( noticeTimerState ) => {
+		PCX.patientTimer = noticeTimerState.noticeTimerState;
+		return resolve()
+	});
+})).then((resolve)=>{
+	if(PCX.patientTimer > (PCX.patientTransfer.Buffer+3)){
+		PCX.noticeUpdate(DXRESULTS.noticeUpdateCallback);
+	}
+});

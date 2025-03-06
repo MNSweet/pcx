@@ -339,11 +339,11 @@ class PCX {
 		Notice	: "noticeDisplay",
 		Info	: "patientInfo",
 		Timer	: "patientDataTimer",
+		Buffer	: 10
 	}
 	static notice = PCX.createDOM('div', {id: PCX.patientTransfer.Notice});
 	static initializeNotice(patientData,callback=()=>{return;}) {
 		PCX.notice.innerHTML = "";
-		PCX.notice.style = "position:fixed; top:0; width:100%; background-color:yellow; z-index:1000; padding:10px; display:flex; justify-content:space-between;";
 		
 		PCX.CategoryTranslation = {
 			 3:"PGX",
@@ -366,8 +366,7 @@ class PCX {
 		document.body.appendChild(PCX.notice);
 	}
 
-	static async noticeUpdate(callback=()=>{console.log('default');return;}) {
-
+	static async noticeUpdate(callback=()=>{return;}) {
 		/*
 		
 		patientData: {
@@ -388,7 +387,7 @@ class PCX {
 		})).then((resolve)=>{
 			console.log('PCX.patientData: ',PCX.patientData);
 			console.log('PCX.patientTimer: ',PCX.patientTimer);
-			if(PCX.getEl(`#${PCX.patientTransfer.Notice}`,true) && PCX.patientTimer < 5) {
+			if(PCX.getEl(`#${PCX.patientTransfer.Notice}`,true) && PCX.patientTimer < PCX.patientTransfer.Buffer) {
 				PCX.getEl(`#${PCX.patientTransfer.Notice}`).remove();
 				return;
 			}
@@ -399,25 +398,22 @@ class PCX {
 			
 			PCX.updateCountdownNotice = setInterval(async ()=>{
 				PCX.patientTimer--;
-				if(PCX.getEl(`#${PCX.patientTransfer.Notice}`,true) && PCX.patientTimer < 5) {
+				if(PCX.getEl(`#${PCX.patientTransfer.Notice}`,true) && PCX.patientTimer < PCX.patientTransfer.Buffer) {
 					PCX.getEl(`#${PCX.patientTransfer.Notice}`).remove();
 					return;
 				}
 				if (PCX.getEl(`#${PCX.patientTransfer.Timer}`,true)) {
-					const minutes = Math.floor(PCX.patientTimer / 60);
-					const seconds = (PCX.patientTimer % 60) -5;
+					const minutes = Math.floor((PCX.patientTimer - PCX.patientTransfer.Buffer) / 60 );
+					let seconds = ((PCX.patientTimer - PCX.patientTransfer.Buffer) % 60);
 					PCX.getEl(`#${PCX.patientTransfer.Timer}`).textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 				}
 			}, 1000);
 
 			const hashCode = PCX.hashCode(`${PCX.patientData.LastName}${PCX.patientData.FirstName}${PCX.patientData.Category}`);
-			if (PCX.getEl(`#${PCX.patientTransfer.Info}`,true).dataset.hash == hashCode) {
-				return;
+			if (PCX.getEl(`#${PCX.patientTransfer.Info}`,true).dataset.hash !== hashCode) {
+				PCX.getEl(`#${PCX.patientTransfer.Info}`).dataset.hash = hashCode;
+				PCX.getEl(`#${PCX.patientTransfer.Info}`).textContent = `Patient: ${PCX.patientData.LastName}, ${PCX.patientData.FirstName} | ${PCX.CategoryTranslation[PCX.patientData.Category]}`;
 			}
-			PCX.getEl(`#${PCX.patientTransfer.Info}`).dataset.hash = hashCode;
-		
-			PCX.getEl(`#${PCX.patientTransfer.Info}`).textContent = `Patient: ${PCX.patientData.LastName}, ${PCX.patientData.FirstName} | ${PCX.patientData.Category}`;
-
 			if (callback) {callback(PCX.patientData);}
 		})
 	}

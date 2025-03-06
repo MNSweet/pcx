@@ -1056,7 +1056,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		return resolve()
 	});
 })).then((resolve)=>{
-	if(PCX.patientTimer > 8){
+	if(PCX.patientTimer > (PCX.patientTransfer.Buffer+3)){
 		PCX.noticeUpdate();
 	}
 });
