@@ -33,19 +33,22 @@
 			"matches": ["https://prince.iatserv.com/*"],
 			"js": ["js/pcx/pcx_controller.js", "js/pcx/qa_manager.js", "js/pcx/keybinding.js", "js/lims/iatserv.js", "js/labs/lab_pl.js"],
 			"css": ["css/content_pl.css"],
-			"run_at": "document_end"
+			"run_at": "document_end",
+			"all_frames":true
 		},
 		{
 			"matches": ["https://reliable.iatserv.com/*"],
 			"js": ["js/pcx/pcx_controller.js", "js/pcx/qa_manager.js", "js/pcx/keybinding.js", "js/lims/iatserv.js", "js/labs/lab_rr.js"],
 			"css": ["css/content_rr.css"],
-			"run_at": "document_end"
+			"run_at": "document_end",
+			"all_frames":true
 		},
 		{
 			"matches": ["https://pnc.dxresults.com/*"],
 			"js": ["js/pcx/pcx_controller.js", "js/pcx/qa_manager.js", "js/pcx/keybinding.js", "js/lims/dxresults.js", "js/labs/lab_pd.js"],
 			"css": ["css/content_pd.css"],
-			"run_at": "document_end"
+			"run_at": "document_end",
+			"all_frames":true
 		}
 	],
 	"host_permissions": [

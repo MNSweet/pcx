@@ -242,10 +242,27 @@ if(PCX.preferedUserMode()) {
 	if (IATSERV.linkId == "2001") {
 		checkAndReplaceIframe();
 	}
+	if (IATSERV.linkId == "2004") {
+		checkAndReplaceIframe();
+	}
 	function checkAndReplaceIframe(){
 		waitForElm(".fancybox-iframe").then((iframe)=> {
 			waitForIframeElm(".fancybox-iframe","#MainContent_ctl00_tbName").then((input)=> {
 				input.value=input.value.replace(/[,.\"]/,"");
+				waitForElm(".fancybox-close").then((close)=> {
+					close.addEventListener('click', ()=>{
+						delay(1000).then(checkAndReplaceIframe);
+					});
+				});
+			});
+			waitForIframeElm(".fancybox-iframe","#MainContent_ctl00_tbCode").then((input)=> {
+				let oldval = input.value;
+				input.value=input.value
+					.replace(/\s+/g, '')  // Remove spaces
+					.replace(/Reliable/ig, 'REL')  // Replace 'Reliable' with 'REL'
+					.replace(/Safe/ig, 'SAF')  // Replace 'Safe' with 'SAF'
+					.replace(/Vibrant/ig, 'VIB');
+				if(input.value != oldval){input.style.border="2px solid #0cc90c"}
 				waitForElm(".fancybox-close").then((close)=> {
 					close.addEventListener('click', ()=>{
 						delay(1000).then(checkAndReplaceIframe);
