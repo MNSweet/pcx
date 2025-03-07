@@ -32,12 +32,12 @@ class TableEnhancer {
 	processTable() {
 		const headerRow = document.querySelector(this.headerSelector);
 		if (!headerRow) {
-			Logger.warn("TableEnhancer: Header row not found", { selector: this.headerSelector });
+			Logger.warn("TableEnhancer: Header row not found", "", { selector: this.headerSelector });
 			return;
 		}
 		const headerCells = Array.from(headerRow.querySelectorAll("th, td"));
 		const headers = headerCells.map(cell => cell.textContent.trim());
-		Logger.log("TableEnhancer: Extracted headers", { headers });
+		Logger.log("TableEnhancer: Extracted headers","", { headers });
 		
 		const rows = document.querySelectorAll(this.rowSelector);
 		rows.forEach(row => {
@@ -50,7 +50,7 @@ class TableEnhancer {
 						try {
 							this.config[headers[index]](cell);
 						} catch (error) {
-							Logger.error(`TableEnhancer: Error applying override for header "${headers[index]}"`, { error });
+							Logger.error(`TableEnhancer: Error applying override for header "${headers[index]}"`, "",{ error });
 						}
 					}
 				}

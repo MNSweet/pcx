@@ -75,22 +75,7 @@ class IATSERV extends LIMS {
 		super.getEl(el.Status).value = "Received";
 		super.getEl(el.newPatientBtn, true).addEventListener("click", IATSERV.newPatientBtn);
 		super.getEl(el.newPatientBtn).classList.add("disabled");
-		super.getEl(el.locationInput).addEventListener("blur", (event) => {
-			if (event.target.value !== "" && super.getEl(el.newPatientBtn).classList.contains("disabled")) {
-				if (event.target.value.match("^(AM-|CTD-).*")) {
-					waitForElm(el.PhysicianOptions).then(() => {
-						super.getEl(el.Physician, true).innerHTML =
-							`<option value="0" disabled selected hidden>Select a Physician</option>` +
-							super.getEl(el.Physician).innerHTML;
-						super.getEl(el.PhysicianId, true).value = "";
-						super.getEl(el.PhysicianName, true).value = "";
-					});
-				}
-				super.getEl(el.newPatientBtn).classList.remove("disabled");
-			} else if (event.target.value === "" && !super.getEl(el.newPatientBtn).classList.contains("disabled")) {
-				super.getEl(el.newPatientBtn).classList.add("disabled");
-			}
-		});
+		super.getEl(el.locationInput).addEventListener("blur", IATSERV.locationBlur);
 		super.getEl(el.UpPanel).addEventListener('change', (e) => {
 			// Ping reloaded Elements
 			if (e.target && e.target.id === el.Category.replace('#','')) {
@@ -493,6 +478,25 @@ class IATSERV extends LIMS {
 		});
 	}
 
+	static locationBlur(event) {
+		if (event.target.value !== "" && super.getEl(el.newPatientBtn).classList.contains("disabled")) {
+			if (event.target.value.match("^(AM-|CTD-).*")) {
+				waitForElm(el.PhysicianOptions).then(() => {
+					super.getEl(el.Physician, true).innerHTML =
+						`<option value="0" disabled selected hidden>Select a Physician</option>` +
+						super.getEl(el.Physician).innerHTML;
+					super.getEl(el.PhysicianId, true).value = "";
+					super.getEl(el.PhysicianName, true).value = "";
+				});
+			}
+			if(event.target.value.match("^(5556).*")){
+				super.getEl(el.BillType,true).value = "3";
+			}
+			super.getEl(el.newPatientBtn).classList.remove("disabled");
+		} else if (event.target.value === "" && !super.getEl(el.newPatientBtn).classList.contains("disabled")) {
+			super.getEl(el.newPatientBtn).classList.add("disabled");
+		}
+	}
 
 	static async checkTestCat(elCategory, elTestCodes, testCategories) {
 		PCX.processEnabled("SOP", "Use Preset Test Category Codes", () => {

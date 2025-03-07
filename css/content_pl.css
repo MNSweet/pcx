@@ -215,12 +215,22 @@
 	font-weight: bold;
 }
 
-.ngs90 {
+.ngsExpired {
 	background-color: #990000;
 	color:#ffffff;
 }
 
-.ngs60 {
+.ngsLow {
+	background-color: #e58a00;
+	color:#ffffff;
+}
+
+.ngsMedium {
+	background-color: #e58a00;
+	color:#ffffff;
+}
+
+.ngsHigh {
 	background-color: #e58a00;
 	color:#ffffff;
 }
