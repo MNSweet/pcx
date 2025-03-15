@@ -171,3 +171,12 @@ button.tab-button:not(:last-child) {
 	margin-inline-start: 10px;
 	padding-left: 10px;
 }
+.text_gradient {
+	background: #CC4444; /* Fallback color */
+	background: linear-gradient(90deg, rgb(57, 66, 145) 0%, rgba(218, 6, 53, 1) 100%); /* Gradient shown */
+	-webkit-background-clip: text; /* Chrome, Edge & Safari: Clips Gradient to text */
+	-moz-background-clip: text; /* FireFox: Clips Gradient to text */
+	-webkit-text-fill-color: transparent; /* Chrome, Edge & Safari: Hides Text revealing Gradient background "Text" */
+	-moz-text-fill-color: transparent; /* FireFox: Hides Text revealing Gradient background "Text" */
+}
+

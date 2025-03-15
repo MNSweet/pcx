@@ -12,6 +12,7 @@ class TableEnhancer {
 		this.rowSelector = rowSelector;
 		this.config = config;
 		this.debounceTimeout = null;
+		this.headerCellSelector = ".dxgvHeader_Metropolis";
 	}
 	
 	/**
@@ -30,33 +31,43 @@ class TableEnhancer {
 	 *  - Optionally invokes an override function if specified in the config.
 	 */
 	processTable() {
+		// Locate the header row using the provided headerSelector.
 		const headerRow = document.querySelector(this.headerSelector);
 		if (!headerRow) {
 			Logger.warn("TableEnhancer: Header row not found", "", { selector: this.headerSelector });
 			return;
 		}
-		const headerCells = Array.from(headerRow.querySelectorAll("th, td"));
-		const headers = headerCells.map(cell => cell.textContent.trim());
-		Logger.log("TableEnhancer: Extracted headers","", { headers });
-		
+
+		const headerCells = Array.from(headerRow.querySelectorAll(this.headerCellSelector));
+
+		const normalizedHeaders = headerCells.map(cell => this.sanitizeHeader(cell.textContent.trim()));
+		Logger.log("TableEnhancer: Extracted & normalizedHeaders headers", "", { headers: normalizedHeaders });
+
 		const rows = document.querySelectorAll(this.rowSelector);
 		rows.forEach(row => {
 			const cells = Array.from(row.children);
 			cells.forEach((cell, index) => {
-				if (headers[index]) {
-					const headerClass = this.sanitizeHeader(headers[index]);
-					cell.classList.add(headerClass);
-					if (this.config[headers[index]]) {
+				if (normalizedHeaders[index]) {
+					cell.classList.add(normalizedHeaders[index]);
+					if (this.config[normalizedHeaders[index]]) {
 						try {
-							this.config[headers[index]](cell);
+							this.config[normalizedHeaders[index]].fn(cell);
 						} catch (error) {
-							Logger.error(`TableEnhancer: Error applying override for header "${headers[index]}"`, "",{ error });
+							Logger.error(`TableEnhancer: Error applying override for header "${originalHeaders[index]}"`, "", { error });
 						}
 					}
 				}
 			});
 		});
-	}
+
+	headerCells.forEach((cell, index) => {
+		const normalizedHeader = normalizedHeaders[index];
+		if (this.config[normalizedHeader] && this.config[normalizedHeader].name) {
+			cell.textContent = this.config[normalizedHeader].name;
+		}
+	});
+	Logger.log("TableEnhancer: Headers renamed based on config.");
+}
 	
 	/**
 	 * Starts observing the document body using DOMObserver.
@@ -64,12 +75,31 @@ class TableEnhancer {
 	 */
 	startObserver() {
 		DOMObserver.observe(document.body, { childList: true, subtree: true }, (mutations) => {
-			// Debounce processing to avoid rapid reprocessing.
-			clearTimeout(this.debounceTimeout);
-			this.debounceTimeout = setTimeout(() => {
-				this.processTable();
-			}, 300);
+			for (const mutation of mutations) { 
+				if(mutation.target.id == "MainContent_ctl00_updatePanel1") {
+					Array.from(mutation.addedNodes).forEach((node)=> {
+						if (node.nodeType === Node.ELEMENT_NODE && node.matches) {
+							if (node.matches("table#MainContent_ctl00_grid.dxgvControl_Metropolis.dxgrid-table.dxgv")) {
+								this.processTable();
+								return;
+							}
+						}
+					});
+				}
+				if(mutation.target.nodeName == "TD" && mutation.target.id == "") {
+					console.log("addedNodes",mutation.addedNodes);
+					Array.from(mutation.addedNodes).forEach((node)=> {
+						if (node.nodeType === Node.ELEMENT_NODE && node.matches) {
+							if (node.matches("table#MainContent_ctl00_grid_DXMainTable.dxgvTable_Metropolis.dxgvRBB")) {
+								this.processTable();
+								return;
+							}
+						}
+					});
+				}
+			}
 		});
+		this.processTable();
 		Logger.log("TableEnhancer: DOMObserver started on body.");
 	}
 	

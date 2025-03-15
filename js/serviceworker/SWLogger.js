@@ -32,9 +32,6 @@ export var SWLogger = {
 		config = config || {};
 		this.enabled = config.enabled || false;
 		this.outputBrowserConsole = config.outputBrowserConsole || false;
-		if (this.enabled) {
-			this.createDevLog();
-		}
 	},
 
 	/**

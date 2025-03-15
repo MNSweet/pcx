@@ -52,7 +52,8 @@
 				"js/modules/helpers/KeyBinding.js",
 				"js/modules/helpers/Settings.js",
 				"js/modules/helpers/TableEnhancer.js",
-				"js/modules/helpers/Utils.js"
+				"js/modules/helpers/Utils.js",
+				"js/modules/helpers/PageDataManager.js"
 			],
 			"css":["css/modal.css","css/Logger.css"],
 			"run_at": "document_end",
@@ -115,6 +116,7 @@
 				"js/lims/DXRESULTS.js",
 
 				"js/modules/MessageRouter.js",
+				"js/modules/PageDataManager.js",
 				"js/modules/PCX.js",
 
 					"js/modules/helpers/AsyncHelpers.js",

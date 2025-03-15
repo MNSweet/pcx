@@ -229,6 +229,29 @@ class Logger {
 		}
 	}
 
+	/**
+	 * Log if a file is loaded to the File tab.
+	 * @param {string} message - The message.
+	 * @param {any} context - Optional context.
+	 */
+	static fileLog(message, context, ...args) {
+		if (!Logger.enabled) { return; }
+		let entry = Logger.createEntry('file', message, context, args);
+		Logger.output(entry);
+	}
+
+	/**
+	 * Log intercontext messaging events.
+	 * This logs a message with type "message" that will be output in the Messaging tab.
+	 * @param {string} message - The message.
+	 * @param {any} context - Optional context.
+	 */
+	static messageLog(message, context, ...args) {
+		if (!Logger.enabled) { return; }
+		let entry = Logger.createEntry('message', message, context, args);
+		Logger.output(entry);
+		// Optionally, you might also directly append this to the messaging tab UI.
+	}
 
 	/**
 	 * Logs a normal message.
@@ -324,26 +347,36 @@ class Logger {
 			if (self.devLogTabs.tracer) {
 				// Create tracer table if it doesn't exist
 				if (!self.devLogTabs.tracer.querySelector('table')) {
-					let table = document.createElement('table');
-					table.style.width = '100%';
-					table.style.borderCollapse = 'collapse';
+					let table = Logger.createLogDOM('table',{
+						style:{
+							width:'100%',
+							borderCollapse:'collapse'
+						}
+					});
 					// Create thead with sticky header
-					let thead = document.createElement('thead');
 					let headerRow = document.createElement('tr');
 					['Data', 'Event', 'Count', 'Location'].forEach(function(col) {
-						let th = document.createElement('th');
-						th.textContent = col;
-						th.style.textAlign = 'left';
-						th.style.padding = '4px';
-						th.style.background = '#fff';
-						th.style.position = 'sticky';
-						th.style.top = '0';
-						th.style.borderBottom = '1px solid #ccc';
-						th.style.zIndex = '1';
-						headerRow.appendChild(th);
+						headerRow.appendChild(
+						    Logger.createLogDOM(
+								'th',
+								{
+									textContent: col,
+									style: {
+										textAlign: 'left',
+										padding: '4px',
+										background: '#fff',
+										position: 'sticky',
+										top: '0',
+										borderBottom: '1px solid #ccc',
+										zIndex: '1'
+									}
+								}
+							)
+						);
 					});
-					thead.appendChild(headerRow);
-					table.appendChild(thead);
+					table.appendChild(
+						document.createElement('thead').appendChild(headerRow)
+					);
 					// Create tbody for tracer entries
 					let tbody = document.createElement('tbody');
 					table.appendChild(tbody);
@@ -402,41 +435,52 @@ class Logger {
 	 */
 	static createDevLog() {
 		// Create main container (initially hidden)
-		Logger.devLogContainer = document.createElement('div');
-		Logger.devLogContainer.style.position = 'fixed';
-		Logger.devLogContainer.style.left = '0';
-		Logger.devLogContainer.style.right = '0';
-		Logger.devLogContainer.style.bottom = '0';
-		Logger.devLogContainer.style.height = '300px';
-		Logger.devLogContainer.style.background = '#fff';
-		Logger.devLogContainer.style.borderTop = '1px solid #ccc';
-		Logger.devLogContainer.style.boxShadow = '0 -2px 5px rgba(0,0,0,0.1)';
-		Logger.devLogContainer.style.display = 'none'; // collapsed initially
-		Logger.devLogContainer.style.zIndex = '9999';
-		Logger.devLogContainer.style.fontFamily = 'sans-serif';
-		Logger.devLogContainer.style.fontSize = '12px';
+		Logger.devLogContainer = Logger.createLogDOM('div',{
+			style: {
+				position: 'fixed',
+				left: '0',
+				right: '0',
+				bottom: '0',
+				height: '300px',
+				background: '#fff',
+				borderTop: '1px solid #ccc',
+				boxShadow: '0 -2px 5px rgba(0,0,0,0.1)',
+				display: 'none',
+				zIndex: '9999',
+				fontFamily: 'sans-serif',
+				fontSize: '12px'
+			}
+		});
 
 		// Create tab navigation container (left side)
-		let tabNav = document.createElement('div');
-		tabNav.style.width = '100px';
-		tabNav.style.height = '100%';
-		tabNav.style.float = 'left';
-		tabNav.style.borderRight = '1px solid #ddd';
-		tabNav.style.boxSizing = 'border-box';
-		tabNav.style.background = '#f7f7f7';
-		tabNav.style.overflowY = 'auto';
+		let tabNav = Logger.createLogDOM('div',{
+			style: {
+				width:'100px',
+				height:'100%',
+				float:'left',
+				borderRight:'1px solid #ddd',
+				boxSizing:'border-box',
+				background:'#f7f7f7',
+				overflowY:'auto',
+			}
+		});
 
 		// Create content container (right side)
-		let tabContent = document.createElement('div');
-		tabContent.style.marginLeft = '100px';
-		tabContent.style.height = '100%';
-		tabContent.style.overflowY = 'auto';
-		tabContent.style.padding = '4px';
+		let tabContent = Logger.createLogDOM('div', {
+			style:{
+				marginLeft: '100px',
+				height: '100%',
+				overflowY: 'auto',
+				padding: '4px'
+			}
+		});
 
 		// Define tabs
 		let tabs = [
 			{ name: 'console', label: 'Console' },
-			{ name: 'tracer', label: 'Tracer' }//,
+			{ name: 'tracer', label: 'Tracer' },
+			{ name: 'messaging', label: 'Messaging' },
+			{ name: 'files', label: 'Files' }//,
 			//{ name: 'tab3', label: 'Tab 3' },
 			//{ name: 'tab4', label: 'Tab 4' }
 		];
@@ -445,13 +489,18 @@ class Logger {
 		// Create each tab button and content pane
 		tabs.forEach(function(tab) {
 			// Tab button
-			let tabButton = document.createElement('div');
-			tabButton.textContent = tab.label;
-			tabButton.style.padding = '8px';
-			tabButton.style.cursor = 'pointer';
-			tabButton.style.borderBottom = '1px solid #ddd';
-			tabButton.style.background = (tab.name === self.activeTab ? '#e0e0e0' : 'transparent');
-			tabButton.setAttribute('data-tab', tab.name);
+			let tabButton = Logger.createLogDOM('div',{
+				textContent: tab.label,
+				style: {
+					padding: "8px",
+					cursor: "pointer",
+					borderBottom: "1px solid #ddd",
+					background: (tab.name === self.activeTab ? '#e0e0e0' : 'transparent')
+				},
+				dataset: {
+					tab: tab.name
+				}
+			});
 			tabButton.addEventListener('click', function() {
 				self.activeTab = tab.name;
 				// Update tab nav buttons styling
@@ -466,11 +515,14 @@ class Logger {
 			tabNav.appendChild(tabButton);
 
 			// Content pane
-			let pane = document.createElement('div');
-			pane.style.width = '100%';
-			pane.style.height = '100%';
-			pane.style.display = (tab.name === self.activeTab ? 'block' : 'none');
-			pane.style.overflowY = 'auto';
+			let pane = Logger.createLogDOM('div',{
+				style:{
+					width: '100%',
+					height: '100%',
+					display: (tab.name === self.activeTab ? 'block' : 'none'),
+					overflowY: 'auto%',
+				}
+			})
 			self.devLogTabs[tab.name] = pane;
 			tabContent.appendChild(pane);
 		});
@@ -480,22 +532,25 @@ class Logger {
 		document.body.appendChild(Logger.devLogContainer);
 
 		// Create the toggle handle (always visible at the bottom-right)
-		Logger.devLogHandle = document.createElement('div');
-		Logger.devLogHandle.style.position = 'fixed';
-		Logger.devLogHandle.style.width = '100px';
-		Logger.devLogHandle.style.height = '30px';
-		Logger.devLogHandle.style.right = '0';
-		Logger.devLogHandle.style.bottom = '0';
-		Logger.devLogHandle.style.background = '#333';
-		Logger.devLogHandle.style.color = '#fff';
-		Logger.devLogHandle.style.display = 'flex';
-		Logger.devLogHandle.style.alignItems = 'center';
-		Logger.devLogHandle.style.justifyContent = 'center';
-		Logger.devLogHandle.style.cursor = 'pointer';
-		Logger.devLogHandle.style.zIndex = '10000';
-		Logger.devLogHandle.style.fontSize = '18px';
-		Logger.devLogHandle.style.borderRadius = '10px 0 0';
-		Logger.devLogHandle.textContent = 'DevLog';
+		Logger.devLogHandle = Logger.createLogDOM('div', {
+			textContent: 'DevLog',
+			style:{
+				position: 'fixed',
+				width: '100px',
+				height: '30px',
+				right: '0',
+				bottom: '0',
+				background: '#333',
+				color: '#fff',
+				display: 'flex',
+				alignItems: 'center',
+				justifyContent: 'center',
+				cursor: 'pointer',
+				zIndex: '10000',
+				fontSize: '18px',
+				borderRadius: '10px 0 0'
+			}
+		});
 		Logger.devLogHandle.addEventListener('click', function() {
 			self.toggleDevLog();
 		});
@@ -509,6 +564,31 @@ class Logger {
 		if (!Logger.devLogContainer) { return; }
 		Logger.devLogHandle.style.bottom		= (Logger.devLogContainer.style.display === 'none' ? '300px' : '0px');
 		Logger.devLogContainer.style.display	= (Logger.devLogContainer.style.display === 'none' ? 'block' : 'none');
+	}
+
+
+
+	static createLogDOM(domType, properties = {}) {
+		try {
+			const element = document.createElement(domType);
+			Logger.applyLogAttributes(element, properties);
+			return element;
+		} catch (error) {
+			return null;
+		}
+	}
+	static applyLogAttributes(element, attributes) {
+		for (const key in attributes) {
+			if (attributes.hasOwnProperty(key)) {
+				if (typeof attributes[key] === 'object' && attributes[key] !== null) {
+					// Recursive application for nested objects (like 'style')
+					Logger.applyLogAttributes(element[key], attributes[key]);
+				} else {
+					// Direct attribute assignment
+					element[key] = attributes[key];
+				}
+			}
+		}
 	}
 };
 

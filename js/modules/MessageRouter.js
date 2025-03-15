@@ -1,25 +1,20 @@
 // /js/modules/MessageRouter.js
-Logger.log("MessageRouter Loaded","INIT");
-
+Logger.log("MessageRouter Loaded", "INIT");
 
 class MessageRouter {
-	// Map actions to arrays of handler functions.
+	static port = null;
 	static handlers = new Map();
 
-	// Static initialization block for setting up the onMessage listener.
-	static {
-		try {
-			chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-				try {
-					MessageRouter.handleMessage(message, sender, sendResponse);
-				} catch (err) {
-					Logger.error("MessageRouter: Error handling message", { error: err, message, sender });
-				}
-				// Return true to indicate that the response may be sent asynchronously.
-				return true;
+	/**
+	 * Initializes the persistent port (if not already open).
+	 */
+	static init() {
+		if (!MessageRouter.port) {
+			MessageRouter.port = chrome.runtime.connect({ name: "persistentChannel" });
+			MessageRouter.port.onMessage.addListener((msg) => {
+				Logger.log("MessageRouter: Received persistent message", msg.action, { msg });
+				MessageRouter.handleMessage(msg);
 			});
-		} catch (err) {
-			Logger.error("MessageRouter: Failed to initialize message listener", { error: err });
 		}
 	}
 
@@ -61,12 +56,10 @@ class MessageRouter {
 	}
 
 	/**
-	 * Dispatches incoming messages to the registered handlers.
+	 * Routes incoming messages to registered handlers.
 	 * @param {Object} message - The incoming message.
-	 * @param {Object} sender - Information about the sender.
-	 * @param {function} sendResponse - Function to send a response.
 	 */
-	static handleMessage(message, sender, sendResponse) {
+	static handleMessage(message) {
 		if (!message || !message.action) {
 			Logger.warn("MessageRouter: Received message with no action", { message });
 			return;
@@ -74,11 +67,10 @@ class MessageRouter {
 		const action = message.action;
 		const callbacks = MessageRouter.handlers.get(action);
 		if (callbacks && callbacks.length > 0) {
-			Logger.log(`MessageRouter: Handling action "${action}"`, { message, sender });
-			// Invoke all handlers for this action.
-			callbacks.forEach((cb) => {
+			Logger.log(`MessageRouter: Handling action "${action}"`, { message });
+			callbacks.forEach((callback) => {
 				try {
-					cb(message, sender, sendResponse);
+					callback(message);
 				} catch (error) {
 					Logger.error(`MessageRouter: Error in handler for action "${action}"`, { error });
 				}
@@ -89,25 +81,18 @@ class MessageRouter {
 	}
 
 	/**
-	 * A convenience method to send a message.
+	 * Sends a message over the persistent channel.
 	 * @param {Object} message - The message to send.
-	 * @returns {Promise} Resolves with the response or rejects with an error.
 	 */
 	static sendMessage(message) {
-		return new Promise((resolve, reject) => {
-			try {
-				chrome.runtime.sendMessage(message, (response) => {
-					if (chrome.runtime.lastError) {
-						Logger.error("MessageRouter.sendMessage: Error sending message", { error: chrome.runtime.lastError });
-						return reject(chrome.runtime.lastError);
-					}
-					resolve(response);
-				});
-			} catch (err) {
-				Logger.error("MessageRouter.sendMessage: Exception caught when sending message", { error: err });
-				reject(err);
-			}
-		});
+		MessageRouter.init();
+		try {
+			MessageRouter.port.postMessage(message);
+			Logger.log("MessageRouter: Sent persistent message", message.action, { message });
+		} catch (err) {
+			Logger.error("MessageRouter.sendMessage: Error sending persistent message", { error: err });
+		}
 	}
 }
 
+MessageRouter.init();

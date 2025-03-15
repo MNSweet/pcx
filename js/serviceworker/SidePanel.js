@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		}
 	}
 
-	document.addEventListener('DOMContentLoaded', loadSettingsUI);
+	loadSettingsUI();
 /**
  * 
  * Information
@@ -252,14 +252,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	// Request the active tab's page state from the background.
 	function requestTabData() {
+	console.log('SP','requestTabData');
 		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+		console.log('SP tabs',tabs);
 			if (tabs.length > 0) {
 				const activeTab = tabs[0];
-				MessageRouter.sendMessage({ type: 'getPageState', tabId: activeTab.id }, (response) => {
+		console.log('SP activeTab',activeTab);
+				MessageRouter.sendMessage({ type: 'getPageData', tabId: activeTab.id }, (response) => {
+		console.log('SP response',response);
 					if (response) {
 						renderSidePanel(response);
 					} else {
-						DOMHelper.getEl('#sidePanel').innerHTML = '<p>No page data available.</p>';
+						DOMHelper.getEl('#information-container').innerHTML = '<p>No page data available.</p>';
 					}
 				});
 			}
@@ -269,18 +273,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 	// Render the sidePanel's content.
 	function renderSidePanel(pageState) {
 		const content = buildFormFromData(pageState);
-		DOMHelper.getEl('#sidePanel').innerHTML = content;
+		DOMHelper.getEl('#information-container').innerHTML = content;
 	}
-
-	// Initialize the sidePanel when the panel loads.
-	document.addEventListener('DOMContentLoaded', requestTabData);
+	requestTabData();
+	console.log('end of DOM Ready');
 });
 
 window.addEventListener("unload", () => {
 	chrome.runtime.sendMessage({ action: "sidePanelClosed" });
 });
 
-MessageRouter.registerHandler("sidePanelOpened", (message, sender, sendResponse) => {
-	ServiceWorker.handleOpenWindow(message.target, message.url, message.whitelist);
-	sendResponse({ status: "SidePanel pened request processed" });
-});

@@ -21,7 +21,7 @@ class IATSERV extends LIMS {
 	 */
 	static accessionList() {
 		const accessionConfig = {
-			"Alt ID 1": accessionList_AltId1_Results
+			"alt-id-1": {fn:accessionList_AltId1_Results,name:"Results"}
 		};
 		const accessionEnhancer = new TableEnhancer(
 			"#MainContent_ctl00_grid_DXHeadersRow0",
@@ -37,7 +37,7 @@ class IATSERV extends LIMS {
 	 */
 	static locations() {
 		const locationConfig = {
-			"ID1": location_ID1_Delivery
+			"id1": {fn:location_ID1_Delivery,name:"Delivery"}
 		};
 		const locationEnhancer = new TableEnhancer(
 			"#MainContent_ctl00_grid_DXHeadersRow0",
@@ -53,7 +53,8 @@ class IATSERV extends LIMS {
 	 */
 	static reports() {
 		const reportsConfig = {
-			"DOS": results_DOS_Status
+			"accession": {fn:results_ACS_HREF,name:false},
+			"dos": {fn:results_DOS_Status,name:false}
 		};
 		const reportsEnhancer = new TableEnhancer(
 			"#MainContent_ctl00_grid_DXHeadersRow0",
@@ -690,7 +691,7 @@ function location_ID1_Delivery(cell) {
 	// Locate the cell containing the "Code" column data.
 	const codeCell = Array.from(row.cells).find(c => {
 		const a = c.querySelector("a");
-		return a && a.getAttribute("onclick") && /ShowForm\((\d+),this\)/i.test(a.getAttribute("onclick"));
+		return a && a.getAttribute("onclick") && /ShowForm\((\d+)\)/i.test(a.getAttribute("onclick"));
 	});
 	if (!codeCell) {
 		console.warn("location_ID1_Delivery: Code cell not found in row");
@@ -698,9 +699,9 @@ function location_ID1_Delivery(cell) {
 	}
 	const codeAnchor = codeCell.querySelector("a");
 	const onclickAttr = codeAnchor.getAttribute("onclick");
-	const locationID = onclickAttr.replace(/ShowForm\((\d+),this\)/i, "$1");
+	const locationID = onclickAttr.replace(/ShowForm\((\d+)\)/i, "$1");
 	// Build a new anchor for Delivery.
-	cell.innerHTML = `<a href="javascript:ShowForm(${locationID});" class="delivery" target="_blank">Delivery</a>`;
+	cell.innerHTML = `<a href="javascript:ShowForm(${locationID});" class="delivery">Delivery</a>`;
 	// Attach an event listener to trigger a click within an iframe.
 	const newAnchor = cell.querySelector("a.delivery");
 	if (newAnchor) {
@@ -711,6 +712,18 @@ function location_ID1_Delivery(cell) {
 				});
 			});
 		});
+	}
+}
+
+function results_ACS_HREF(cell) {
+	//?LinkId=2071&AccessionId=#####&_ml=9&_mlp=5
+	let anchor = cell.querySelector('a[href*="/ViewAccession.aspx?AccessionId="]')
+
+	// Regular expression to extract AccessionId
+	let match = anchor.getAttribute('href').match(/AccessionId=(\d+)&?/);
+
+	if (match) {
+		anchor.setAttribute('href', `/?LinkId=2071&AccessionId=${match[1]}&_ml=9&_mlp=5`);
 	}
 }
 

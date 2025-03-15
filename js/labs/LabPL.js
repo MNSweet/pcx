@@ -243,32 +243,49 @@ if (PCX.preferredUserMode()) {
 			test	: IATSERV.getEl("#MainContent_ctl00_ctrlOrderTestCategoryControl_ddTestCategory option:checked").innerText,
 			files	: files
 		};
-		PCX.sendPageDataToBackground(data);
 
-		chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-			if (request.action === "getPageContent") {
-				// Extract relevant data from the page		
-				let liveFiles = [];
-					IATSERV.getEls('[id^="MainContent_ctl00_ObjectDocuments1_ObjectDocuments_Exists_GridView1_lblTitle_"]',true).forEach((file)=>{files.push(file.innerText);});
-				let liveData = {
-					acsNum	: IATSERV.getEl("#MainContent_ctl00_tbAccession",true).value,
-					acsID	: IATSERV.getEl("#tbAccessionId",true).value,
-					location: IATSERV.getEl("#MainContent_ctl00_tbLocation_tbText",true).value,
-					req		: IATSERV.scanFilenamer(true)+".pdf",
-					patient	: IATSERV.getEl("#MainContent_ctl00_tbPatient_tbText",true).value.toUpperCase().split(', '),
-					ptID	: IATSERV.getEl("#MainContent_ctl00_tbPatient_tbID",true).value,
-					dob		: IATSERV.getEl("#tbPatientDOB",true).value,
-					doc		: IATSERV.getEl("#MainContent_ctl00_tbCollectionDateTime_tbDate_tbText",true).value,
-					rd		: IATSERV.getEl("#MainContent_ctl00_tbReceivedDateTime_tbDate_tbText",true).value,
-					lab		: IATSERV.getEl("#ddPerformingLabId option:checked",true).innerText,
-					test	: IATSERV.getEl("#MainContent_ctl00_ctrlOrderTestCategoryControl_ddTestCategory option:checked",true).innerText,
-					files	: files
-				};
 
-				console.log("Sending page content:", liveData);
-				sendResponse({ content: liveData });
+
+
+		const pageData = {
+			acsNum: { selector: "#MainContent_ctl00_tbAccession", default: "" },
+			acsID: { selector: "#tbAccessionId", default: "" },
+			location: { selector: "#MainContent_ctl00_tbLocation_tbText", default: "" },
+			req: { 
+				preprocess: () => IATSERV.scanFilenamer(true) + ".pdf",
+				default: ""
+			},
+			patient: { 
+				selector: "#MainContent_ctl00_tbPatient_tbText", 
+				preprocess: (value) => value.toUpperCase().split(', ')
+			},
+			ptID: { selector: "#MainContent_ctl00_tbPatient_tbID", default: "" },
+			dob: { selector: "#tbPatientDOB", default: "" },
+			doc: { selector: "#MainContent_ctl00_tbCollectionDateTime_tbDate_tbText", default: "" },
+			rd: { selector: "#MainContent_ctl00_tbReceivedDateTime_tbDate_tbText", default: "" },
+			lab: { 
+				selector: "#ddPerformingLabId option:checked", 
+				preprocess: (value, el) => el ? el.innerText : ""
+			},
+			test: { 
+				selector: "#MainContent_ctl00_ctrlOrderTestCategoryControl_ddTestCategory option:checked", 
+				preprocess: (value, el) => el ? el.innerText : ""
+			},
+			files: { 
+				selector: '[id^="MainContent_ctl00_ObjectDocuments1_ObjectDocuments_Exists_GridView1_lblTitle_"]',
+				multiple: true,
+				preprocess: (value, el, elements) => Array.from(elements).map(file => file.innerText)
+			},
+			pageTemplate: { 
+				default: IATSERV.linkId
+			},
+			sidePanelTemplate: { 
+				default: IATSERV.linkId
 			}
-		});
+		};
+
+		PCX.monitorPageData(pageData);
+
 	}
 
 	// Patient
@@ -353,6 +370,23 @@ if (PCX.preferredUserMode()) {
 				result	: true
 			},false,false,"#dvFooter")}
 		);
+	}
+
+	// Update Location
+	if (IATSERV.linkId == "2001") {
+		checkAndReplaceIframe();
+	}
+	function checkAndReplaceIframe(){
+		waitForElm(".fancybox-iframe").then((iframe)=> {
+			waitForIframeElm(".fancybox-iframe","#MainContent_ctl00_tbName").then((input)=> {
+				input.value=input.value.replace(/[,.\"]/,"");
+				waitForElm(".fancybox-close").then((close)=> {
+					close.addEventListener('click', ()=>{
+						delay(1000).then(checkAndReplaceIframe);
+					});
+				});
+			});
+		})
 	}
 }
 

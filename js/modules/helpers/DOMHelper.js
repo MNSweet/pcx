@@ -100,12 +100,25 @@ class DOMHelper {
 	static createDOM(domType, properties = {}) {
 		try {
 			const element = document.createElement(domType);
-			Object.assign(element, properties);
+			DOMHelper.applyAttributes(element, properties);
 			Logger.log(`createDOM: Created "${domType}"`, "Modify", { properties });
 			return element;
 		} catch (error) {
 			Logger.error(`createDOM: Error creating element "${domType}"`, "Modify", { error, properties });
 			return null;
+		}
+	}
+	static applyAttributes(element, attributes) {
+		for (const key in attributes) {
+			if (attributes.hasOwnProperty(key)) {
+				if (typeof attributes[key] === 'object' && attributes[key] !== null) {
+					// Recursive application for nested objects (like 'style')
+					DOMHelper.applyAttributes(element[key], attributes[key]);
+				} else {
+					// Direct attribute assignment
+					element[key] = attributes[key];
+				}
+			}
 		}
 	}
 

@@ -69,6 +69,85 @@ class PCX {
 			Logger.log("Cleared Chrome notification for ID: " + id);
 		});
 	}
+
+	static monitorPageData(pageData,observerData={active:false,target:"",addedNode:""}) {
+
+		// Send page data when needed.
+		PageDataManager.sendPageData(pageData);
+
+		// Attach a listener to respond when background requests the page content.
+		PageDataManager.attachContentListener(pageData);
+
+		/*
+		let lastUrl = location.href;
+		const whitelist = ["DIV#MainContent_ctl00_ctl00_upPanel"];
+		let elementsMutated = []
+		let timeout;
+		
+		// Detect changes via history API
+		history.pushState = ((original) =>
+			function pushState() {
+				let result = original.apply(this, arguments);
+				chrome.runtime.sendMessage({ action: "pageUpdated", url: location.href });
+				return result;
+			})(history.pushState);
+
+		history.replaceState = ((original) =>
+			function replaceState() {
+				let result = original.apply(this, arguments);
+				chrome.runtime.sendMessage({ action: "pageUpdated", url: location.href });
+				return result;
+			})(history.replaceState);
+
+		// Listen for back/forward button navigation
+		window.addEventListener("popstate", () => {
+			chrome.runtime.sendMessage({ action: "pageUpdated", url: location.href });
+		});
+
+		chrome.runtime.sendMessage({ action: "storePageData", data: data });
+
+		// Listen for changes to the body
+		DOMObserver.observe(document.body, { childList: true, subtree: true }, (mutations) => {
+			const filteredMutations = mutations.filter((m) => {
+				let id = m.target.id ? `#${m.target.id}` : "";
+				let classes = m.target.classList.length > 0 ? '.' + [...m.target.classList].join('.') : "";
+				m.target.elementKey = `${m.target.tagName}${id}${classes}`;
+
+
+				if(!elementsMutated.includes(m.target.elementKey)) {elementsMutated.push(m.target.elementKey)}
+				
+				if(whitelist.includes(m.target.elementKey)){return true;}
+				if(m.target.tagName == "BODY"){return true;}
+				return false;
+			});
+			if (location.href !== lastUrl) {
+				lastUrl = location.href;
+				chrome.runtime.sendMessage({ action: "pageUpdated", url: lastUrl });
+				return;
+			}
+			
+			console.log(filteredMutations);
+			if (filteredMutations.length > 0) {
+				clearTimeout(timeout);
+				timeout = setTimeout(() => {
+					let elements = {};
+					filteredMutations.forEach(m => {
+					console.log(m.target.elementKey);
+						elements[m.target.elementKey] = m.target;
+					});
+					let processedData = {
+						LinkId: new URL(location.href).searchParams.get("LinkId") || "0",
+						title: document.title,
+						elements: elements
+					};
+					console.log(elementsMutated);
+					console.log(`Mutation:`,processedData);
+					chrome.runtime.sendMessage({ action: "storePageData", data: processedData });
+				}, 500);
+			}
+
+		});*/
+	}
 }
 
 // Expose PCX to the global window if needed.

@@ -67,13 +67,11 @@ class ServiceWorker {
 		if (tabId) {
 			options.tabId = tabId;
 		}
-		chrome.sidePanel.setOptions(options).then(() => {
-			//SWMessageRouter.sendMessage({ action: "sidePanelOpened" });
-		});
+		chrome.sidePanel.setOptions(options)
 	}
 	static updateSidePanel(data) {
 		try {
-			SWMessageRouter.sendMessage(data, (response) => {
+			broadcastToTabs('SP', (response) => {
 				if (chrome.runtime.lastError || !response) {
 					SWLogger.log("Side panel not available; marking as closed.");
 					ServiceWorker.sidePanelState.open = false;
@@ -99,35 +97,6 @@ class ServiceWorker {
 				else reject("Site not recognized.");
 			});
 		});
-	}
-
-	static async getSite(request, sender) {
-		ServiceWorker.getCurrentSite()
-			.then((site) => {
-				chrome.tabs.sendMessage(
-					sender.tab.id,
-					{ action: "returnSite", site: site },
-					() => {
-						if (chrome.runtime.lastError) {
-							console.error("SendMessage Error:", chrome.runtime.lastError);
-						}
-						console.log("Message sent: returnSite", site);
-					}
-				);
-			})
-			.catch((error) => {
-				chrome.tabs.sendMessage(
-					sender.tab.id,
-					{ action: "error", note: "returnSite failed", error: error },
-					() => {
-						if (chrome.runtime.lastError) {
-							console.error("SendMessage Error:", chrome.runtime.lastError);
-						}
-						console.error("Error sending returnSite failed:", error);
-					}
-				);
-			});
-		return true;
 	}
 
 	// --- Tab Update & Extension Icon ---
@@ -165,7 +134,7 @@ class ServiceWorker {
 
 		chrome.tabs.query({ url: matchUrls }, (tabs) => {
 			tabs.forEach((tab) => {
-				chrome.tabs.sendMessage(tab.id, {
+				SWMessageRouter.broadcastToTabs('SITES',{
 					action: "noticeDisplay",
 					patientData: request.patientData,
 					timer: ServiceWorker.timer
@@ -181,13 +150,6 @@ class ServiceWorker {
 			});
 			chrome.tabs.query({ url: matchUrls }, (tabs) => {
 				ServiceWorker.timer--;
-				tabs.forEach((tab) => {
-					chrome.tabs.sendMessage(tab.id, {
-						action: "noticePing",
-						patientData: request.patientData,
-						timer: ServiceWorker.timer
-					});
-				});
 				if (ServiceWorker.timer <= 0 || !ServiceWorker.timerState) {
 					clearInterval(ServiceWorker.updateCountdownNotice);
 					if (ServiceWorker.timerState) {
@@ -285,22 +247,37 @@ class ServiceWorker {
 
 	SWMessageRouter.registerHandler("setNotification", (message, sender, sendResponse) => {
 		ServiceWorker.setNotification(message, sendResponse);
+		sendResponse({ status: "Acknowledged" });
 	});
 
 	SWMessageRouter.registerHandler("clearReminder", (message, sender, sendResponse) => {
 		ServiceWorker.clearReminder(message, sendResponse);
+		sendResponse({ status: "Acknowledged" });
 	});
 
 	SWMessageRouter.registerHandler("getSite", (message, sender, sendResponse) => {
-		ServiceWorker.getSite(message, sender);
+		sendResponse({ site: ServiceWorker.getCurrentSite(message, sender) });
 	});
 
 	SWMessageRouter.registerHandler("sidePanelReady",(message, sender, sendResponse) => {
 		ServiceWorker.sidePanelState.open = true;
+		sendResponse({ status: "Acknowledged" });
 	});
 
 	SWMessageRouter.registerHandler("sidePanelClosed",(message, sender, sendResponse) => {
 		ServiceWorker.sidePanelState.open = false;
+		sendResponse({ status: "Acknowledged" });
+	});
+
+	SWMessageRouter.registerHandler("storePageData",(message, sender, sendResponse) => {
+		console.log('SWMessageRouter storePageData:',storePageData);
+		ServiceWorker.storeTabData(sender.tab.id, message.data);
+		sendResponse({ status: "Acknowledged" });
+	});
+
+	SWMessageRouter.registerHandler("getPageData",(message, sender, sendResponse) => {
+		console.log('SWMessageRouter getPageData:',getPageData);
+		sendResponse({ data: ServiceWorker.getTabData(message.tabid)});
 	});
 /** 
  * 

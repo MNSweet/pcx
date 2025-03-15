@@ -215,36 +215,26 @@
 	font-weight: bold;
 }
 
+/* Over 90 days old */
 .ngsExpired {
 	background-color: #990000;
 	color:#ffffff;
 }
 
+/* 90-61 days old */
 .ngsLow {
 	background-color: #e58a00;
 	color:#ffffff;
 }
 
+/* 60-46 days */
 .ngsMedium {
-	background-color: #e58a00;
+	background-color: #599012;
 	color:#ffffff;
 }
 
+/* Under 45 days old */
 .ngsHigh {
-	background-color: #e58a00;
+	background-color: #13c213;
 	color:#ffffff;
 }
-
-/*#page-wrapper .container-fluid {
-	padding-bottom: 70px;
-	position: relative;
-}
-
-.modal-footer {
-	position: fixed;
-	bottom: 0;
-	right: 0;
-	width: 100%;
-	background: #fff;
-	z-index: 10000;
-}*/
