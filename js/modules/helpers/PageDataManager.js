@@ -5,6 +5,7 @@
  * optionally pre-process values, and send/receive messages with the background.
  * 
  */
+Logger.file("PageDataManager");
 class PageDataManager {
 	static getData(config) {
 		const data = {};
@@ -68,7 +69,7 @@ class PageDataManager {
 			timestamp: new Date().toISOString()
 		};
 		console.log("PageDataManager: Data sent", normalizedData);
-		MessageRouter.sendMessage({ action: 'storePageData', data: normalizedData });
+		MessageRouter.sendMessage({ action: 'storePageData', data: normalizedData },);
 	}
 
 	/**

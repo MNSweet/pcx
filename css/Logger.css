@@ -1,60 +1,145 @@
 /* css/Logger.css */
 
-#debug-table {
-	width: 100%;
-	table-layout: auto;  /* Columns will adapt to their content */
-	border-collapse: collapse;
+/* DevLog Container */
+#devlog-container {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 300px;
+  background: #fff;
+  border-top: 1px solid #ccc;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  display: none; /* initially collapsed */
+  z-index: 9999;
+  font-family: sans-serif;
+  font-size: 12px;
 }
 
-/* Basic cell styling */
-#debug-table th,
-#debug-table td {
-	border: 1px solid #ddd;
-	padding: 4px;
-	vertical-align: middle;
+/* Tab Navigation */
+#devlog-tab-nav {
+  width: 100px;
+  height: 100%;
+  float: left;
+  border-right: 1px solid #ddd;
+  box-sizing: border-box;
+  background: #f7f7f7;
+  overflow-y: auto;
 }
 
-#debug-table thead th {
-	text-align: left;
-	background-color: #ffffff;
-	position: sticky;
-	top:0;
-	border-bottom: 1px solid #cccccc;
-	z-index: 1;
+/* Tab Content Container */
+#devlog-tab-content {
+  margin-left: 100px;
+  height: 100%;
+  overflow-y: auto;
+  padding: 4px;
 }
 
-/* Columns */
-col.colDate {
-	width: 100px;
-	white-space: nowrap;
-}
-col.colType,
-col.colLoc {
-	width: 1px;/* Force Text Width */
-	white-space: nowrap;
-}
-
-col.colMsg {
-	width: auto;
-}
-
-
-th.colDate,
-th.colType,
-th.colLoc,
-th.colMsg {
-	font-weight: bold;
+#devlog-tab-content pre {
+	tab-size:4;
+	font-size: 12px;
+	margin: 0 10px 5px;
+	background: #333;
+	color: #eee;
+	padding: 9.5px;
+	line-height: 1.42857143;
+	word-break: break-all;
+	word-wrap: break-word;
+	border: 1px solid #ccc;
+	border-radius: 4px;
 }
 
-#debug-table thead th.colDate,
-td.colDate {
-	text-align: center;
+/* Tab Buttons */
+.devlog-tab-button {
+  padding: 8px;
+  cursor: pointer;
+  border-bottom: 1px solid #ddd;
+  background: transparent;
 }
-td.colType {
+.devlog-tab-button.active {
+  background: #e0e0e0;
 }
-td.colLoc {
-	font-style: italic;
+
+/* DevLog Toggle Handle */
+#devlog-handle {
+  position: fixed;
+  width: 100px;
+  height: 30px;
+  right: 0;
+  bottom: 0;
+  background: #333;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10000;
+  font-size: 18px;
+  border-radius: 10px 0 0;
 }
-td.colMsg {
-	font-weight: bold;
+
+/* Debug Table Styles for Each Tab (e.g., #debug-table-console, #debug-table-tracer, etc.) */
+table[id^="debug-table-"] {
+  width: 100%;
+  table-layout: auto;
+  border-collapse: collapse;
+}
+
+table[id^="debug-table-"] th,
+table[id^="debug-table-"] td {
+  border: 1px solid #ddd;
+  padding: 4px;
+  vertical-align: middle;
+}
+
+/* Table Header (Thead) */
+table[id^="debug-table-"] thead th {
+  text-align: left;
+  background-color: #ffffff;
+  position: sticky;
+  top: -6px;
+  border-bottom: 1px solid #cccccc;
+  z-index: 1;
+  padding: 6px;
+}
+
+/* Column Classes */
+.colDate {
+  width: 100px;
+  white-space: nowrap;
+}
+.colType,
+.colLoc {
+  width: 1px; /* Force text width */
+  white-space: nowrap;
+}
+.colMsg {
+  width: auto;
+}
+
+/* Log Entry Specific Styles */
+.log-entry {
+  margin: 2px 0;
+}
+.log-timestamp {
+  font-weight: bold;
+  margin-right: 4px;
+}
+.log-type {
+  font-weight: bold;
+  margin-right: 4px;
+}
+.log-message {
+  margin-right: 4px;
+}
+.log-caller {
+  font-style: italic;
+  color: #555;
+}
+.log-context {
+  background: #f4f4f4;
+  padding: 4px;
+  border: 1px solid #ddd;
+  white-space: pre-wrap;
+  font-size: 10px;
 }

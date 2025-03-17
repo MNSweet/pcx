@@ -1,5 +1,5 @@
 // /js/lims/DXRESULTS.js
-Logger.log('DXRESULTS Loaded',"INIT");
+Logger.file("DXRESULTS");
 
 class DXRESULTS extends LIMS {
 	constructor() {

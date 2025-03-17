@@ -1,5 +1,5 @@
 // /js/modules/helpers/Settings.js
-Logger.log("Settings loaded","INIT");
+Logger.file("Settings");
 class Settings {
 	static storageKey = "pcx_settings";
 

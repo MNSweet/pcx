@@ -1,2 +1,2 @@
 // /js/labs/LabPD.js
-Logger.log('LabPD Loaded',"INIT");
+Logger.file("LabPD");

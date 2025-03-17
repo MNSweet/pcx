@@ -49,7 +49,18 @@ class ServiceWorker {
 	}
 
 	static getTabData(tabId) {
+		console.log("tabId",tabId);
 		return ServiceWorker.dataStore[tabId] || null;
+	}
+
+	static getActiveTabData() {
+		return new Promise((resolve) => {
+			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+				const tabId = tabs[0].id;
+				console.log("tabId",tabId);
+				resolve(ServiceWorker.dataStore[tabId] || null);
+			})
+		})
 	}
 
 	static removeTabData(tabId) {
@@ -71,15 +82,14 @@ class ServiceWorker {
 	}
 	static updateSidePanel(data) {
 		try {
-			broadcastToTabs('SP', (response) => {
-				if (chrome.runtime.lastError || !response) {
-					SWLogger.log("Side panel not available; marking as closed.");
-					ServiceWorker.sidePanelState.open = false;
-				} else {
-					SWLogger.log("Side panel update successful:", response);
-					ServiceWorker.sidePanelState.open = true;
-				}
-			});
+			SWMessageRouter.broadcastToTabs('SP', data);
+			if (chrome.runtime.lastError) {
+				SWLogger.log("Side panel not available; marking as closed.");
+				ServiceWorker.sidePanelState.open = false;
+			} else {
+				SWLogger.log("Side panel update successful:");
+				ServiceWorker.sidePanelState.open = true;
+			}
 		} catch (err) {
 			SWLogger.error("Error sending update message to side panel:", err);
 			ServiceWorker.sidePanelState.open = false;
@@ -232,52 +242,53 @@ class ServiceWorker {
 
 	SWMessageRouter.registerHandler("openWindow", (message, sender, sendResponse) => {
 		ServiceWorker.handleOpenWindow(message.target, message.url, message.whitelist);
-		sendResponse({ status: "window open request processed" });
+		sendResponse({ action:"openWindowResponse", status: "window open request processed" });
 	});
 
 	SWMessageRouter.registerHandler("initPatientTransfer", (message, sender, sendResponse) => {
 		ServiceWorker.initPatientTransfer(message);
-		sendResponse({ status: "patient transfer initiated" });
+		sendResponse({ action:"initPatientTransferResponse", status: "patient transfer initiated" });
 	});
 
 	SWMessageRouter.registerHandler("clearPTData", (message, sender, sendResponse) => {
 		ServiceWorker.clearPTData();
-		sendResponse({ status: "patient data cleared" });
+		sendResponse({ action:"clearPTDataResponse", status: "patient data cleared" });
 	});
 
 	SWMessageRouter.registerHandler("setNotification", (message, sender, sendResponse) => {
 		ServiceWorker.setNotification(message, sendResponse);
-		sendResponse({ status: "Acknowledged" });
+		sendResponse({ action:"setNotificationResponse", status: "Acknowledged" });
 	});
 
 	SWMessageRouter.registerHandler("clearReminder", (message, sender, sendResponse) => {
 		ServiceWorker.clearReminder(message, sendResponse);
-		sendResponse({ status: "Acknowledged" });
+		sendResponse({ action:"clearReminderResponse", status: "Acknowledged" });
 	});
 
 	SWMessageRouter.registerHandler("getSite", (message, sender, sendResponse) => {
-		sendResponse({ site: ServiceWorker.getCurrentSite(message, sender) });
+		sendResponse({ action:"getPageDataResponse", site: ServiceWorker.getCurrentSite(message, sender) });
 	});
 
 	SWMessageRouter.registerHandler("sidePanelReady",(message, sender, sendResponse) => {
 		ServiceWorker.sidePanelState.open = true;
-		sendResponse({ status: "Acknowledged" });
+		sendResponse({ action:"sidePanelReadyResponse", status: "Acknowledged" });
 	});
 
 	SWMessageRouter.registerHandler("sidePanelClosed",(message, sender, sendResponse) => {
 		ServiceWorker.sidePanelState.open = false;
-		sendResponse({ status: "Acknowledged" });
+		sendResponse({ action:"sidePanelClosedResponse", status: "Acknowledged" });
 	});
 
 	SWMessageRouter.registerHandler("storePageData",(message, sender, sendResponse) => {
-		console.log('SWMessageRouter storePageData:',storePageData);
+		console.log('SWMR storePageData:',message, sender);
 		ServiceWorker.storeTabData(sender.tab.id, message.data);
-		sendResponse({ status: "Acknowledged" });
+		sendResponse({ action:"storePageDataResponse", status: "Acknowledged" });
 	});
 
 	SWMessageRouter.registerHandler("getPageData",(message, sender, sendResponse) => {
-		console.log('SWMessageRouter getPageData:',getPageData);
-		sendResponse({ data: ServiceWorker.getTabData(message.tabid)});
+		console.log('SWMR getPageData:',message, sender);
+		ServiceWorker.updateSidePanel(ServiceWorker.getActiveTabData())
+		sendResponse({ action:"getPageDataResponse", status: "Acknowledged"});
 	});
 /** 
  * 

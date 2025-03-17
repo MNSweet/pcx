@@ -251,15 +251,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 
 	// Request the active tab's page state from the background.
-	function requestTabData() {
-	console.log('SP','requestTabData');
+	function requestPageData() {
+	//console.log('SP','requestPageData');
 		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-		console.log('SP tabs',tabs);
+		//console.log('SP tabs',tabs);
 			if (tabs.length > 0) {
 				const activeTab = tabs[0];
-		console.log('SP activeTab',activeTab);
-				MessageRouter.sendMessage({ type: 'getPageData', tabId: activeTab.id }, (response) => {
-		console.log('SP response',response);
+
+				MessageRouter.sendMessage({ action: 'getPageData', tabId: activeTab.id }, (response) => {
+
 					if (response) {
 						renderSidePanel(response);
 					} else {
@@ -269,14 +269,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 			}
 		});
 	}
-
+	MessageRouter.registerHandler("getPageDataResponse", (msg) => {
+		console.log("SidePanel: Received page data response", msg.data);
+		renderSidePanel(msg.data);
+	});
+	const infoTab = document.getElementById("infoTab");
+	if (infoTab) {
+		infoTab.addEventListener("click", () => {
+			requestPageData();
+		});
+	}
 	// Render the sidePanel's content.
 	function renderSidePanel(pageState) {
 		const content = buildFormFromData(pageState);
 		DOMHelper.getEl('#information-container').innerHTML = content;
 	}
-	requestTabData();
-	console.log('end of DOM Ready');
+	requestPageData();
+	//console.log('end of DOM Ready');
 });
 
 window.addEventListener("unload", () => {

@@ -1,5 +1,5 @@
 // /js/modules/helpers/QAManager.js
-Logger.log("QAManager loaded","INIT");
+Logger.file("QAManager");
 
 /**
  * QA Warning System

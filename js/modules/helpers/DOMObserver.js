@@ -1,5 +1,5 @@
 // /js/modules/helpers/DOMObserver.js
-Logger.log("DOMObserver loaded","INIT");
+Logger.file("DOMObserver");
 class DOMObserver {
 	static observers = new Map(); // Stores observer instances keyed by a unique ID
 	static idCounter = 0;        // Unique identifier generator

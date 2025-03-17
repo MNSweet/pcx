@@ -1,5 +1,5 @@
 // /js/modules/helpers/Utils.js
-Logger.log("Utils Loaded","INIT");
+Logger.file("Utils");
 
 /**
  * Merges multiple option objects into one.

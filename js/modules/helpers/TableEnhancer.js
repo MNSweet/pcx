@@ -1,5 +1,5 @@
 // /js/modules/helpers/TableEnhancer.js
-Logger.log("TableEnhancer loaded","INIT");
+Logger.file("TableEnhancer");
 class TableEnhancer {
 	/**
 	 * @param {string} headerSelector - CSS selector for the header row.
@@ -87,7 +87,6 @@ class TableEnhancer {
 					});
 				}
 				if(mutation.target.nodeName == "TD" && mutation.target.id == "") {
-					console.log("addedNodes",mutation.addedNodes);
 					Array.from(mutation.addedNodes).forEach((node)=> {
 						if (node.nodeType === Node.ELEMENT_NODE && node.matches) {
 							if (node.matches("table#MainContent_ctl00_grid_DXMainTable.dxgvTable_Metropolis.dxgvRBB")) {

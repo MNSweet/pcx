@@ -12,14 +12,13 @@ const allowedDomains = [
 export class SWMessageRouter {
 	static handlers = new Map();
 	// Map of persistent ports keyed by tab id.
-	// Each value is an object: { port, domain, url, tabId, isSidePanel }
 	static portMap = new Map();
 
 	static init() {
 		chrome.runtime.onConnect.addListener((port) => {
 			if (port.name === "persistentChannel") {
 				SWLogger.log("SWMessageRouter: Persistent channel connected", port.sender);
-				// Ensure we have tab information.
+				console.log("SWMR ⎥⊶⎢");
 				if (port.sender && port.sender.tab) {
 					const tabId = port.sender.tab.id;
 					let url = port.sender.tab.url || "";
@@ -28,7 +27,6 @@ export class SWMessageRouter {
 					try {
 						const parsedUrl = new URL(url);
 						domain = parsedUrl.hostname;
-						// If the URL includes "SidePanel.html", mark it as a side panel.
 						isSidePanel = url.includes("SidePanel.html");
 					} catch (e) {
 						SWLogger.warn("SWMessageRouter: Could not parse tab URL", { url, error: e });
@@ -37,16 +35,16 @@ export class SWMessageRouter {
 				}
 				// Listen for messages on this port.
 				port.onMessage.addListener((msg) => {
-					SWLogger.log("SWMessageRouter: Received persistent message", msg.action, { msg });
+					console.log("SWMR⎥«⊶",msg.action, msg);
+					SWLogger.log("SWMessageRouter: Received message", "", { msg });
 					SWMessageRouter.handleMessage(msg, port.sender, (response) => {
 						port.postMessage(response);
 					});
 				});
-				// Clean up when the port disconnects.
 				port.onDisconnect.addListener(() => {
 					if (port.sender && port.sender.tab) {
 						const tabId = port.sender.tab.id;
-						SWLogger.log("SWMessageRouter: Persistent channel disconnected", { tabId });
+						SWLogger.log("SWMessageRouter: Port disconnected", { tabId });
 						SWMessageRouter.portMap.delete(tabId);
 					}
 				});
@@ -61,6 +59,7 @@ export class SWMessageRouter {
 			}
 			SWMessageRouter.handlers.get(action).push(callback);
 			SWLogger.log(`SWMessageRouter: Registered handler for action "${action}"`, action);
+			console.log("SWMR⎥ℹ⎢",action);
 		} catch (err) {
 			SWLogger.error(`SWMessageRouter: Error registering handler for action "${action}"`, action, { error: err });
 		}
@@ -82,7 +81,9 @@ export class SWMessageRouter {
 	}
 
 	static handleMessage(message, sender, sendResponse) {
+		console.log("SWMR⎥«", message.action, sender);
 		if (!message || !message.action) {
+			console.log("SWMR⎥!⎢ No message and/or action", message);
 			SWLogger.warn("SWMessageRouter: Received message with no action", { message }, "NullAction");
 			return;
 		}
@@ -103,19 +104,11 @@ export class SWMessageRouter {
 	}
 
 	/**
-	 * Broadcasts a message to tabs filtered by the provided filter.
-	 * Filter options:
-	 *   "ALL" (default) - all domains and side panels
-	 *   "SITES" - all domains only (excludes side panels)
-	 *   "SP" - side panels only
-	 *   "PL" - only tabs with domain "prince.iatserv.com"
-	 *   "RR" - only tabs with domain "reliable.iatserv.com"
-	 *   "PD" - only tabs with domain "pnc.dxresults.com"
-	 *
-	 * @param {string} filter - The filter string.
-	 * @param {Object} message - The message to broadcast.
+	 * Helper function to broadcast a message to all connected ports.
+	 * (For demonstration, not necessarily used in a request/response cycle.)
 	 */
 	static broadcastToTabs(filter = "ALL", message) {
+		console.log("SWMessageRouter: Broadcasting message", filter, { message });
 		SWLogger.log("SWMessageRouter: Broadcasting message", filter, { message });
 		SWMessageRouter.portMap.forEach((data, tabId) => {
 			const { port, domain, isSidePanel } = data;
@@ -142,22 +135,18 @@ export class SWMessageRouter {
 				default:
 					send = true;
 			}
-			// Only send if within allowed domains.
 			if (send) {
 				try {
 					port.postMessage(message);
 				} catch (err) {
-					SWLogger.error("SWMessageRouter.broadcastToTabs: Error sending message", { error: err });
+					SWLogger.error(`SWMessageRouter.broadcastToTabs: Error sending message for ${filter.toUpperCase()}`, { error: err });
 				}
 			}
 		});
 	}
 
 	/**
-	 * Broadcasts a message to the currently active tab.
-	 * Uses chrome.tabs.query to determine the active tab and sends the message to its persistent port.
-	 *
-	 * @param {Object} message - The message to send.
+	 * For completeness, a helper to send a message to the active tab.
 	 */
 	static broadcastToActive(message) {
 		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -171,83 +160,12 @@ export class SWMessageRouter {
 						SWLogger.error("SWMessageRouter.broadcastToActive: Error sending message", { error: err });
 					}
 				} else {
-					SWLogger.warn("SWMessageRouter.broadcastToActive: No persistent port found for active tab", { activeTabId });
+					SWLogger.warn("SWMessageRouter.broadcastToActive: No port for active tab", { activeTabId });
 				}
-			}
-		});
-	}
-
-	/**
-	 * Checks all persistent ports and disconnects those whose URL is outside the allowed domains.
-	 * This helps ensure that ports for non-tracked domains are removed.
-	 */
-	static cleanupPorts() {
-		SWMessageRouter.portMap.forEach((data, tabId) => {
-			const { port, domain, isSidePanel } = data;
-			// Allow side panel regardless of domain.
-			if (!isSidePanel && !allowedDomains.includes(domain)) {
-				try {
-					port.disconnect();
-					SWLogger.log("SWMessageRouter.cleanupPorts: Disconnecting port for tab", { tabId, domain });
-				} catch (err) {
-					SWLogger.error("SWMessageRouter.cleanupPorts: Error disconnecting port", { error: err });
-				}
-				SWMessageRouter.portMap.delete(tabId);
-			}
-		});
-	}
-
-	/**
-	 * Convenience method to send an ephemeral message (if needed).
-	 * Retained for backward compatibility.
-	 * @param {Object} message 
-	 * @returns {Promise}
-	 */
-	static sendMessage(message) {
-		return new Promise((resolve, reject) => {
-			try {
-				chrome.runtime.sendMessage(message, (response) => {
-					if (chrome.runtime.lastError) {
-						SWLogger.error("SWMessageRouter.sendMessage: Error sending message", { error: chrome.runtime.lastError });
-						return reject(chrome.runtime.lastError.message);
-					}
-					resolve(response);
-				});
-			} catch (err) {
-				SWLogger.error("SWMessageRouter.sendMessage: Exception caught when sending message", { error: err });
-				reject(err);
 			}
 		});
 	}
 }
 
 SWMessageRouter.init();
-
-// Tab Specific Garbage Collection
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-	if (changeInfo.url) {
-		try {
-			const parsedUrl = new URL(changeInfo.url);
-			const domain = parsedUrl.hostname;
-			// Check if the updated domain is allowed.
-			if (!allowedDomains.includes(domain)) {
-				const portData = SWMessageRouter.portMap.get(tabId);
-				// Disconnect only if this isn’t a side panel.
-				if (portData && !portData.isSidePanel) {
-					portData.port.disconnect();
-					SWLogger.log("SWMessageRouter: Disconnected port due to domain change", { tabId, domain });
-					SWMessageRouter.portMap.delete(tabId);
-				}
-			}
-		} catch (err) {
-			SWLogger.error("SWMessageRouter: Error parsing updated URL", { error: err, tabId });
-		}
-	}
-});
-
-// General Garbage Collection for Redundancy
-setInterval(() => {
-	SWMessageRouter.cleanupPorts();
-}, 300000); // 5 minutes
-
 export default SWMessageRouter;

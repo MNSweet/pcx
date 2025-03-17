@@ -1,5 +1,5 @@
 // /js/labs/lab_pl.js
-Logger.log('Viewing Prince Laboratories | LabPL Loaded',"INIT");
+Logger.file("LabPL");
 
 // Log initial messages and set the lab portal
 PCX.setLabPortal("PL");

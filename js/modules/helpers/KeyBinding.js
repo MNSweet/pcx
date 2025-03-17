@@ -1,5 +1,5 @@
 // /js/modules/helpers/Keybinding.js
-Logger.log("Keybinding loaded","INIT");
+Logger.file("Keybinding");
 class Keybinding {
 	constructor(bindings = {}) {
 		this.bindings = bindings;

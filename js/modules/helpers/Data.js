@@ -1,5 +1,5 @@
 // /js/modules/helpers/DataHandler.js
-Logger.log("DataHandler Loaded","INIT");
+Logger.file("DataHandler");
 
 class DataHandler {
 	static IndexDB = "pxc";

@@ -1,5 +1,5 @@
 // /js/modules/helpers/AsyncHelpers.js
-Logger.log("AsyncHelpers Loaded","INIT");
+Logger.file("AsyncHelpers");
 
 /**
  * Waits for a DOM element matching the selector to appear.

@@ -146,8 +146,9 @@ class Logger {
 	 * @param {Object} entry - The log entry.
 	 */
 	static output(entry) {
+		// Save the log entry
 		Logger.logs.push(entry);
-		// Output to browser console
+		// Optionally output to browser console
 		if (Logger.outputBrowserConsole) {
 			switch (entry.type) {
 				case 'warn': console.warn(entry); break;
@@ -155,78 +156,155 @@ class Logger {
 				default: console.log(entry);
 			}
 		}
-		// Add to the DevLog UI Console tab as a table row
-		if (Logger.devLogTabs.console && (entry.type === 'log' || entry.type === 'structure' || entry.type === 'capture')) {
-			// Create the table if it doesn't exist yet
-			if (!Logger.devLogTabs.console.querySelector('table')) {
-				let table = document.createElement('table');
-				table.id = 'debug-table';
-				// Create thead with sticky header
-				let colgroup = document.createElement('colgroup');
-				['colDate', 'colType', 'colMsg', 'colLoc'].forEach(function(className) {
-					let col = document.createElement('col');
-					col.classList.add(className);
-					colgroup.appendChild(col);
-				});
-				table.appendChild(colgroup);
-				let thead = document.createElement('thead');
-				let headerRow = document.createElement('tr');
-				['Date', 'Type', 'Message/Args', 'Location'].forEach(function(col) {
-					let th = document.createElement('th');
-					th.textContent = col;
-					th.classList.add("col"+(col =='Message/Args'? 'Msg': (col == 'Location' ? 'Loc': col)));
-					headerRow.appendChild(th);
-				});
-				thead.appendChild(headerRow);
-				table.appendChild(thead);
-				// Create tbody for log entries
-				let tbody = document.createElement('tbody');
-				table.appendChild(tbody);
-				Logger.devLogTabs.console.appendChild(table);
-			}
-			let table = Logger.devLogTabs.console.querySelector('table');
-			let tbody = table.querySelector('tbody');
-			let row = document.createElement('tr');
-			// Calculate alternating row colors (excluding header)
-			let count = tbody.children.length;
-			row.style.background = (count % 2 === 0 ? '#fff' : '#f9f9f9');
-
-			// Date cell
-			let dateCell = document.createElement('td');
-			dateCell.classList.add("colDate");
-			dateCell.innerHTML = entry.timestamp.toLocaleString();
-
-			// Type cell
-			let typeList = [entry.type.toUpperCase(),Logger.getFileCategory(entry.caller),entry.context];
-			let typeCell = document.createElement('td');
-			typeCell.classList.add("colType");
-			typeCell.innerHTML = '[' + typeList.join(']<br/>[') + "]";
-			row.dataset.types = typeList.join(",")
-
-
-			// Message/Args cell
-			let msgCell = document.createElement('td');
-			msgCell.classList.add("colMsg");
-			let msgText = entry.message;
-			if (entry.args) {
-				entry.args.forEach((arg)=>{
-					msgText += ' | ' + JSON.stringify(arg);
-				})
-			}
-			msgCell.textContent = msgText;
-
-			// Location cell
-			let locCell = document.createElement('td');
-			locCell.classList.add("colLoc");
-			locCell.textContent = entry.caller;
-
-			row.appendChild(dateCell);
-			row.appendChild(typeCell);
-			row.appendChild(msgCell);
-			row.appendChild(locCell);
-
-			tbody.appendChild(row);
+		
+		// Determine the target tab based on the log entry type.
+		// "console" covers 'log', 'warn', 'error', 'structure', and 'capture'
+		// "tracer" covers entries created via trackFunction() (type 'tracer')
+		// "messaging" covers entries with type 'message'
+		// "file" covers entries with type 'file'
+		let targetTab = 'console';
+		if (['tracer'].includes(entry.type)) {
+			targetTab = 'tracer';
+		} else if (['messaging'].includes(entry.type)) {
+			targetTab = 'messaging';
+		} else if (['file'].includes(entry.type)) {
+			targetTab = 'file';
 		}
+		
+		// Define the table headings and column classes for each tab.
+		let headings = [];
+		let colClasses = [];
+		switch(targetTab) {
+			case 'console':
+				headings = ['Date', 'Type', 'Message/Args', 'Location'];
+				colClasses = ['colDate', 'colType', 'colMsg', 'colLoc'];
+				break;
+			case 'tracer':
+				headings = ['Data', 'Event', 'Count', 'Location'];
+				colClasses = ['colDate', 'colEvent', 'colCount', 'colLoc'];
+				break;
+			case 'messaging':
+				// Reuse the console layout for messaging (or change as desired)
+				headings = ['Date', 'Direction', 'Message', 'Location'];
+				colClasses = ['colDate', 'colDir', 'colMsg', 'colLoc'];
+				break;
+			case 'file':
+				// Reuse the console layout for file events (or define a custom one)
+				headings = ['Date', 'Name', 'Location'];
+				colClasses = ['colDate', 'colName', 'colLoc'];
+				break;
+			default:
+				headings = ['Date', 'Type', 'Message/Args', 'Location'];
+				colClasses = ['colDate', 'colType', 'colMsg', 'colLoc'];
+		}
+		
+		// Get the target tab container.
+		let targetContainer = Logger.devLogTabs[targetTab];
+		
+		// Check if a table already exists; if not, create one.
+		let table = targetContainer.querySelector('table');
+		if (!table) {
+			table = Logger.createLogDOM('table', { id: `debug-table-${targetTab}` });
+			// Create a colgroup with the appropriate column classes.
+			let colgroup = Logger.createLogDOM('colgroup');
+			colClasses.forEach(cls => {
+				let col = Logger.createLogDOM('col', { className: cls });
+				colgroup.appendChild(col);
+			});
+			table.appendChild(colgroup);
+			// Create the table header (thead)
+			let thead = Logger.createLogDOM('thead');
+			let headerRow = Logger.createLogDOM('tr');
+			headings.forEach((heading, index) => {
+				let th = Logger.createLogDOM('th', { textContent: heading, className: colClasses[index] });
+				headerRow.appendChild(th);
+			});
+			thead.appendChild(headerRow);
+			table.appendChild(thead);
+			// Create a tbody for log entries.
+			let tbody = Logger.createLogDOM('tbody');
+			table.appendChild(tbody);
+			targetContainer.appendChild(table);
+		}
+		
+		// Append a new row for the log entry.
+		let tbody = table.querySelector('tbody');
+		let row = Logger.createLogDOM('tr');
+		let count = tbody.children.length;
+		// Alternate row background color
+		row.style.background = (count % 2 === 0 ? '#fff' : '#f9f9f9');
+		
+
+		colClasses.forEach(cls => {
+			let cell = Logger.createLogDOM('td');
+			
+			switch(cls) {
+				case 'colDate':
+					Logger.applyLogAttributes(cell, {
+						className: 'colDate',
+						textContent: entry.timestamp.toLocaleString()
+					});
+				break;
+
+				case 'colType':
+					let typeList = [entry.type.toUpperCase(),Logger.getFileCategory(entry.caller),entry.context];
+					row.dataset.types = typeList.join(",")
+
+					Logger.applyLogAttributes(cell, {
+						className: 'colType',
+						innerHTML: '[' + typeList.join(']<br/>[') + "]"
+					});
+				break;
+
+				case 'colMsg':
+				case 'colName':
+					let msgText = entry.message;
+					if (entry.args) {
+						entry.args.forEach(arg => {
+							msgText += `<br/><pre>${JSON.stringify(arg,null,"\t")}</pre>`;
+						});
+					}
+					Logger.applyLogAttributes(cell, {
+						className: 'colMsg',
+						innerHTML: msgText
+					});
+				break;
+
+				case 'colLoc':
+					Logger.applyLogAttributes(cell, {
+						className: 'colLoc',
+						textContent: entry.caller
+					});
+				break;
+
+				case 'colEvent':
+					Logger.applyLogAttributes(cell, {
+						textContent: ""
+					});
+				break;
+
+				case 'colCount':
+					Logger.applyLogAttributes(cell, {
+						textContent: ""
+					});
+				break;
+
+				case 'colDir':
+					Logger.applyLogAttributes(cell, {
+						textContent: entry.context
+					});
+				break;
+
+				default:
+					Logger.applyLogAttributes(cell, {
+						textContent: ""
+					});
+				break;
+			}
+			row.appendChild(cell);
+		});
+		
+		tbody.appendChild(row);
 	}
 
 	/**
@@ -234,9 +312,9 @@ class Logger {
 	 * @param {string} message - The message.
 	 * @param {any} context - Optional context.
 	 */
-	static fileLog(message, context, ...args) {
+	static file(message, ...args) {
 		if (!Logger.enabled) { return; }
-		let entry = Logger.createEntry('file', message, context, args);
+		let entry = Logger.createEntry('file', message, '', args);
 		Logger.output(entry);
 	}
 
@@ -244,13 +322,12 @@ class Logger {
 	 * Log intercontext messaging events.
 	 * This logs a message with type "message" that will be output in the Messaging tab.
 	 * @param {string} message - The message.
-	 * @param {any} context - Optional context.
+	 * @param {any} direction - Sent / Received / Added / Deleted.
 	 */
-	static messageLog(message, context, ...args) {
+	static messageLog(message, direction, ...args) {
 		if (!Logger.enabled) { return; }
-		let entry = Logger.createEntry('message', message, context, args);
+		let entry = Logger.createEntry('messaging', message, direction, args);
 		Logger.output(entry);
-		// Optionally, you might also directly append this to the messaging tab UI.
 	}
 
 	/**
@@ -434,53 +511,25 @@ class Logger {
 	 * with a small handle in the bottom-right.
 	 */
 	static createDevLog() {
-		// Create main container (initially hidden)
-		Logger.devLogContainer = Logger.createLogDOM('div',{
+		Logger.devLogContainer = Logger.createLogDOM('div',
+		{
+			id: 'devlog-container',
 			style: {
-				position: 'fixed',
-				left: '0',
-				right: '0',
-				bottom: '0',
-				height: '300px',
-				background: '#fff',
-				borderTop: '1px solid #ccc',
-				boxShadow: '0 -2px 5px rgba(0,0,0,0.1)',
-				display: 'none',
-				zIndex: '9999',
-				fontFamily: 'sans-serif',
-				fontSize: '12px'
+				display: 'none'
 			}
 		});
 
-		// Create tab navigation container (left side)
-		let tabNav = Logger.createLogDOM('div',{
-			style: {
-				width:'100px',
-				height:'100%',
-				float:'left',
-				borderRight:'1px solid #ddd',
-				boxSizing:'border-box',
-				background:'#f7f7f7',
-				overflowY:'auto',
-			}
-		});
-
-		// Create content container (right side)
-		let tabContent = Logger.createLogDOM('div', {
-			style:{
-				marginLeft: '100px',
-				height: '100%',
-				overflowY: 'auto',
-				padding: '4px'
-			}
-		});
+		// Create tab navigation container.
+		let tabNav = Logger.createLogDOM('div', { id: 'devlog-tab-nav' });
+		// Create content container.
+		let tabContent = Logger.createLogDOM('div', { id: 'devlog-tab-content' });
 
 		// Define tabs
 		let tabs = [
 			{ name: 'console', label: 'Console' },
 			{ name: 'tracer', label: 'Tracer' },
 			{ name: 'messaging', label: 'Messaging' },
-			{ name: 'files', label: 'Files' }//,
+			{ name: 'file', label: 'Files' }//,
 			//{ name: 'tab3', label: 'Tab 3' },
 			//{ name: 'tab4', label: 'Tab 4' }
 		];
@@ -491,12 +540,7 @@ class Logger {
 			// Tab button
 			let tabButton = Logger.createLogDOM('div',{
 				textContent: tab.label,
-				style: {
-					padding: "8px",
-					cursor: "pointer",
-					borderBottom: "1px solid #ddd",
-					background: (tab.name === self.activeTab ? '#e0e0e0' : 'transparent')
-				},
+				className: 'devlog-tab-button', 
 				dataset: {
 					tab: tab.name
 				}
@@ -515,14 +559,12 @@ class Logger {
 			tabNav.appendChild(tabButton);
 
 			// Content pane
-			let pane = Logger.createLogDOM('div',{
-				style:{
-					width: '100%',
-					height: '100%',
-					display: (tab.name === self.activeTab ? 'block' : 'none'),
-					overflowY: 'auto%',
+			let pane = Logger.createLogDOM('div', {
+				className: 'devlog-tab-pane',
+				style: {
+					display: (tab.name === self.activeTab ? 'block' : 'none')
 				}
-			})
+			});
 			self.devLogTabs[tab.name] = pane;
 			tabContent.appendChild(pane);
 		});
@@ -533,22 +575,10 @@ class Logger {
 
 		// Create the toggle handle (always visible at the bottom-right)
 		Logger.devLogHandle = Logger.createLogDOM('div', {
+			id: 'devlog-handle',
 			textContent: 'DevLog',
-			style:{
-				position: 'fixed',
-				width: '100px',
-				height: '30px',
-				right: '0',
-				bottom: '0',
-				background: '#333',
-				color: '#fff',
-				display: 'flex',
-				alignItems: 'center',
-				justifyContent: 'center',
-				cursor: 'pointer',
-				zIndex: '10000',
-				fontSize: '18px',
-				borderRadius: '10px 0 0'
+			style: {
+				bottom: '0px'
 			}
 		});
 		Logger.devLogHandle.addEventListener('click', function() {
@@ -596,34 +626,34 @@ class Logger {
 Logger.init();
 
 /*
-// Example usage:
-// Register structural events when classes or functions are defined.
-Logger.registerStructure('MyClass defined');
-function MyClass(value) {
-	Logger.value = value;
-}
-MyClass.prototype.increment = function() {
-	Logger.value++;
-	return Logger.value;
-};
-Logger.registerStructure('MyClass.prototype.increment defined');
-
-// Capture state on a specific event (e.g., click)
-document.addEventListener('click', function() {
-	let importantState = {
-		someValue: window.someGlobalValue || null,
-		anotherValue: window.anotherGlobalValue || null
+	// Example usage:
+	// Register structural events when classes or functions are defined.
+	Logger.registerStructure('MyClass defined');
+	function MyClass(value) {
+		Logger.value = value;
+	}
+	MyClass.prototype.increment = function() {
+		Logger.value++;
+		return Logger.value;
 	};
-	Logger.capture('User click state capture', importantState);
-});
+	Logger.registerStructure('MyClass.prototype.increment defined');
 
-// Wrap a function to track its calls
-function exampleFunction(a, b) {
-	return a + b;
-}
-let trackedExampleFunction = Logger.trackFunction(exampleFunction, 'exampleFunction');
-console.log('Result:', trackedExampleFunction(2, 3));
+	// Capture state on a specific event (e.g., click)
+	document.addEventListener('click', function() {
+		let importantState = {
+			someValue: window.someGlobalValue || null,
+			anotherValue: window.anotherGlobalValue || null
+		};
+		Logger.capture('User click state capture', importantState);
+	});
 
-// Basic logs
-Logger.log('This is a log message.');
+	// Wrap a function to track its calls
+	function exampleFunction(a, b) {
+		return a + b;
+	}
+	let trackedExampleFunction = Logger.trackFunction(exampleFunction, 'exampleFunction');
+	console.log('Result:', trackedExampleFunction(2, 3));
+
+	// Basic logs
+	Logger.log('This is a log message.');
 */
