@@ -606,7 +606,7 @@ class IATSERV {
 		}
 
 		// Add event listener to the button
-		document.querySelector('[onclick="printLables()"]').addEventListener('click', generateLabel);
+		document.querySelectorAll('[onclick="printLables()"]').forEach((btn)=>{btn.addEventListener('click', generateLabel);});
 
 	}
 
