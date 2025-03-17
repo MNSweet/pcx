@@ -9,7 +9,7 @@ class ServiceWorker {
 		}
 	};
 
-	static timer = 36000;
+	static timer = 36;
 	static timerState = 0;
 
 	static log(message) {
