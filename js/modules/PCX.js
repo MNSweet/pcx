@@ -28,7 +28,7 @@ class PCX {
 	static async processEnabled(category, key, trueCallback, callback) {
 		let result = await Settings.check(category, key, callback);
 		let metadata = Settings.PERMISSION_STRUCTURE[category]?.[key] || { description: "", priority: 10 };
-		Logger.log(`processEnabled: ${category} - ${key} = ${result}. Priority: ${metadata.priority}`);
+		Logger.log(`processEnabled: ${category} - ${key} = ${result}. Priority: ${metadata.priority}`, 'Perms');
 		return result ? (trueCallback?.() ?? true) : result;
 	}
 

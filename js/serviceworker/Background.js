@@ -287,8 +287,8 @@ class ServiceWorker {
 
 	SWMessageRouter.registerHandler("getPageData",(message, sender, sendResponse) => {
 		console.log('SWMR getPageData:',message, sender);
-		ServiceWorker.updateSidePanel(ServiceWorker.getActiveTabData())
-		sendResponse({ action:"getPageDataResponse", status: "Acknowledged"});
+		sendResponse({ action:"getPageDataResponse", status: "Acknowledged", data:ServiceWorker.getActiveTabData()});
+		ServiceWorker.updateSidePanel({ action:"updatePageData", data:ServiceWorker.getActiveTabData()})
 	});
 /** 
  * 

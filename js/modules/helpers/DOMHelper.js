@@ -21,7 +21,7 @@ class DOMHelper {
 	static findEl(selector) {
 		try {
 			const el = document.querySelector(selector);
-			Logger.log(`findEl located "${selector}"`,"Scan", { element: el });
+			Logger.log(`findEl located "${selector}"`,"Scan");
 			return el;
 		} catch (error) {
 			Logger.error(`findEl: Error querying selector "${selector}"`,"Scan", { error });
@@ -37,7 +37,7 @@ class DOMHelper {
 	static findEls(selector) {
 		try {
 			const els = document.querySelectorAll(selector);
-			Logger.log(`findEls located "${selector.length}" elements`,"Scan", { elements: els });
+			Logger.log(`findEls located "${selector.length}" elements`,"Scan");
 			return els;
 		} catch (error) {
 			Logger.error(`findEls: Error querying selector "${JSON.stringify(selector)}"`,"Scan", { error });

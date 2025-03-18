@@ -252,32 +252,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	// Request the active tab's page state from the background.
 	function requestPageData() {
-	//console.log('SP','requestPageData');
-		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-		//console.log('SP tabs',tabs);
-			if (tabs.length > 0) {
-				const activeTab = tabs[0];
 
-				MessageRouter.sendMessage({ action: 'getPageData', tabId: activeTab.id }, (response) => {
+		MessageRouter.registerHandler("getPageDataResponse", (msg) => {
+			console.log("SidePanel: Received page data response", msg.data);
+		});
+		MessageRouter.registerHandler("updatePageData", (msg) => {
+			console.log("SidePanel: Received page data response", msg.data);
+			renderSidePanel(msg.data);
+		});
+		MessageRouter.sendMessage({ action: 'getPageData'});
 
-					if (response) {
-						renderSidePanel(response);
-					} else {
-						DOMHelper.getEl('#information-container').innerHTML = '<p>No page data available.</p>';
-					}
-				});
-			}
-		});
-	}
-	MessageRouter.registerHandler("getPageDataResponse", (msg) => {
-		console.log("SidePanel: Received page data response", msg.data);
-		renderSidePanel(msg.data);
-	});
-	const infoTab = document.getElementById("infoTab");
-	if (infoTab) {
-		infoTab.addEventListener("click", () => {
-			requestPageData();
-		});
+		const infoTab = document.getElementById("infoTab");
+		if (infoTab) {
+			infoTab.addEventListener("click", () => {
+				requestPageData();
+			});
+		}
 	}
 	// Render the sidePanel's content.
 	function renderSidePanel(pageState) {

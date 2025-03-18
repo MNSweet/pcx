@@ -19,11 +19,14 @@ export class SWMessageRouter {
 			if (port.name === "persistentChannel") {
 				SWLogger.log("SWMessageRouter: Persistent channel connected", port.sender);
 				console.log("SWMR ⎥⊶⎢");
+				let tabId;
+				let url = "";
+				let domain = "";
+				let isSidePanel = false;
 				if (port.sender && port.sender.tab) {
-					const tabId = port.sender.tab.id;
-					let url = port.sender.tab.url || "";
-					let domain = "";
-					let isSidePanel = false;
+					// Normal tab.
+					tabId = port.sender.tab.id;
+					url = port.sender.tab.url || "";
 					try {
 						const parsedUrl = new URL(url);
 						domain = parsedUrl.hostname;
@@ -31,8 +34,15 @@ export class SWMessageRouter {
 					} catch (e) {
 						SWLogger.warn("SWMessageRouter: Could not parse tab URL", { url, error: e });
 					}
-					SWMessageRouter.portMap.set(tabId, { port, domain, url, tabId, isSidePanel });
+				} else {
+					// Side panel.
+					tabId = "sidePanel";
+					url = port.sender && port.sender.url ? port.sender.url : "";
+					domain = "sidePanel";
+					isSidePanel = true;
 				}
+				SWMessageRouter.portMap.set(tabId, { port, domain, url, tabId, isSidePanel });
+
 				// Listen for messages on this port.
 				port.onMessage.addListener((msg) => {
 					console.log("SWMR⎥«⊶",msg.action, msg);
@@ -109,6 +119,7 @@ export class SWMessageRouter {
 	 */
 	static broadcastToTabs(filter = "ALL", message) {
 		console.log("SWMessageRouter: Broadcasting message", filter, { message });
+			console.log(SWMessageRouter.portMap);
 		SWLogger.log("SWMessageRouter: Broadcasting message", filter, { message });
 		SWMessageRouter.portMap.forEach((data, tabId) => {
 			const { port, domain, isSidePanel } = data;

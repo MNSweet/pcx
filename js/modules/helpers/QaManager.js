@@ -135,7 +135,7 @@ class QAManager {
 	}
 	
 	static setStablityNotice(parentElement,stabilityDate,existingAcs = false) {
-		Logger.log("setStablityNotice: ",parentElement,stabilityDate,existingAcs);
+		Logger.log(`setStablityNotice: ${stabilityDate}`,"QA",{"Update ACS Format":existingAcs});
 		if(stabilityDate == "") {return;}
 		let stabilityAge = Math.floor(
 			(new Date() - new Date(stabilityDate)) / (1000 * 60 * 60 * 24)

@@ -94,9 +94,8 @@ class Logger {
 			// stackLines[1] is getCallerInfo
 			// stackLines[2] is the Logger method (log, warn, error)
 			// stackLines[3] is the caller we want to capture
-			
 			if (stackLines.length > 1) {
-				return stackLines[stackLines.length - 1].trim().match(/^(?:at\s+)?(?:[a-zA-Z-]+:\/\/[^/]+)(\/.*)$/)[1];
+				return stackLines[stackLines.length - 1].trim().match(/(?:at\s+)?(?:[a-zA-Z-]+:\/\/[^/]+)(\/[^)]*)(?:\))?$/)[1];
 			}
 			return '';
 		} catch (error) {
@@ -624,6 +623,17 @@ class Logger {
 
 // Automatically initialize if debug is enabled via URL, otherwise require manual init.
 Logger.init();
+
+
+
+class Icon {
+	static Incoming	= "⎥«";
+	static Outgoing	= "»⎢";
+	static Error 	= "⎥!⎢";
+	static Info 	= "⎥ℹ⎢";
+	static Port 	= "⎥⊶⎢";
+	static Listener = "⎥«⊶";
+}
 
 /*
 	// Example usage:

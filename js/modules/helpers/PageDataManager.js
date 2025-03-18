@@ -68,6 +68,9 @@ class PageDataManager {
 			url: location.href,
 			timestamp: new Date().toISOString()
 		};
+		MessageRouter.registerHandler("storePageDataResponse", (msg) => {
+			Logger.messageLog(`${msg.action} - Response from storePageData`, "⎥«" , msg.status );
+		});
 		console.log("PageDataManager: Data sent", normalizedData);
 		MessageRouter.sendMessage({ action: 'storePageData', data: normalizedData },);
 	}
