@@ -248,8 +248,18 @@ if(PCX.preferedUserMode()) {
 	function checkAndReplaceIframe(){
 		waitForElm(".fancybox-iframe").then((iframe)=> {
 			waitForIframeElm(".fancybox-iframe","#MainContent_ctl00_tbName").then((input)=> {
+				let tbName = input.value;
 				input.value=input.value.replace(/[,.\"]/,"");
+				if(input.value != tbName){
+					input.style.border="2px solid #0cc90c";
+					document.querySelector('.fancybox-iframe').contentWindow.document.querySelector("#MainContent_ctl00_btnSave",true).click()
+				}
 				waitForElm(".fancybox-close").then((close)=> {
+					close.addEventListener('click', ()=>{
+						delay(1000).then(checkAndReplaceIframe);
+					});
+				});
+				waitForElm(".fancybox-overlay").then((close)=> {
 					close.addEventListener('click', ()=>{
 						delay(1000).then(checkAndReplaceIframe);
 					});
