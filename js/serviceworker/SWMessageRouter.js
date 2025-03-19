@@ -18,7 +18,6 @@ export class SWMessageRouter {
 		chrome.runtime.onConnect.addListener((port) => {
 			if (port.name === "persistentChannel") {
 				SWLogger.log("SWMessageRouter: Persistent channel connected", port.sender);
-				console.log("SWMR ⎥⊶⎢");
 				let tabId;
 				let url = "";
 				let domain = "";
@@ -45,7 +44,6 @@ export class SWMessageRouter {
 
 				// Listen for messages on this port.
 				port.onMessage.addListener((msg) => {
-					console.log("SWMR⎥«⊶",msg.action, msg);
 					SWLogger.log("SWMessageRouter: Received message", "", { msg });
 					SWMessageRouter.handleMessage(msg, port.sender, (response) => {
 						port.postMessage(response);
@@ -69,7 +67,6 @@ export class SWMessageRouter {
 			}
 			SWMessageRouter.handlers.get(action).push(callback);
 			SWLogger.log(`SWMessageRouter: Registered handler for action "${action}"`, action);
-			console.log("SWMR⎥ℹ⎢",action);
 		} catch (err) {
 			SWLogger.error(`SWMessageRouter: Error registering handler for action "${action}"`, action, { error: err });
 		}
@@ -118,8 +115,6 @@ export class SWMessageRouter {
 	 * (For demonstration, not necessarily used in a request/response cycle.)
 	 */
 	static broadcastToTabs(filter = "ALL", message) {
-		console.log("SWMessageRouter: Broadcasting message", filter, { message });
-			console.log(SWMessageRouter.portMap);
 		SWLogger.log("SWMessageRouter: Broadcasting message", filter, { message });
 		SWMessageRouter.portMap.forEach((data, tabId) => {
 			const { port, domain, isSidePanel } = data;

@@ -38,7 +38,6 @@ class MessageRouter {
 	 * Routes incoming messages to registered handlers.
 	 */
 	static handleMessage(message) {
-		console.log("CXMR⎥«", message.action);
 		if (!message || !message.action) {
 			Logger.messageLog("No message and/or action",Icon.Error, { message });
 			return;

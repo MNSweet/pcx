@@ -63,6 +63,7 @@ class PageDataManager {
 		const normalizedData = {
 			pageTemplate: data.pageTemplate || new URL(location.href).searchParams.get("LinkId") || "default",
 			sidePanelTemplate: data.sidePanelTemplate || "defaultSidePanel",
+			lims: data.lims || "default",
 			pageContext: data,
 			title: document.title,
 			url: location.href,
@@ -71,7 +72,6 @@ class PageDataManager {
 		MessageRouter.registerHandler("storePageDataResponse", (msg) => {
 			Logger.messageLog(`${msg.action} - Response from storePageData`, "⎥«" , msg.status );
 		});
-		console.log("PageDataManager: Data sent", normalizedData);
 		MessageRouter.sendMessage({ action: 'storePageData', data: normalizedData },);
 	}
 
@@ -84,7 +84,6 @@ class PageDataManager {
 		chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 			if (request.action === "getPageContent") {
 				const liveData = PageDataManager.getData(config);
-				console.log("PageDataManager: Sending live page content", liveData);
 				sendResponse({ content: liveData });
 			}
 		});

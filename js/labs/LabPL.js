@@ -281,6 +281,9 @@ if (PCX.preferredUserMode()) {
 			},
 			sidePanelTemplate: { 
 				default: IATSERV.linkId
+			},
+			lims: { 
+				default: "IATSERV"
 			}
 		};
 

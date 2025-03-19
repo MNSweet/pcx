@@ -129,7 +129,6 @@ document.addEventListener("DOMContentLoaded", async () => {
  */
 
 	async function loadInfoUI(data) {
-		console.log("loadInfoUI data", data);
 		let container = DOMHelper.getEl("#information-container");
 
 		if (!container) {
@@ -170,9 +169,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	// Main function to choose and call the correct renderer.
 	function buildFormFromData(pageState) {
-		const { lims, location } = pageState;
-		const renderer = templateRegistry[lims] && templateRegistry[lims][location];
-		return renderer ? renderer(pageState) : renderDefault(pageState);
+		const { lims, pageTemplate, sidePanelTemplate } = pageState;
+		const renderer = (templateRegistry[lims] && templateRegistry[lims][sidePanelTemplate])
+		                  ? templateRegistry[lims][sidePanelTemplate]
+		                  : renderDefault;
+		return renderer(pageState);
 	}
 
 	// Example renderer functions for IATSERV pages.
@@ -181,10 +182,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 
 	function renderUpdateAccession(pageState) {
-		if (!pageState.extraParams.AccessionId) {
+		if (!pageState.pageContext.acsID && !pageState.pageContext.acsNum) {
 			return `<h1>Error</h1><p>Missing AccessionId for Update Accession.</p>`;
 		}
-		return `<h1>Update Accession</h1><p>Updating Accession: ${pageState.extraParams.AccessionId}</p>`;
+		return `<h1>Viewing Accession</h1><p>${pageState.pageContext.acsNum}</p>`;
 	}
 
 	function renderCreateAccession(pageState) {
@@ -253,12 +254,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 	// Request the active tab's page state from the background.
 	function requestPageData() {
 
-		MessageRouter.registerHandler("getPageDataResponse", (msg) => {
-			console.log("SidePanel: Received page data response", msg.data);
-		});
-		MessageRouter.registerHandler("updatePageData", (msg) => {
-			console.log("SidePanel: Received page data response", msg.data);
-			renderSidePanel(msg.data);
+		MessageRouter.registerHandler("getPageDataResponse", (message) => {/* Silence */});
+		MessageRouter.registerHandler("updatePageData", (message) => {
+			renderSidePanel(message.data);
 		});
 		MessageRouter.sendMessage({ action: 'getPageData'});
 
@@ -274,8 +272,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const content = buildFormFromData(pageState);
 		DOMHelper.getEl('#information-container').innerHTML = content;
 	}
+	MessageRouter.registerHandler("showLoading", (msg) => {
+		console.log("SidePanel: Showing loading template");
+		renderLoadingTemplate();
+	});
 	requestPageData();
-	//console.log('end of DOM Ready');
 });
 
 window.addEventListener("unload", () => {

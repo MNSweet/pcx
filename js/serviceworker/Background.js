@@ -49,7 +49,7 @@ class ServiceWorker {
 	}
 
 	static getTabData(tabId) {
-		console.log("tabId",tabId);
+		console.log("getTabData:tabId",tabId);
 		return ServiceWorker.dataStore[tabId] || null;
 	}
 
@@ -57,7 +57,7 @@ class ServiceWorker {
 		return new Promise((resolve) => {
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 				const tabId = tabs[0].id;
-				console.log("tabId",tabId);
+				console.log("getActiveTabData:tabId",tabId);
 				resolve(ServiceWorker.dataStore[tabId] || null);
 			})
 		})
@@ -70,7 +70,7 @@ class ServiceWorker {
 	}
 
 	// --- Side Panel Functions ---
-	static enableSidePanel(tabId = null) {
+	static async enableSidePanel(tabId = null) {
 		let options = {
 			enabled: true,
 			path: "SidePanel.html"
@@ -78,7 +78,8 @@ class ServiceWorker {
 		if (tabId) {
 			options.tabId = tabId;
 		}
-		chrome.sidePanel.setOptions(options)
+		console.log("options",options);
+		await chrome.sidePanel.setOptions(options)
 	}
 	static updateSidePanel(data) {
 		try {
@@ -121,7 +122,9 @@ class ServiceWorker {
 			await chrome.sidePanel.setOptions({ tabId, enabled: false });
 		} else {
 			ServiceWorker.changeExtensionIcon(true);
+			console.log("enableSidePanel",tabId);
 			ServiceWorker.enableSidePanel(tabId);
+			SWMessageRouter.broadcastToTabs("SP", { action: "showLoading" });
 		}
 	}
 
@@ -134,6 +137,27 @@ class ServiceWorker {
 			}
 		});
 	}
+
+	static isTabInScope(tab) {
+		if (!tab.url) {
+			return false;
+		}
+		let url;
+		try {
+			url = new URL(tab.url);
+		} catch (e) {
+			return false;
+		}
+		const allowedHostnames = Object.values(ServiceWorker.options.domains).map(domainUrl => {
+			try {
+				return new URL(domainUrl).hostname;
+			} catch (e) {
+				return null;
+			}
+		}).filter(Boolean);
+		return allowedHostnames.includes(url.hostname);
+	}
+
 
 	// --- Patient Transfer ---
 	static initPatientTransfer(request) {
@@ -271,24 +295,43 @@ class ServiceWorker {
 
 	SWMessageRouter.registerHandler("sidePanelReady",(message, sender, sendResponse) => {
 		ServiceWorker.sidePanelState.open = true;
+/*
+		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+			tabs.forEach((tab) => {
+				if (ServiceWorker.isTabInScope(tab)) {
+					ServiceWorker.enableSidePanel(tab.id);
+				}
+			});
+		});
+*/
 		sendResponse({ action:"sidePanelReadyResponse", status: "Acknowledged" });
 	});
 
 	SWMessageRouter.registerHandler("sidePanelClosed",(message, sender, sendResponse) => {
 		ServiceWorker.sidePanelState.open = false;
+		/*chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+			tabs.forEach((tab) => {
+				if (ServiceWorker.isTabInScope(tab)) {
+					ServiceWorker.enableSidePanel(tab.id);
+				}
+			});
+		});*/
 		sendResponse({ action:"sidePanelClosedResponse", status: "Acknowledged" });
 	});
 
 	SWMessageRouter.registerHandler("storePageData",(message, sender, sendResponse) => {
-		console.log('SWMR storePageData:',message, sender);
 		ServiceWorker.storeTabData(sender.tab.id, message.data);
+		if (ServiceWorker.sidePanelState.open) {
+			SWMessageRouter.broadcastToTabs("SP", { action: "getPageDataResponse", data: message.data });
+		}
 		sendResponse({ action:"storePageDataResponse", status: "Acknowledged" });
 	});
 
 	SWMessageRouter.registerHandler("getPageData",(message, sender, sendResponse) => {
-		console.log('SWMR getPageData:',message, sender);
-		sendResponse({ action:"getPageDataResponse", status: "Acknowledged", data:ServiceWorker.getActiveTabData()});
-		ServiceWorker.updateSidePanel({ action:"updatePageData", data:ServiceWorker.getActiveTabData()})
+		sendResponse({ action:"getPageDataResponse", status: "Acknowledged"});
+		ServiceWorker.getActiveTabData().then((activeData) => {
+			SWMessageRouter.broadcastToTabs("SP", { action: "updatePageData", data: activeData });
+		});
 	});
 /** 
  * 
@@ -334,12 +377,18 @@ class ServiceWorker {
 	chrome.tabs.onActivated.addListener((info) => {
 		chrome.tabs.get(info.tabId, (tab) => {
 			ServiceWorker.handleTabUpdate(tab.id, tab.url);
+			/*if (ServiceWorker.sidePanelState.open) {
+				ServiceWorker.enableSidePanel(tab.id);
+			}*/
 		});
 	});
 
 	chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
 		if (change.url) {
 			ServiceWorker.handleTabUpdate(tabId, change.url);
+			/*if (ServiceWorker.sidePanelState.open) {
+				SWMessageRouter.broadcastToTabs("SP", { action: "showLoading" });
+			}*/
 		}
 	});
 
