@@ -67,6 +67,8 @@ if(PCX.preferedUserMode()) {
 			FancyBox		: ".fancybox-overlay.fancybox-overlay-fixed iframe",
 			Iframe			: '[class="fancybox-iframe"',
 			IframeDOB		: "#MainContent_ctl00_tbDOB_tbText",
+			IframeZip		: '#MainContent_ctl00_AddressControl1_tbZipCode',
+			IframePhone		: '#MainContent_ctl00_AddressControl1_tbPhone',
 			IframeForm		: "#form1",
 			PhysicianId		: "#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianId",
 			PhysicianName	: "#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianName",

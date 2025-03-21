@@ -498,6 +498,29 @@ class IATSERV {
 						}
 					}, 100);
 				});
+				const inputPhone = PCX.getEl(el.FancyBox,true).contentWindow.document.querySelector(el.IframePhone);
+				inputPhone.addEventListener('blur', (e) => {
+					console.log(e,e.target,e.target.value,e.target.value.length);
+					if(![0,10].includes(e.target.value.length)){
+						e.target.style.backgroundColor = "#ffcece";
+						e.target.style.border = "1px #872626 solid";
+					} else {
+						e.target.style.backgroundColor = null;
+						e.target.style.border = null;
+					}
+				});
+				const inputZip = PCX.getEl(el.FancyBox,true).contentWindow.document.querySelector(el.IframeZip);
+				inputZip.addEventListener('blur', (e) => {
+					console.log(e,e.target,e.target.value,e.target.value.length);
+					if(![0,5].includes(e.target.value.length)){
+						e.target.style.backgroundColor = "#ffcece";
+						e.target.style.border = "1px #872626 solid";
+					} else {
+						e.target.style.backgroundColor = null;
+						e.target.style.border = null;
+					}
+				});
+
 				PCX.getEl(el.FancyBox).contentWindow.document.querySelectorAll(el.StateDropdown+' option').forEach((option)=>{
 					//option.dataset.name = option.innerText;
 					if(["","AA","AE","AP"].includes(option.value)){return;}
