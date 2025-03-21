@@ -154,10 +154,12 @@
 	box-shadow: 0px -1px 0px 1px #bbb;
 }
 
+#MainContent_ctl00_ctrlICDCodes_tbList_tbText~#dvCount,
 #MainContent_ctl00_ctl00_ctrlICDCodes_tbList_tbText~#dvCount{
 	display: block !important;
 }
 
+#MainContent_ctl00_ctrlICDCodes_tbList_tbText~#dvCount::before,
 #MainContent_ctl00_ctl00_ctrlICDCodes_tbList_tbText~#dvCount::before{
 	content: "ICD Code Count: ";
 	font-weight: bold;
@@ -193,6 +195,12 @@
 .signature #MainContent_ctl00_ctl00_PlacePatientAuthorizeText + .form-group.col-lg-2.new-row + .form-group.col-lg-2{
 	opacity: 1;
 	max-height: 190px;
+}
+
+#buttonBottomText {
+	text-align: left;
+	font-weight: bold;
+	padding: 10px 0;
 }
 
 .BillingHold {

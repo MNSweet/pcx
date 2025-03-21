@@ -217,6 +217,11 @@ if(PCX.preferedUserMode()) {
 		},false,false,"#dvFooter");
 
 		IATSERV.scanFilenamer();
+
+		let acsStatus = PCX.getEl(`a[href^="javascript:WebApp.UI.Popup('/Pupup.aspx?LinkId=2078"]`).parentElement.innerText.replace(/Results|Status|\|/gi,"").split("-").map(item => item.trim());
+		let buttonText = PCX.createDOM('div',{id:"buttonBottomText",innerHTML:`Patient: ${PCX.getEl("#MainContent_ctl00_tbPatient_tbText").value.toUpperCase()} | Status: ${acsStatus.join(' - ')}`})
+		PCX.getEl('.all-buttons-bottom').insertAdjacentElement('beforebegin', buttonText);
+
 	}
 
 	// Results
@@ -233,6 +238,9 @@ if(PCX.preferedUserMode()) {
 			patient	: PCX.getEl("#lblPatient").textContent.toUpperCase().split(' '),
 			result	: true
 		},false,false,"#dvFooter");
+
+		PCX.getEl('#MainContent_ctl00_ctrlResultEntryList_ctrlResultEntryFullStatus_ddResultStatus option[value="5"]').disabled = true;
+		PCX.getEl('#MainContent_ctl00_ctrlResultEntryList_ctrlResultEntryFullStatus_ddResultStatus option[value="2"]').disabled = true;
 	}
 
 	// Locations
