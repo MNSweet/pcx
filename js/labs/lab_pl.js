@@ -221,6 +221,10 @@ if(PCX.preferedUserMode()) {
 		let acsStatus = PCX.getEl(`a[href^="javascript:WebApp.UI.Popup('/Pupup.aspx?LinkId=2078"]`).parentElement.innerText.replace(/Results|Status|\|/gi,"").split("-").map(item => item.trim());
 		let buttonText = PCX.createDOM('div',{id:"buttonBottomText",innerHTML:`Patient: ${PCX.getEl("#MainContent_ctl00_tbPatient_tbText").value.toUpperCase()} | Status: ${acsStatus.join(' - ')}`})
 		PCX.getEl('.all-buttons-bottom').insertAdjacentElement('beforebegin', buttonText);
+		PCX.getEl('body').classList.add(`status${acsStatus[0].replace(" ","")}`);
+		if(acsStatus[1] && acsStatus[1] != "") {
+			PCX.getEl('body').classList.add(`substatus${acsStatus[1].replace(" ","")}`);
+		}
 
 	}
 
