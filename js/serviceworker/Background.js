@@ -69,34 +69,6 @@ class ServiceWorker {
 		console.log(`Data removed for tab ${tabId}`);
 	}
 
-	// --- Side Panel Functions ---
-	static async enableSidePanel(tabId = null) {
-		let options = {
-			enabled: true,
-			path: "SidePanel.html"
-		};
-		if (tabId) {
-			options.tabId = tabId;
-		}
-		console.log("options",options);
-		await chrome.sidePanel.setOptions(options)
-	}
-	static updateSidePanel(data) {
-		try {
-			SWMessageRouter.broadcastToTabs('SP', data);
-			if (chrome.runtime.lastError) {
-				SWLogger.log("Side panel not available; marking as closed.");
-				ServiceWorker.sidePanelState.open = false;
-			} else {
-				SWLogger.log("Side panel update successful:");
-				ServiceWorker.sidePanelState.open = true;
-			}
-		} catch (err) {
-			SWLogger.error("Error sending update message to side panel:", err);
-			ServiceWorker.sidePanelState.open = false;
-		}
-	}
-
 	// --- Site Detection ---
 	static async getCurrentSite() {
 		return new Promise((resolve, reject) => {
@@ -119,12 +91,9 @@ class ServiceWorker {
 				!tabUrl.startsWith(ServiceWorker.options.domains.pd))
 		) {
 			ServiceWorker.changeExtensionIcon(false);
-			await chrome.sidePanel.setOptions({ tabId, enabled: false });
 		} else {
 			ServiceWorker.changeExtensionIcon(true);
-			console.log("enableSidePanel",tabId);
-			ServiceWorker.enableSidePanel(tabId);
-			SWMessageRouter.broadcastToTabs("SP", { action: "showLoading" });
+			//SWMessageRouter.broadcastToTabs("SP", { action: "showLoading" });
 		}
 	}
 
@@ -294,34 +263,18 @@ class ServiceWorker {
 	});
 
 	SWMessageRouter.registerHandler("sidePanelReady",(message, sender, sendResponse) => {
-		ServiceWorker.sidePanelState.open = true;
-/*
-		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-			tabs.forEach((tab) => {
-				if (ServiceWorker.isTabInScope(tab)) {
-					ServiceWorker.enableSidePanel(tab.id);
-				}
-			});
-		});
-*/
+		ServiceWorker.sidePanelState = true;
 		sendResponse({ action:"sidePanelReadyResponse", status: "Acknowledged" });
 	});
 
 	SWMessageRouter.registerHandler("sidePanelClosed",(message, sender, sendResponse) => {
-		ServiceWorker.sidePanelState.open = false;
-		/*chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-			tabs.forEach((tab) => {
-				if (ServiceWorker.isTabInScope(tab)) {
-					ServiceWorker.enableSidePanel(tab.id);
-				}
-			});
-		});*/
+		ServiceWorker.sidePanelState = false;
 		sendResponse({ action:"sidePanelClosedResponse", status: "Acknowledged" });
 	});
 
 	SWMessageRouter.registerHandler("storePageData",(message, sender, sendResponse) => {
 		ServiceWorker.storeTabData(sender.tab.id, message.data);
-		if (ServiceWorker.sidePanelState.open) {
+		if (TabTracker.sidePanelState) {
 			SWMessageRouter.broadcastToTabs("SP", { action: "getPageDataResponse", data: message.data });
 		}
 		sendResponse({ action:"storePageDataResponse", status: "Acknowledged" });
@@ -446,3 +399,179 @@ class ServiceWorker {
 			);
 		}
 	});
+
+/**
+ *
+ * Tab Tracking Class
+ * 
+ */
+class TabTracker {
+	// Map to track tabs (by tabId) that are within the extension's domain scope.
+	static trackedTabs = new Map();
+	static sidePanelSubState = {
+		lastOpenedBy: "init", // "User", "onCreated", "onUpdated", "onActivated", "init"
+		lastClosedBy: "init", // "User", "onCreated", "onUpdated", "onActivated", "init"
+		reopenSidePanel: false,
+		activeTabId:0,
+		activeWindowId:0
+	} 
+
+	// Initialize event listeners.
+	static init() {
+		// keep alive, see stackoverflow.com/a/66618269
+		//setInterval(chrome.runtime.getPlatformInfo, 25e3);
+		chrome.tabs.onCreated.addListener(TabTracker.handleTabCreated.bind(this));
+		chrome.tabs.onUpdated.addListener(TabTracker.handleTabUpdated.bind(this));
+		chrome.tabs.onRemoved.addListener(TabTracker.handleTabRemoved.bind(this));
+		chrome.tabs.onActivated.addListener(TabTracker.handleTabActivated.bind(this));
+		chrome.action.onClicked.addListener(TabTracker.handleActionClick.bind(this));
+		/*chrome.runtime.onStartup.addListener(async () => {
+			TabTracker.sidePanelSubState.activeTabId = (await chrome.tabs.query({ active: true, currentWindow: true }))[0]?.id;
+			TabTracker.sidePanelSubState.activeWindowId = (await chrome.tabs.query({ active: true, currentWindow: true }))[0]?.windowId;
+		});*/
+
+		if (ServiceWorker.options.debug) {
+			console.log("TabTracker initialized and listeners attached.");
+		}
+	}
+
+	// Helper: Process a tab.
+	// Checks if the tab is within a tracked domain, updates the trackedTabs map,
+	// and then updates side panel options for that tab.
+	static processTab(tab) {
+		const inScope = TabTracker.isTrackedDomain(tab.url);
+		if (inScope) {
+			TabTracker.trackedTabs.set(tab.id, tab.url);
+			if (ServiceWorker.options.debug) {
+				console.log(`Tab ${tab.id} is in scope; added/updated in trackedTabs.`);
+			}
+		} else {
+			if (TabTracker.trackedTabs.has(tab.id)) {
+				TabTracker.trackedTabs.delete(tab.id);
+				if (ServiceWorker.options.debug) {
+					console.log(`Tab ${tab.id} is out of scope; removed from trackedTabs.`);
+				}
+			}
+		}
+		// Update the side panel options for this specific tab.
+		TabTracker.updateSidePanelOptions(tab,inScope);
+	}
+
+	// Returns true if the provided URL starts with one of the allowed domains.
+	static isTrackedDomain(url) {
+		if (!url) return false;
+		for (const key in ServiceWorker.options.domains) {
+			if (url.startsWith(ServiceWorker.options.domains[key])) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	
+	static async updateSidePanelOptions(tab, inScope) {
+		console.log("inScope: ",inScope," | sidePanelState: ",ServiceWorker.sidePanelState);
+		if (inScope) {
+			await chrome.sidePanel.setOptions({
+				path: 'SidePanel.html',
+				enabled: true
+			});
+			if(TabTracker.sidePanelSubState.reopenSidePanel) {
+				ServiceWorker.sidePanelState = true;
+				TabTracker.sidePanelSubState.reopenSidePanel = false;
+				chrome.sidePanel.open({windowId:tab.windowId});
+			}
+		} else {
+			// Disables the side panel on all other sites
+			await chrome.sidePanel.setOptions({
+				enabled: false
+			});
+			if(ServiceWorker.sidePanelState){
+				TabTracker.sidePanelSubState.reopenSidePanel = true
+			}
+		}
+	}
+
+	// Enforce the side panel state on all active tabs (across all windows).
+	static async enforceSidePanelState() {
+		chrome.tabs.query({ active: true }, (tabs) => {
+			tabs.forEach(async (tab) => {
+			console.log('enforce before: ',chrome.sidePanel.getOptions({tabId:tab.id}));
+				await TabTracker.updateSidePanelOptions(tab,TabTracker.isTrackedDomain(tab.url));
+			console.log('enforce after: ',chrome.sidePanel.getOptions({tabId:tab.id}));
+			});
+			if (ServiceWorker.options.debug) {
+				console.log("Enforced side panel state on all active tabs.");
+			}
+		});
+	}
+
+	// Event Handlers
+
+	static handleTabCreated(tab) {
+		console.log('handleTabCreated');
+		if (ServiceWorker.options.debug) {
+			console.log(`Tab created: ID ${tab.id} | URL: ${tab.url}`);
+		}
+		TabTracker.processTab(tab);
+	}
+
+	static handleTabUpdated(tabId, changeInfo, tab) {
+		console.log('handleTabUpdated');
+		if (changeInfo.url) {
+			if (ServiceWorker.options.debug) {
+				console.log(`Tab updated: ID ${tabId} | New URL: ${changeInfo.url}`);
+			}
+			TabTracker.processTab(tab);
+		}
+	}
+
+	static handleTabActivated(activeInfo) {
+		console.log('handleTabActivated');
+		TabTracker.sidePanelSubState.activeTabId = activeInfo.tabId;
+		TabTracker.sidePanelSubState.activeWindowId = activeInfo.windowId;
+		chrome.tabs.get(activeInfo.tabId, (tab) => {
+			if (ServiceWorker.options.debug) {
+				console.log(`Tab activated: ID ${tab.id} | URL: ${tab.url}`);
+			}
+			TabTracker.processTab(tab);
+		});
+	}
+
+	static handleTabRemoved(tabId, removeInfo) {
+		console.log('handleTabRemoved');
+		if (TabTracker.trackedTabs.has(tabId)) {
+			TabTracker.trackedTabs.delete(tabId);
+			if (ServiceWorker.options.debug) {
+				console.log(`Tab removed: ID ${tabId}`);
+			}
+			// Optionally update side panel options for the removed tab's window.
+			TabTracker.enforceSidePanelState();
+		}
+	}
+
+	// Handles the extension action click event.
+	// Toggles the global side panel state via setPanelBehavior and then enforces it.
+	static handleActionClick(tab) {
+
+		console.log('handleActionClick');
+		ServiceWorker.sidePanelState=!ServiceWorker.sidePanelState;
+		console.log(`handleActionClick: ID ${tab.id} | URL: ${tab.url}`,ServiceWorker.sidePanelState);
+		if(ServiceWorker.sidePanelState){
+			chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+				chrome.sidePanel.open({ windowId: tab.windowId });
+			});
+		}
+
+		// Enforce the new state across active tabs.
+		/*if(ServiceWorker.sidePanelState){
+			let activeTabId;
+			chrome.sidePanel.open({windowId:TabTracker.sidePanelSubState.activeWindowId});
+		}*/
+		TabTracker.enforceSidePanelState();
+	}
+}
+
+// Initialize the tracker.
+TabTracker.init();
+

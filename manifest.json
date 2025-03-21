@@ -25,12 +25,16 @@
 		"type": "module",
 		"service_worker": "js/serviceworker/Background.js"
 	},
+	"side_panel": {
+		"default_path": "SidePanel.html"
+	},
 	"action": {
 		"default_icon": {
 			"16": "icons/default-icon-16.png",
 			"48": "icons/default-icon-48.png",
 			"128": "icons/default-icon-128.png"
-		}
+		},
+		"default_title": "PXC"
 	},
 	"content_scripts": [
 		{
