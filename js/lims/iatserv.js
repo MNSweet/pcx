@@ -500,7 +500,6 @@ class IATSERV {
 				});
 				const inputPhone = PCX.getEl(el.FancyBox,true).contentWindow.document.querySelector(el.IframePhone);
 				inputPhone.addEventListener('blur', (e) => {
-					console.log(e,e.target,e.target.value,e.target.value.length);
 					if(![0,10].includes(e.target.value.length)){
 						e.target.style.backgroundColor = "#ffcece";
 						e.target.style.border = "1px #872626 solid";
@@ -511,7 +510,6 @@ class IATSERV {
 				});
 				const inputZip = PCX.getEl(el.FancyBox,true).contentWindow.document.querySelector(el.IframeZip);
 				inputZip.addEventListener('blur', (e) => {
-					console.log(e,e.target,e.target.value,e.target.value.length);
 					if(![0,5].includes(e.target.value.length)){
 						e.target.style.backgroundColor = "#ffcece";
 						e.target.style.border = "1px #872626 solid";
