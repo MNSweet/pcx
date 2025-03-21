@@ -424,6 +424,30 @@ class IATSERV extends LIMS {
 			if (["", "AA", "AE", "AP"].includes(option.value)) return;
 			option.innerText = `${option.value} - ${option.innerText}`;
 		});
+
+		// Notify wrong Phone digit length
+		const inputPhone = fancyDoc.querySelector(el.IframePhone);
+		inputPhone.addEventListener('blur', (e) => {
+			if(![0,10].includes(e.target.value.length)){
+				e.target.style.backgroundColor = "#ffcece";
+				e.target.style.border = "1px #872626 solid";
+			} else {
+				e.target.style.backgroundColor = null;
+				e.target.style.border = null;
+			}
+		});
+
+		// Notify wrong Zip digit length
+		const inputZip = fancyDoc.querySelector(el.IframeZip);
+		inputZip.addEventListener('blur', (e) => {
+			if(![0,5].includes(e.target.value.length)){
+				e.target.style.backgroundColor = "#ffcece";
+				e.target.style.border = "1px #872626 solid";
+			} else {
+				e.target.style.backgroundColor = null;
+				e.target.style.border = null;
+			}
+		});
 		
 		// Enable Insurance Provider suggestion.
 		PCX.processEnabled("Interface", "Insurance Provider Suggestion", () => {
@@ -453,7 +477,7 @@ class IATSERV extends LIMS {
 				});
 			}
 		});
-		/*
+		
 		// Reduce tab indices for elements inside the FancyBox.
 		PCX.processEnabled("Interface", "Reduce Tabable Inputs", () => {
 			const removeSelectors = [
@@ -468,7 +492,7 @@ class IATSERV extends LIMS {
 				el.SeconFax, el.SeconEmail, el.Cancel
 			];
 			super.disableTabIndex(removeSelectors, el.FancyBox);
-		});*/
+		});
 		
 		// Bind form submit event to trigger QA Manager notifications.
 		fancyDoc.querySelector(el.IframeForm).addEventListener("submit", (eventSubmit) => {
