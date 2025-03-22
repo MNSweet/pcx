@@ -306,6 +306,41 @@ if(PCX.preferedUserMode()) {
 	if (IATSERV.linkId == "2005") {
 		console.log(window.location.hash);
 	}
+
+	// Wizard New Master & Location
+	if (IATSERV.linkId == "2006") {
+		waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_AddressControl1_0_tbPhone_0")
+			.then((phone)=>{
+				phone.addEventListener('blur', (e) => {
+					if(![0,10].includes(e.target.value.length)){
+						e.target.style.backgroundColor = "#ffcece";
+						e.target.style.border = "1px #872626 solid";
+					} else {
+						e.target.style.backgroundColor = null;
+						e.target.style.border = null;
+					}
+				});
+			});
+		waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_AddressControl1_0_tbFax_0")
+			.then((fax)=>{
+				fax.addEventListener('blur', (e) => {
+					if(![0,10].includes(e.target.value.length)){
+						e.target.style.backgroundColor = "#ffcece";
+						e.target.style.border = "1px #872626 solid";
+					} else {
+						e.target.style.backgroundColor = null;
+						e.target.style.border = null;
+					}
+				});
+			});
+		waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_AddressControl1_0_CountryState_0_ddState_0")
+			.then((state)=>{
+				state.querySelectorAll('option').forEach((option)=>{
+					if(["","AA","AE","AP"].includes(option.value)){return;}
+					option.innerText = option.value + " - " + option.innerText;
+				});
+			});
+	}
 }
 if(PCX.currentUser() == "Joel") {
 	// Create Accession
