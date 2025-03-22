@@ -408,27 +408,18 @@ class ServiceWorker {
 class TabTracker {
 	// Map to track tabs (by tabId) that are within the extension's domain scope.
 	static trackedTabs = new Map();
-	static sidePanelSubState = {
-		lastOpenedBy: "init", // "User", "onCreated", "onUpdated", "onActivated", "init"
-		lastClosedBy: "init", // "User", "onCreated", "onUpdated", "onActivated", "init"
-		reopenSidePanel: false,
-		activeTabId:0,
-		activeWindowId:0
-	} 
 
 	// Initialize event listeners.
 	static init() {
-		// keep alive, see stackoverflow.com/a/66618269
-		//setInterval(chrome.runtime.getPlatformInfo, 25e3);
 		chrome.tabs.onCreated.addListener(TabTracker.handleTabCreated.bind(this));
 		chrome.tabs.onUpdated.addListener(TabTracker.handleTabUpdated.bind(this));
 		chrome.tabs.onRemoved.addListener(TabTracker.handleTabRemoved.bind(this));
 		chrome.tabs.onActivated.addListener(TabTracker.handleTabActivated.bind(this));
-		chrome.action.onClicked.addListener(TabTracker.handleActionClick.bind(this));
-		/*chrome.runtime.onStartup.addListener(async () => {
-			TabTracker.sidePanelSubState.activeTabId = (await chrome.tabs.query({ active: true, currentWindow: true }))[0]?.id;
-			TabTracker.sidePanelSubState.activeWindowId = (await chrome.tabs.query({ active: true, currentWindow: true }))[0]?.windowId;
-		});*/
+
+		chrome.sidePanel.setOptions({
+			path: 'SidePanel.html',
+			enabled: true
+		});
 
 		if (ServiceWorker.options.debug) {
 			console.log("TabTracker initialized and listeners attached.");
@@ -440,21 +431,14 @@ class TabTracker {
 	// and then updates side panel options for that tab.
 	static processTab(tab) {
 		const inScope = TabTracker.isTrackedDomain(tab.url);
-		if (inScope) {
-			TabTracker.trackedTabs.set(tab.id, tab.url);
-			if (ServiceWorker.options.debug) {
-				console.log(`Tab ${tab.id} is in scope; added/updated in trackedTabs.`);
-			}
-		} else {
-			if (TabTracker.trackedTabs.has(tab.id)) {
-				TabTracker.trackedTabs.delete(tab.id);
-				if (ServiceWorker.options.debug) {
-					console.log(`Tab ${tab.id} is out of scope; removed from trackedTabs.`);
-				}
-			}
+		const tabData = TabTracker.trackedTabs.get(tab.id);
+		const lastState = (tabData == undefined) ? inScope : tabData.inScope;
+		TabTracker.trackedTabs.set(tab.id, {url:tab.url,inScope:inScope,lastState:lastState});
+		if (ServiceWorker.options.debug) {
+			console.log(`Tab ${tab.id} added/updated in trackedTabs as ${inScope} / lastState was ${lastState}.`);
 		}
 		// Update the side panel options for this specific tab.
-		TabTracker.updateSidePanelOptions(tab,inScope);
+		TabTracker.updateSidePanelOptions(tab);
 	}
 
 	// Returns true if the provided URL starts with one of the allowed domains.
@@ -469,41 +453,26 @@ class TabTracker {
 	}
 
 	
-	static async updateSidePanelOptions(tab, inScope) {
-		console.log("inScope: ",inScope," | sidePanelState: ",ServiceWorker.sidePanelState);
-		if (inScope) {
+	static async updateSidePanelOptions(tab) {
+		const tabData = TabTracker.trackedTabs.get(tab.id);
+		console.log("updateSidePanelOptions - tabData: ",tabData);
+		if (tabData.inScope && !tabData.lastState) {
+			// Re-Enable the ability to access the global SidePanel
 			await chrome.sidePanel.setOptions({
+				tabId: undefined,
 				path: 'SidePanel.html',
 				enabled: true
-			});
-			if(TabTracker.sidePanelSubState.reopenSidePanel) {
-				ServiceWorker.sidePanelState = true;
-				TabTracker.sidePanelSubState.reopenSidePanel = false;
-				chrome.sidePanel.open({windowId:tab.windowId});
-			}
-		} else {
+			}).then((opt)=>{console.log("tabData.inScope && !tabData.lastState ",tab.id,opt)});
+		} else if (!tabData.inScope) {
 			// Disables the side panel on all other sites
 			await chrome.sidePanel.setOptions({
+				tabId:tab.id,
+				path:undefined,
 				enabled: false
-			});
-			if(ServiceWorker.sidePanelState){
-				TabTracker.sidePanelSubState.reopenSidePanel = true
-			}
+			}).then((opt)=>{console.log("!tabData.inScope ",tab.id,opt)});
 		}
-	}
 
-	// Enforce the side panel state on all active tabs (across all windows).
-	static async enforceSidePanelState() {
-		chrome.tabs.query({ active: true }, (tabs) => {
-			tabs.forEach(async (tab) => {
-			console.log('enforce before: ',chrome.sidePanel.getOptions({tabId:tab.id}));
-				await TabTracker.updateSidePanelOptions(tab,TabTracker.isTrackedDomain(tab.url));
-			console.log('enforce after: ',chrome.sidePanel.getOptions({tabId:tab.id}));
-			});
-			if (ServiceWorker.options.debug) {
-				console.log("Enforced side panel state on all active tabs.");
-			}
-		});
+		await chrome.sidePanel.getOptions({tabId:tab.id}).then((opt)=>{console.log(tab.id,opt)});
 	}
 
 	// Event Handlers
@@ -528,8 +497,6 @@ class TabTracker {
 
 	static handleTabActivated(activeInfo) {
 		console.log('handleTabActivated');
-		TabTracker.sidePanelSubState.activeTabId = activeInfo.tabId;
-		TabTracker.sidePanelSubState.activeWindowId = activeInfo.windowId;
 		chrome.tabs.get(activeInfo.tabId, (tab) => {
 			if (ServiceWorker.options.debug) {
 				console.log(`Tab activated: ID ${tab.id} | URL: ${tab.url}`);
@@ -545,30 +512,7 @@ class TabTracker {
 			if (ServiceWorker.options.debug) {
 				console.log(`Tab removed: ID ${tabId}`);
 			}
-			// Optionally update side panel options for the removed tab's window.
-			TabTracker.enforceSidePanelState();
 		}
-	}
-
-	// Handles the extension action click event.
-	// Toggles the global side panel state via setPanelBehavior and then enforces it.
-	static handleActionClick(tab) {
-
-		console.log('handleActionClick');
-		ServiceWorker.sidePanelState=!ServiceWorker.sidePanelState;
-		console.log(`handleActionClick: ID ${tab.id} | URL: ${tab.url}`,ServiceWorker.sidePanelState);
-		if(ServiceWorker.sidePanelState){
-			chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-				chrome.sidePanel.open({ windowId: tab.windowId });
-			});
-		}
-
-		// Enforce the new state across active tabs.
-		/*if(ServiceWorker.sidePanelState){
-			let activeTabId;
-			chrome.sidePanel.open({windowId:TabTracker.sidePanelSubState.activeWindowId});
-		}*/
-		TabTracker.enforceSidePanelState();
 	}
 }
 
