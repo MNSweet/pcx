@@ -37,6 +37,7 @@ if (PCX.preferredUserMode()) {
 		17: { Code: "Cardio", Test: "CARDIO", Lab: "PL", LabCode: 1012 }
 	});
 	
+	let pageData = false;
 	
 	// Initialize keybindings
 	const keybindings = new Keybinding({
@@ -225,29 +226,7 @@ if (PCX.preferredUserMode()) {
 
 		PCX.processEnabled('SOP','REQ Filename to Clipboard on Scan',IATSERV.scanFilenamer);
 
-
-		
-		let files = [];
-			IATSERV.getEls('[id^="MainContent_ctl00_ObjectDocuments1_ObjectDocuments_Exists_GridView1_lblTitle_"]').forEach((file)=>{files.push(file.innerText);});
-		let data = {
-			acsNum	: IATSERV.getEl("#MainContent_ctl00_tbAccession").value,
-			acsID	: IATSERV.getEl("#tbAccessionId").value,
-			location: IATSERV.getEl("#MainContent_ctl00_tbLocation_tbText").value,
-			req		: IATSERV.scanFilenamer(true)+".pdf",
-			patient	: IATSERV.getEl("#MainContent_ctl00_tbPatient_tbText").value.toUpperCase().split(', '),
-			ptID	: IATSERV.getEl("#MainContent_ctl00_tbPatient_tbID").value,
-			dob		: IATSERV.getEl("#tbPatientDOB").value,
-			doc		: IATSERV.getEl("#MainContent_ctl00_tbCollectionDateTime_tbDate_tbText").value,
-			rd		: IATSERV.getEl("#MainContent_ctl00_tbReceivedDateTime_tbDate_tbText").value,
-			lab		: IATSERV.getEl("#ddPerformingLabId option:checked").innerText,
-			test	: IATSERV.getEl("#MainContent_ctl00_ctrlOrderTestCategoryControl_ddTestCategory option:checked").innerText,
-			files	: files
-		};
-
-
-
-
-		const pageData = {
+		pageData = {
 			acsNum: { selector: "#MainContent_ctl00_tbAccession", default: "" },
 			acsID: { selector: "#tbAccessionId", default: "" },
 			location: { selector: "#MainContent_ctl00_tbLocation_tbText", default: "" },
@@ -287,7 +266,6 @@ if (PCX.preferredUserMode()) {
 			}
 		};
 
-		PCX.monitorPageData(pageData);
 
 	}
 
@@ -357,6 +335,25 @@ if (PCX.preferredUserMode()) {
 	}
 
 
+	// PA
+	if (IATSERV.linkId == "7006") {
+		console.log(Object.fromEntries(new URLSearchParams(window.location.search)));
+		pageData = {
+			someParams: IATSERV.extraParams,
+			extraParams: Object.fromEntries(new URLSearchParams(window.location.search)),
+			pageTemplate: { 
+				default: IATSERV.linkId
+			},
+			sidePanelTemplate: { 
+				default: IATSERV.linkId
+			},
+			lims: { 
+				default: "IATSERV"
+			}
+		};
+	}
+
+
 	// Results
 	if (IATSERV.linkId == "2461") {
 		IATSERV.setSelectors({
@@ -391,6 +388,23 @@ if (PCX.preferredUserMode()) {
 			});
 		})
 	}
+
+	// PL Data Port Listener
+	if(pageData === false){
+		pageData = {
+			pageTemplate: { 
+				default: IATSERV.linkId
+			},
+			sidePanelTemplate: { 
+				default: IATSERV.linkId
+			},
+			lims: { 
+				default: "IATSERV"
+			},
+			fallback:true
+		};
+	}
+	PCX.monitorPageData(pageData);
 }
 
 

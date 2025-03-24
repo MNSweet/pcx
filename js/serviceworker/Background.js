@@ -16,18 +16,14 @@ class ServiceWorker {
 
 	static timer = 0;
 	static timerState = false;
-	static dataStore = {};  // In-memory page state storage
 	static updateCountdownNotice = null;
-	static tabWhitelists = {};
-	static tabTargets = {};
-	static sidePanelState = false;
 
 	// --- Background Initialization & Data Backup ---
 	static initBackground() {
 		chrome.storage.local.get("dataStore", (result) => {
 			if (result.dataStore) {
-				ServiceWorker.dataStore = result.dataStore;
-				console.log("Data loaded from storage:", ServiceWorker.dataStore);
+				TabTracker.dataStore = result.dataStore;
+				console.log("Data loaded from storage:", TabTracker.dataStore);
 			}
 		});
 		// Backup data every minute.
@@ -37,36 +33,9 @@ class ServiceWorker {
 	}
 
 	static backupDataToStorage() {
-		chrome.storage.local.set({ dataStore: ServiceWorker.dataStore }, () => {
+		chrome.storage.local.set({ dataStore: TabTracker.dataStore }, () => {
 			console.log("Backup complete.");
 		});
-	}
-
-	// --- Tab Data Storage ---
-	static storeTabData(tabId, pageState) {
-		ServiceWorker.dataStore[tabId] = pageState;
-		console.log(`Data stored for tab ${tabId}:`, pageState);
-	}
-
-	static getTabData(tabId) {
-		console.log("getTabData:tabId",tabId);
-		return ServiceWorker.dataStore[tabId] || null;
-	}
-
-	static getActiveTabData() {
-		return new Promise((resolve) => {
-			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-				const tabId = tabs[0].id;
-				console.log("getActiveTabData:tabId",tabId);
-				resolve(ServiceWorker.dataStore[tabId] || null);
-			})
-		})
-	}
-
-	static removeTabData(tabId) {
-		delete ServiceWorker.dataStore[tabId];
-		ServiceWorker.backupDataToStorage();
-		console.log(`Data removed for tab ${tabId}`);
 	}
 
 	// --- Site Detection ---
@@ -81,52 +50,6 @@ class ServiceWorker {
 			});
 		});
 	}
-
-	// --- Tab Update & Extension Icon ---
-	static async handleTabUpdate(tabId, tabUrl) {
-		if (
-			!tabUrl ||
-			(!tabUrl.startsWith(ServiceWorker.options.domains.pl) &&
-				!tabUrl.startsWith(ServiceWorker.options.domains.rr) &&
-				!tabUrl.startsWith(ServiceWorker.options.domains.pd))
-		) {
-			ServiceWorker.changeExtensionIcon(false);
-		} else {
-			ServiceWorker.changeExtensionIcon(true);
-			//SWMessageRouter.broadcastToTabs("SP", { action: "showLoading" });
-		}
-	}
-
-	static changeExtensionIcon(change = false) {
-		chrome.action.setIcon({
-			path: {
-				"16": change ? "../../icons/alt-icon-16.png" : "../../icons/default-icon-16.png",
-				"48": change ? "../../icons/alt-icon-48.png" : "../../icons/default-icon-48.png",
-				"128": change ? "../../icons/alt-icon-128.png" : "../../icons/default-icon-128.png"
-			}
-		});
-	}
-
-	static isTabInScope(tab) {
-		if (!tab.url) {
-			return false;
-		}
-		let url;
-		try {
-			url = new URL(tab.url);
-		} catch (e) {
-			return false;
-		}
-		const allowedHostnames = Object.values(ServiceWorker.options.domains).map(domainUrl => {
-			try {
-				return new URL(domainUrl).hostname;
-			} catch (e) {
-				return null;
-			}
-		}).filter(Boolean);
-		return allowedHostnames.includes(url.hostname);
-	}
-
 
 	// --- Patient Transfer ---
 	static initPatientTransfer(request) {
@@ -263,17 +186,17 @@ class ServiceWorker {
 	});
 
 	SWMessageRouter.registerHandler("sidePanelReady",(message, sender, sendResponse) => {
-		ServiceWorker.sidePanelState = true;
+		TabTracker.sidePanelState = true;
 		sendResponse({ action:"sidePanelReadyResponse", status: "Acknowledged" });
 	});
 
 	SWMessageRouter.registerHandler("sidePanelClosed",(message, sender, sendResponse) => {
-		ServiceWorker.sidePanelState = false;
+		TabTracker.sidePanelState = false;
 		sendResponse({ action:"sidePanelClosedResponse", status: "Acknowledged" });
 	});
 
 	SWMessageRouter.registerHandler("storePageData",(message, sender, sendResponse) => {
-		ServiceWorker.storeTabData(sender.tab.id, message.data);
+		TabTracker.storeTabData(sender.tab.id, message.data);
 		if (TabTracker.sidePanelState) {
 			SWMessageRouter.broadcastToTabs("SP", { action: "getPageDataResponse", data: message.data });
 		}
@@ -281,68 +204,16 @@ class ServiceWorker {
 	});
 
 	SWMessageRouter.registerHandler("getPageData",(message, sender, sendResponse) => {
+		// Got your Request
 		sendResponse({ action:"getPageDataResponse", status: "Acknowledged"});
-		ServiceWorker.getActiveTabData().then((activeData) => {
+		
+		// Here is what I have
+		TabTracker.getActiveTabData().then((activeData) => {
 			SWMessageRouter.broadcastToTabs("SP", { action: "updatePageData", data: activeData });
 		});
-	});
-/** 
- * 
- * Web Navigation Listeners
- * 
- */
 
-	// --- onCommitted Listener ---
-	// Fired when a navigation is committed. At least part of the new document
-	// has been received from the server and the browser has decided to switch
-	// to the new document.
-	chrome.webNavigation.onCommitted.addListener((details) => {
-		const whitelist = ServiceWorker.tabWhitelists[details.tabId];
-		if (!whitelist) return;
-		const isAllowed = whitelist.some(keyword => details.url.includes(keyword));
-		if (!isAllowed) {
-			delete ServiceWorker.tabWhitelists[details.tabId];
-			const targetName = Object.keys(ServiceWorker.tabTargets).find(
-				key => ServiceWorker.tabTargets[key] === details.tabId
-			);
-			if (targetName) delete ServiceWorker.tabTargets[targetName];
-		}
-	}, { url: [{ schemes: ["http", "https"] }] });
-
-	// --- onRemoved Listener ---
-	// A tab is deleted from the window
-	chrome.tabs.onRemoved.addListener((tabId) => {
-		ServiceWorker.removeTabData(tabId);
-		delete ServiceWorker.tabWhitelists[tabId];
-		const targetName = Object.keys(ServiceWorker.tabTargets).find(
-			key => ServiceWorker.tabTargets[key] === tabId
-		);
-		if (targetName) delete ServiceWorker.tabTargets[targetName];
-	});
-
-/** 
- * 
- * Side Panel Behavior and Tab Update Listeners
- * 
- */
-	chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(console.error);
-		
-	chrome.tabs.onActivated.addListener((info) => {
-		chrome.tabs.get(info.tabId, (tab) => {
-			ServiceWorker.handleTabUpdate(tab.id, tab.url);
-			/*if (ServiceWorker.sidePanelState.open) {
-				ServiceWorker.enableSidePanel(tab.id);
-			}*/
-		});
-	});
-
-	chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
-		if (change.url) {
-			ServiceWorker.handleTabUpdate(tabId, change.url);
-			/*if (ServiceWorker.sidePanelState.open) {
-				SWMessageRouter.broadcastToTabs("SP", { action: "showLoading" });
-			}*/
-		}
+		// Hey Page, do you have anything want to add? Let me know on "storePageData", Thanks
+		SWMessageRouter.broadcastToActive({ action: "getPageContent"});
 	});
 
 /** 
@@ -406,113 +277,103 @@ class ServiceWorker {
  * 
  */
 class TabTracker {
-	// Map to track tabs (by tabId) that are within the extension's domain scope.
+	// trackedTabs.set(ID, { url: URL, inScope: BOOL, contents: {PageDataManagementObject} });
 	static trackedTabs = new Map();
+	static tabWhitelists = {};
+	static tabTargets = {};
+	static sidePanelState = false;
 
-	// Initialize event listeners.
 	static init() {
-		chrome.tabs.onCreated.addListener(TabTracker.handleTabCreated.bind(this));
-		chrome.tabs.onUpdated.addListener(TabTracker.handleTabUpdated.bind(this));
-		chrome.tabs.onRemoved.addListener(TabTracker.handleTabRemoved.bind(this));
-		chrome.tabs.onActivated.addListener(TabTracker.handleTabActivated.bind(this));
-
-		chrome.sidePanel.setOptions({
-			path: 'SidePanel.html',
-			enabled: true
-		});
-
-		if (ServiceWorker.options.debug) {
-			console.log("TabTracker initialized and listeners attached.");
-		}
+		chrome.tabs.onCreated.addListener(TabTracker.processTab);
+		chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => TabTracker.processTab(tab));
+		chrome.tabs.onActivated.addListener(({ tabId }) => chrome.tabs.get(tabId, TabTracker.processTab));
+		chrome.tabs.onRemoved.addListener(TabTracker.handleTabRemoved);
+		chrome.webNavigation.onCommitted.addListener(TabTracker.handleOnCommitted);
 	}
 
-	// Helper: Process a tab.
-	// Checks if the tab is within a tracked domain, updates the trackedTabs map,
-	// and then updates side panel options for that tab.
-	static processTab(tab) {
-		const inScope = TabTracker.isTrackedDomain(tab.url);
-		const tabData = TabTracker.trackedTabs.get(tab.id);
-		const lastState = (tabData == undefined) ? inScope : tabData.inScope;
-		TabTracker.trackedTabs.set(tab.id, {url:tab.url,inScope:inScope,lastState:lastState});
-		if (ServiceWorker.options.debug) {
-			console.log(`Tab ${tab.id} added/updated in trackedTabs as ${inScope} / lastState was ${lastState}.`);
+	static async processTab(tab) {
+		if(TabTracker.sidePanelState) {
+			//SWMessageRouter.broadcastToTabs("SP", { action: "showLoading" });
+			await TabTracker.getActiveTabData().then((activeData) => {
+				SWMessageRouter.broadcastToTabs("SP", { action: "updatePageData", data: activeData });
+			});
 		}
-		// Update the side panel options for this specific tab.
-		TabTracker.updateSidePanelOptions(tab);
-	}
+		const inScope = Object.values(ServiceWorker.options.domains).some(domain => tab.url.startsWith(domain));
+		const trackedTab = TabTracker.trackedTabs.get(tab.id);
+		TabTracker.trackedTabs.set(tab.id, { url: tab.url, inScope: inScope, contents: (trackedTab?trackedTab.contents:{}) });
+		TabTracker.handleTabIconUpdate(inScope);
 
-	// Returns true if the provided URL starts with one of the allowed domains.
-	static isTrackedDomain(url) {
-		if (!url) return false;
-		for (const key in ServiceWorker.options.domains) {
-			if (url.startsWith(ServiceWorker.options.domains[key])) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	
-	static async updateSidePanelOptions(tab) {
-		const tabData = TabTracker.trackedTabs.get(tab.id);
-		console.log("updateSidePanelOptions - tabData: ",tabData);
-		if (tabData.inScope && !tabData.lastState) {
-			// Re-Enable the ability to access the global SidePanel
-			await chrome.sidePanel.setOptions({
-				tabId: undefined,
-				path: 'SidePanel.html',
-				enabled: true
-			}).then((opt)=>{console.log("tabData.inScope && !tabData.lastState ",tab.id,opt)});
-		} else if (!tabData.inScope) {
-			// Disables the side panel on all other sites
-			await chrome.sidePanel.setOptions({
-				tabId:tab.id,
-				path:undefined,
-				enabled: false
-			}).then((opt)=>{console.log("!tabData.inScope ",tab.id,opt)});
-		}
-
-		await chrome.sidePanel.getOptions({tabId:tab.id}).then((opt)=>{console.log(tab.id,opt)});
 	}
 
 	// Event Handlers
-
-	static handleTabCreated(tab) {
-		console.log('handleTabCreated');
-		if (ServiceWorker.options.debug) {
-			console.log(`Tab created: ID ${tab.id} | URL: ${tab.url}`);
-		}
-		TabTracker.processTab(tab);
-	}
-
-	static handleTabUpdated(tabId, changeInfo, tab) {
-		console.log('handleTabUpdated');
-		if (changeInfo.url) {
-			if (ServiceWorker.options.debug) {
-				console.log(`Tab updated: ID ${tabId} | New URL: ${changeInfo.url}`);
+	static handleTabIconUpdate(inScope) {
+		chrome.action.setIcon({
+			path: {
+				"16": inScope ? "../../icons/alt-icon-16.png" : "../../icons/default-icon-16.png",
+				"48": inScope ? "../../icons/alt-icon-48.png" : "../../icons/default-icon-48.png",
+				"128": inScope ? "../../icons/alt-icon-128.png" : "../../icons/default-icon-128.png"
 			}
-			TabTracker.processTab(tab);
-		}
-	}
-
-	static handleTabActivated(activeInfo) {
-		console.log('handleTabActivated');
-		chrome.tabs.get(activeInfo.tabId, (tab) => {
-			if (ServiceWorker.options.debug) {
-				console.log(`Tab activated: ID ${tab.id} | URL: ${tab.url}`);
-			}
-			TabTracker.processTab(tab);
 		});
 	}
 
 	static handleTabRemoved(tabId, removeInfo) {
-		console.log('handleTabRemoved');
 		if (TabTracker.trackedTabs.has(tabId)) {
 			TabTracker.trackedTabs.delete(tabId);
 			if (ServiceWorker.options.debug) {
 				console.log(`Tab removed: ID ${tabId}`);
 			}
 		}
+		delete TabTracker.tabWhitelists[tabId];
+		const targetName = Object.keys(TabTracker.tabTargets).find(
+			key => TabTracker.tabTargets[key] === tabId
+		);
+		if (targetName) delete TabTracker.tabTargets[targetName];
+
+	}
+
+	static handleOnCommitted(activeInfo) {
+		// Key Binding Logic for New Tab Creation
+		// Whitelist: Array of url %strings% that if found should allow for the tab's target value to remain
+		//   otherwise if the string is not found the tab should be stripped of it's target allowing
+		//   for a new one to be created.
+		const whitelist = TabTracker.tabWhitelists[activeInfo.tabId];
+		if (!whitelist) {
+			return;
+		}
+		const isAllowed = whitelist.some(keyword => activeInfo.url.includes(keyword));
+		if (!isAllowed) {
+			delete TabTracker.tabWhitelists[activeInfo.tabId];
+			const targetName = Object.keys(TabTracker.tabTargets).find(
+				key => TabTracker.tabTargets[key] === activeInfo.tabId
+			);
+			if (targetName) {
+				delete TabTracker.tabTargets[targetName];
+			}
+		}
+	}
+
+	// Page Data
+	static storeTabData(tabId, pageState) {
+		try{
+			const tabData = TabTracker.trackedTabs.get(tabId);
+			TabTracker.trackedTabs.set(tabId, { "url": tabData.url, "inScope": tabData.inScope, "contents": pageState });
+		}catch(e){
+			console.log("storeTabData:ERROR",e);
+		}
+	}
+
+	static getTabData(tabId) {
+		return TabTracker.trackedTabs.get(tabId) || null;
+	}
+
+	static getActiveTabData() {
+		return new Promise((resolve) => {
+			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+				const tabId = tabs[0].id;
+				console.log("getActiveTabData:getTabData",TabTracker.getTabData(tabId));
+				resolve(TabTracker.getTabData(tabId)||{});
+			})
+		})
 	}
 }
 

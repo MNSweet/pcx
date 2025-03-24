@@ -44,6 +44,7 @@ export class SWMessageRouter {
 
 				// Listen for messages on this port.
 				port.onMessage.addListener((msg) => {
+					console.log("SWMR⎥«⊶", msg, port.sender);
 					SWLogger.log("SWMessageRouter: Received message", "", { msg });
 					SWMessageRouter.handleMessage(msg, port.sender, (response) => {
 						port.postMessage(response);
@@ -61,6 +62,7 @@ export class SWMessageRouter {
 	}
 
 	static registerHandler(action, callback) {
+		console.log("SWMR⎥ℹ⎢", action);
 		try {
 			if (!SWMessageRouter.handlers.has(action)) {
 				SWMessageRouter.handlers.set(action, []);
@@ -115,7 +117,7 @@ export class SWMessageRouter {
 	 * (For demonstration, not necessarily used in a request/response cycle.)
 	 */
 	static broadcastToTabs(filter = "ALL", message) {
-		SWLogger.log("SWMessageRouter: Broadcasting message", filter, { message });
+		console.log("SWMessageRouter: Broadcasting message", filter, { message });
 		SWMessageRouter.portMap.forEach((data, tabId) => {
 			const { port, domain, isSidePanel } = data;
 			let send = false;
@@ -161,12 +163,13 @@ export class SWMessageRouter {
 				const data = SWMessageRouter.portMap.get(activeTabId);
 				if (data && data.port) {
 					try {
+						console.log("SWMessageRouter.broadcastToActive:",message)
 						data.port.postMessage(message);
 					} catch (err) {
-						SWLogger.error("SWMessageRouter.broadcastToActive: Error sending message", { error: err });
+						console.error("SWMessageRouter.broadcastToActive: Error sending message", { error: err });
 					}
 				} else {
-					SWLogger.warn("SWMessageRouter.broadcastToActive: No port for active tab", { activeTabId });
+					console.warn("SWMessageRouter.broadcastToActive: No port for active tab", { activeTabId });
 				}
 			}
 		});

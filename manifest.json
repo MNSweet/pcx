@@ -26,7 +26,8 @@
 		"service_worker": "js/serviceworker/Background.js"
 	},
 	"side_panel": {
-		"default_path": "SidePanel.html"
+		"default_path": "SidePanel.html",
+		"enabled": "true"
 	},
 	"action": {
 		"default_icon": {

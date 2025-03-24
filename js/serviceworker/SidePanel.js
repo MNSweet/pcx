@@ -1,4 +1,11 @@
 document.addEventListener("DOMContentLoaded", async () => {
+	
+	MessageRouter.registerHandler("showLoading", (msg) => {
+		console.log("SidePanel: Showing loading template");
+		renderSidePanel({"lims":"Loading","sidePanelTemplate":"Default"});
+	});
+
+	MessageRouter.registerHandler("sidePanelReadyResponse", (message) => {/* Silence */});
 	MessageRouter.sendMessage({ action: "sidePanelReady" });
 
 /**
@@ -127,26 +134,6 @@ document.addEventListener("DOMContentLoaded", async () => {
  * Information
  * 
  */
-
-	async function loadInfoUI(data) {
-		let container = DOMHelper.getEl("#information-container");
-
-		if (!container) {
-			console.log("Error: #information-container not found.");
-			return;
-		}
-		container.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-
-		container.appendChild(DOMHelper.createDOM("dt", {
-			classList: "infoLabel",
-			innerText: "Requisition Filename"
-		}));
-
-		container.appendChild(DOMHelper.createDOM("dd", {
-			classList: "infoDesc",
-			innerText: data.req
-		}));
-	}
 	// Registry mapping each CMS (lims) and location code to a renderer function.
 	const templateRegistry = {
 		IATSERV: {
@@ -165,11 +152,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 			"ImmunodeficiencyReq.aspx": renderImmuno,
 			"Neurology": renderNeuro,
 		},
+		OutOfScope: {
+			"Default": renderOOSDefault 
+		},
+		Loading: {
+			"Default": renderLoadingTemplate 
+		}
 	};
 
 	// Main function to choose and call the correct renderer.
 	function buildFormFromData(pageState) {
-		const { lims, pageTemplate, sidePanelTemplate } = pageState;
+		const { lims, sidePanelTemplate } = pageState;
 		const renderer = (templateRegistry[lims] && templateRegistry[lims][sidePanelTemplate])
 		                  ? templateRegistry[lims][sidePanelTemplate]
 		                  : renderDefault;
@@ -193,24 +186,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 
 	function renderPreviewResults(pageState) {
-		if (!pageState.extraParams.AccessionId) {
+		if (!pageState.pageContext.extraParams.AccessionId) {
 			return `<h1>Error</h1><p>Missing AccessionId for Preview Results.</p>`;
 		}
-		return `<h1>Preview Results</h1><p>Previewing results for Accession: ${pageState.extraParams.AccessionId}</p>`;
+		return `<h1>Preview Results</h1><p>Previewing results for Accession: ${pageState.pageContext.extraParams.AccessionId}</p>`;
 	}
 
 	function renderUpdateResults(pageState) {
-		if (!pageState.extraParams.AccessionId) {
+		if (!pageState.pageContext.extraParams.AccessionId) {
 			return `<h1>Error</h1><p>Missing AccessionId for Update Results.</p>`;
 		}
-		return `<h1>Update Results</h1><p>Updating results for Accession: ${pageState.extraParams.AccessionId}</p>`;
+		return `<h1>Update Results</h1><p>Updating results for Accession: ${pageState.pageContext.extraParams.AccessionId}</p>`;
 	}
 
 	function renderPreauthorization(pageState) {
-		if (!pageState.extraParams.PreauthorizationOrderId) {
+		if (!pageState.pageContext.extraParams.PreauthorizationOrderId) {
 			return `<h1>Error</h1><p>Missing PreauthorizationOrderId.</p>`;
 		}
-		return `<h1>Preauthorization</h1><p>Order: ${pageState.extraParams.PreauthorizationOrderId}</p>`;
+		return `<h1>Preauthorization</h1><p>Order: ${pageState.pageContext.extraParams.PreauthorizationOrderId}</p>`;
 	}
 
 	function renderNewMasterAccount(pageState) {
@@ -238,9 +231,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 		return `<h1>Neurology Page</h1>`;
 	}
 
+	// Default renderer when Loading.
+	function renderLoadingTemplate(pageState) {
+		return `<h1>Hmm</h1>`;
+	}
+
+	// Default renderer for Out Of Scope pages.
+	function renderOOSDefault(pageState) {
+		return `<h1>This isn't where I parked my car</h1>`;
+	}
+
 	// Default renderer if no match is found.
 	function renderDefault(pageState) {
-		return `<h1>Default Template</h1><p>No specific template for ${pageState.lims} with location ${pageState.location}.</p>`;
+		return `<h1>Default Template</h1><p>No specific template for ${pageState.pageContext.lims} with location ${pageState.pageContext.sidePanelTemplate}.</p>`;
 	}
 
 	// Optional: Dynamic registration for new templates.
@@ -256,9 +259,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		MessageRouter.registerHandler("getPageDataResponse", (message) => {/* Silence */});
 		MessageRouter.registerHandler("updatePageData", (message) => {
-			renderSidePanel(message.data);
+			try {
+				renderSidePanel(message.data.inScope ? message.data.contents : {"lims":"OutOfScope","sidePanelTemplate":"Default"});
+			}catch(e){console.log(e)}
 		});
-		MessageRouter.sendMessage({ action: 'getPageData'});
+		MessageRouter.sendMessage({ action: 'getPageData' });
 
 		const infoTab = document.getElementById("infoTab");
 		if (infoTab) {
@@ -269,17 +274,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 	// Render the sidePanel's content.
 	function renderSidePanel(pageState) {
+		DOMHelper.getEl("#loading").innerHTML = `<h4>${new Date()}</h4><pre>${JSON.stringify(pageState, null, "\t")}</pre>`;
 		const content = buildFormFromData(pageState);
 		DOMHelper.getEl('#information-container').innerHTML = content;
 	}
-	MessageRouter.registerHandler("showLoading", (msg) => {
-		console.log("SidePanel: Showing loading template");
-		renderLoadingTemplate();
-	});
 	requestPageData();
 });
 
 window.addEventListener("unload", () => {
+	MessageRouter.registerHandler("sidePanelClosedResponse", (message) => {/* Silence */});
 	chrome.runtime.sendMessage({ action: "sidePanelClosed" });
 });
 
