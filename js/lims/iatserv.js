@@ -469,8 +469,12 @@ class IATSERV {
 		const el = IATSERV.selectors;
 		waitForElm(el.FancyBox).then( (elementLoaded) => {
 			waitForIframeElm(el.FancyBox,el.IframeDOB).then( (elementIframeLoaded) => {
-				// Date of Birth Checks
-				let inputDOB = PCX.getEl(el.FancyBox,true).contentWindow.document.querySelector(el.IframeDOB);
+			
+			const frame = PCX.getEl(el.FancyBox,true).contentWindow.document;
+
+
+			// ---- Birthday  ----
+				let inputDOB = frame.querySelector(el.IframeDOB);
 				let minorDate = new Date();
 					minorDate.setFullYear(minorDate.getFullYear() - 18);
 				let docAttempt 	 = 0;
@@ -498,7 +502,11 @@ class IATSERV {
 						}
 					}, 100);
 				});
-				const inputPhone = PCX.getEl(el.FancyBox,true).contentWindow.document.querySelector(el.IframePhone);
+
+
+
+			// ---- Phone Number  ----
+				const inputPhone = frame.querySelector(el.IframePhone);
 				inputPhone.addEventListener('blur', (e) => {
 					if(![0,10].includes(e.target.value.length)){
 						e.target.style.backgroundColor = "#ffcece";
@@ -508,7 +516,11 @@ class IATSERV {
 						e.target.style.border = null;
 					}
 				});
-				const inputZip = PCX.getEl(el.FancyBox,true).contentWindow.document.querySelector(el.IframeZip);
+
+
+
+			// ---- Zip Code  ----
+				const inputZip = frame.querySelector(el.IframeZip);
 				inputZip.addEventListener('blur', (e) => {
 					if(![0,5].includes(e.target.value.length)){
 						e.target.style.backgroundColor = "#ffcece";
@@ -519,20 +531,26 @@ class IATSERV {
 					}
 				});
 
-				PCX.getEl(el.FancyBox).contentWindow.document.querySelectorAll(el.StateDropdown+' option').forEach((option)=>{
+
+
+			// ---- State DropDown ----
+				frame.querySelectorAll(el.StateDropdown+' option').forEach((option)=>{
 					//option.dataset.name = option.innerText;
 					if(["","AA","AE","AP"].includes(option.value)){return;}
 					option.innerText = option.value + " - " + option.innerText;
 				});
 
-				let stateDropdown = PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.StateDropdown);
-				PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.InsuranceLookup).addEventListener('focus',(e)=>{
+
+
+			// ---- Insurance Placeholder AutoComplete ----
+				let stateDropdown = frame.querySelector(el.StateDropdown);
+				frame.querySelector(el.InsuranceLookup).addEventListener('focus',(e)=>{
 					let input = e.target;
 					if(stateDropdown.value == "" || !(stateDropdown.value in IATSERV.insuranceLookUp)) {return;}
 					input.placeholder = IATSERV.insuranceLookUp[stateDropdown.value].name;
 					
 				});
-				PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.InsuranceLookup).addEventListener('blur',(e)=>{
+				frame.querySelector(el.InsuranceLookup).addEventListener('blur',(e)=>{
 					let input = e.target;
 					if(
 						stateDropdown.value == ""
@@ -546,12 +564,97 @@ class IATSERV {
 					// Prevent data desync between interaction states
 					if (input.placeholder == IATSERV.insuranceLookUp[stateDropdown.value].name) {
 						input.value = input.placeholder;
-						PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.InsuranceID).value = IATSERV.insuranceLookUp[stateDropdown.value].id;
+						frame.querySelector(el.InsuranceID).value = IATSERV.insuranceLookUp[stateDropdown.value].id;
 					}
 					input.placeholder = "Insurance";
 				});
+				frame.querySelector(el.IframePolicy).addEventListener('focus',(e)=>{
+					const policyInput = e.target;
+					const insurance = frame.querySelector(el.InsuranceLookup).value.toLowerCase();
+					const mediCheck = (insurance.includes('medicare')) || (insurance.includes('medi-cal')) ;
+
+					if(mediCheck) {
+						const blurMBI = (blurE)=>{
+							const blurPolicyInput = blurE.target;
+							const policyInputValue = blurPolicyInput.value.toUpperCase();
+							// Set Maximum Length
+							const maxLength = 11;
+							
+							// Regular expressions for each position
+							const positionPatterns = [
+								/^[1-9]$/,					// Position 1: numeric 1-9
+								/^[A-HJ-KM-NP-RT-UWY]$/,	// Position 2: alphabetic A-Z (minus S, L, O, I, B, Z)
+								/^[0-9A-HJ-KM-NP-RT-UWY]$/,	// Position 3: alphanumeric (minus S, L, O, I, B, Z)
+								/^[0-9]$/,					// Position 4: numeric 0-9
+								/^[A-HJ-KM-NP-RT-UWY]$/,	// Position 5: alphabetic A-Z (minus S, L, O, I, B, Z)
+								/^[0-9A-HJ-KM-NP-RT-UWY]$/,	// Position 6: alphanumeric (minus S, L, O, I, B, Z)
+								/^[0-9]$/,					// Position 7: numeric 0-9
+								/^[A-HJ-KM-NP-RT-UWY]$/,	// Position 8: alphabetic A-Z (minus S, L, O, I, B, Z)
+								/^[A-HJ-KM-NP-RT-UWY]$/,	// Position 9: alphabetic A-Z (minus S, L, O, I, B, Z)
+								/^[0-9]$/,					// Position 10: numeric 0-9
+								/^[0-9]$/					// Position 11: numeric 0-9
+							];
+
+							let isValid = true;
+							let debugOutput = [];
+
+							// Validate the length of the policyInputValue
+							if (policyInputValue.length == 0) {
+								return;
+							} else if (policyInputValue.length < maxLength) {
+								blurPolicyInput.title = `Number should contain 11 alphanumerical characters. Current: ${policyInputValue.length}`;
+								blurPolicyInput.style.backgroundColor = "#ffcece";
+								blurPolicyInput.style.border = "1px #872626 solid";
+								return;
+							} else if (policyInputValue.length > maxLength) {
+								blurPolicyInput.title = `Number should contain 11 alphanumerical characters. Current: ${policyInputValue.length}`;
+								blurPolicyInput.style.backgroundColor = "#ffcece";
+								blurPolicyInput.style.border = "1px #872626 solid";
+								return;
+							}
+
+							// Validate each character against the respective pattern
+							for (let i = 0; i < maxLength; i++) {
+								if (positionPatterns[i].test(policyInputValue[i])) {
+									debugOutput.push(1);
+								} else {
+									debugOutput.push(0);
+									isValid = false;
+								}
+							}
+
+							// If there are invalid characters, highlight them in the policyInputValue
+							if (!isValid) {
+								let highlightedInput = '';
+
+								for (let i = 0; i < maxLength; i++) {
+									highlightedInput += (debugOutput[i] === 0) 
+										? ` [${policyInputValue[i]}] `		// Error
+										: ` ${policyInputValue[i]} `;	// Correct
+								}
+
+								// Show the detailed error message with the invalid characters highlighted
+								blurPolicyInput.title = highlightedInput;
+								blurPolicyInput.style.backgroundColor = "#ffcece";
+								blurPolicyInput.style.border = "1px #872626 solid";
+							} else {
+								// If everything is valid, clear the error message
+								blurPolicyInput.title = '';
+								blurPolicyInput.style.backgroundColor = null;
+								blurPolicyInput.style.border = null;
+							}
+					
+							
+						};
+
+						policyInput.removeEventListener('blur',blurMBI);
+						policyInput.addEventListener('blur',blurMBI);
+					}
+				});
 
 
+
+			// ---- Disable input tabable areas ----
 				const removeIframeTabIndexSelectors = [
 					el.SSN, el.LicenseState, el.LicenseNumber, el.CopyColumnBTN1, el.CopyColumnBTN2,
 					el.CopyColumnBTN3, el.CopyColumnBTN4, el.PrimeRelation, 
@@ -565,6 +668,9 @@ class IATSERV {
 				];
 				PCX.disableTabIndex(removeIframeTabIndexSelectors,el.FancyBox);
 
+
+
+			// ---- QA Submit Check ----
 				PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.IframeForm).addEventListener('submit', (eventSubmit) => {
 					if(QAManager.getNoticeCount() > 0) {
 						eventSubmit.preventDefault();

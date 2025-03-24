@@ -69,6 +69,7 @@ if(PCX.preferedUserMode()) {
 			IframeDOB		: "#MainContent_ctl00_tbDOB_tbText",
 			IframeZip		: '#MainContent_ctl00_AddressControl1_tbZipCode',
 			IframePhone		: '#MainContent_ctl00_AddressControl1_tbPhone',
+			IframePolicy	: '#MainContent_ctl00_PrimaryInsurance_tbPolicy',
 			IframeForm		: "#form1",
 			PhysicianId		: "#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianId",
 			PhysicianName	: "#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianName",
