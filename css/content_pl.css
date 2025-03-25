@@ -203,6 +203,14 @@
 	padding: 10px 0;
 }
 
+body.statusReceived {}
+body.substatusBillingAccepted {}
+#btnFail {}
+#btnCancel {}
+#btnReject {}
+#btnRerun {}
+#btnCreatePA {}
+
 .BillingHold {
 	background-color: #f1f1f1;
 }

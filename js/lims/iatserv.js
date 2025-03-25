@@ -583,14 +583,14 @@ class IATSERV {
 							// Regular expressions for each position
 							const positionPatterns = [
 								/^[1-9]$/,					// Position 1: numeric 1-9
-								/^[A-HJ-KM-NP-RT-UWY]$/,	// Position 2: alphabetic A-Z (minus S, L, O, I, B, Z)
-								/^[0-9A-HJ-KM-NP-RT-UWY]$/,	// Position 3: alphanumeric (minus S, L, O, I, B, Z)
+								/^[AC-HJ-KM-NP-RT-Y]$/,		// Position 2: alphabetic A-Z (minus S, L, O, I, B, Z)
+								/^[0-9AC-HJ-KM-NP-RT-Y]$/,	// Position 3: alphanumeric (minus S, L, O, I, B, Z)
 								/^[0-9]$/,					// Position 4: numeric 0-9
-								/^[A-HJ-KM-NP-RT-UWY]$/,	// Position 5: alphabetic A-Z (minus S, L, O, I, B, Z)
-								/^[0-9A-HJ-KM-NP-RT-UWY]$/,	// Position 6: alphanumeric (minus S, L, O, I, B, Z)
+								/^[AC-HJ-KM-NP-RT-Y]$/,		// Position 5: alphabetic A-Z (minus S, L, O, I, B, Z)
+								/^[0-9AC-HJ-KM-NP-RT-Y]$/,	// Position 6: alphanumeric (minus S, L, O, I, B, Z)
 								/^[0-9]$/,					// Position 7: numeric 0-9
-								/^[A-HJ-KM-NP-RT-UWY]$/,	// Position 8: alphabetic A-Z (minus S, L, O, I, B, Z)
-								/^[A-HJ-KM-NP-RT-UWY]$/,	// Position 9: alphabetic A-Z (minus S, L, O, I, B, Z)
+								/^[AC-HJ-KM-NP-RT-Y]$/,		// Position 8: alphabetic A-Z (minus S, L, O, I, B, Z)
+								/^[AC-HJ-KM-NP-RT-Y]$/,		// Position 9: alphabetic A-Z (minus S, L, O, I, B, Z)
 								/^[0-9]$/,					// Position 10: numeric 0-9
 								/^[0-9]$/					// Position 11: numeric 0-9
 							];
