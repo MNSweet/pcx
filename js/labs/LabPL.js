@@ -337,10 +337,11 @@ if (PCX.preferredUserMode()) {
 
 	// PA
 	if (IATSERV.linkId == "7006") {
-		console.log(Object.fromEntries(new URLSearchParams(window.location.search)));
 		pageData = {
-			someParams: IATSERV.extraParams,
-			extraParams: Object.fromEntries(new URLSearchParams(window.location.search)),
+			ptID: { selector: "#tbAccessionId", default: "" },
+			extraParams: { 
+				default: IATSERV.extraParams
+			},
 			pageTemplate: { 
 				default: IATSERV.linkId
 			},

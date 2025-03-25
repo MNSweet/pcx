@@ -103,45 +103,21 @@
 	"web_accessible_resources": [
 		{
 			"resources": [
-				"css/modal.css",
-				"css/Logger.css",
-				"css/content_pr.css",
-				"css/content_rr.css",
-				"css/content_pd.css",
-				"css/SidePanel.css",
-
-				"js/labs/LabPL.js",
-				"js/labs/LabPD.js",
-				"js/labs/LabRR.js",
-
-				"js/libs/marked.min.js",
-
-				"js/lims/LIMS.js",
-				"js/lims/IATSERV.js",
-				"js/lims/DXRESULTS.js",
-
-				"js/modules/MessageRouter.js",
-				"js/modules/PageDataManager.js",
-				"js/modules/PCX.js",
-
-					"js/modules/helpers/AsyncHelpers.js",
-					"js/modules/helpers/Data.js",
-					"js/modules/helpers/DOMHelper.js",
-					"js/modules/helpers/DOMObserver.js",
-					"js/modules/helpers/KeyBinding.js",
-					"js/modules/helpers/Logger.js",
-					"js/modules/helpers/Settings.js",
-					"js/modules/helpers/TableEnhancer.js",
-					"js/modules/helpers/Utils.js",
-					"js/modules/helpers/QAManager.js",
-
-					"js/modules/patientTransfer/DataMapping.js",
-					"js/modules/patientTransfer/DestinationFormFiller.js",
-					"js/modules/patientTransfer/PatientData.js",
-					"js/modules/patientTransfer/TranserNoticeControler.js",
-
-				"js/serviceworker/SidePanel.js",
-				"js/data/permissions.js"
+				"css/*.css",
+				"js/labs/*.js",
+				"js/libs/*.js",
+				"js/lims/*.js",
+				"js/modules/*.js",
+				"js/modules/helpers/*.js",
+				"js/modules/patientTransfer/*.js",
+				"js/data/*.js",
+				
+				"js/serviceworker/*.js",
+				"js/serviceworker/SidePanelTemplates/*.html",
+				"js/serviceworker/SidePanelTemplates/DXRESULTS/*.html",
+				"js/serviceworker/SidePanelTemplates/IATSERV/*.html",
+				"js/serviceworker/SidePanelTemplates/Loading/*.html",
+				"js/serviceworker/SidePanelTemplates/OutOfScope/*.html"
 			],
 			"matches": [
 				"https://prince.iatserv.com/*",

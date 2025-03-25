@@ -72,7 +72,7 @@ if(PCX.preferedUserMode()) {
 			Physician		: "#ContentPlaceHolder1_ddlPhyName"
 		}
 
-		if(DXRESULTS.location == "PGx") {
+		if(DXRESULTS.location == "PGX") {
 			selectors['TestPanel'] = "";
 		}
 
@@ -80,11 +80,11 @@ if(PCX.preferedUserMode()) {
 			selectors['TestPanel'] = "#cbpanel5889";
 		}
 
-		if(DXRESULTS.location == "ImmunodeficiencyReq.aspx") {
+		if(DXRESULTS.location == "Immuno") {
 			selectors['TestPanel'] = "#cbpanel5890";
 		}
 
-		if(DXRESULTS.location == "Neurology") {
+		if(DXRESULTS.location == "Neuro") {
 			selectors['TestPanel'] = "#cbpanel5891";
 		}
 		DXRESULTS.setSelectors(selectors);

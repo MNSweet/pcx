@@ -14,7 +14,23 @@ class DXRESULTS extends LIMS {
 
 	// Override getExtraParams to return the URL directory.
 	getExtraParams() {
-		return { directory: this.getUrlDirectory() };
+		const raw = this.getUrlDirectory();
+		const normalized = [...raw];
+
+		// Normalize known oddities from the site into consistent keys
+		switch (normalized[1]) {
+			case "ImmunodeficiencyReq.aspx":
+				normalized[1] = "Immuno";
+				break;
+			case "PGx":
+				normalized[1] = "PGX";
+				break;
+			case "Neurology":
+				normalized[1] = "Neuro";
+				break;
+		}
+
+		return { directory: normalized };
 	}
 
 	/**
