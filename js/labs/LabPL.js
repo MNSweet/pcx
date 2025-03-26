@@ -226,6 +226,15 @@ if (PCX.preferredUserMode()) {
 
 		PCX.processEnabled('SOP','REQ Filename to Clipboard on Scan',IATSERV.scanFilenamer);
 
+
+		let acsStatus = DOMHelper.getEl(`a[href^="javascript:WebApp.UI.Popup('/Pupup.aspx?LinkId=2078"]`).parentElement.innerText.replace(/Results|Status|\|/gi,"").split("-").map(item => item.trim());
+		let buttonText = DOMHelper.createDOM('div',{id:"buttonBottomText",innerHTML:`Patient: ${DOMHelper.getEl("#MainContent_ctl00_tbPatient_tbText").value.toUpperCase()} | Status: ${acsStatus.join(' - ')}`})
+		DOMHelper.getEl('.all-buttons-bottom').insertAdjacentElement('beforebegin', buttonText);
+		DOMHelper.getEl('body').classList.add(`status${acsStatus[0].replace(" ","")}`);
+		if(acsStatus[1] && acsStatus[1] != "") {
+			DOMHelper.getEl('body').classList.add(`substatus${acsStatus[1].replace(" ","")}`);
+		}
+
 		pageData = {
 			acsNum: { selector: "#MainContent_ctl00_tbAccession", default: "" },
 			acsID: { selector: "#tbAccessionId", default: "" },
@@ -242,6 +251,7 @@ if (PCX.preferredUserMode()) {
 			dob: { selector: "#tbPatientDOB", default: "" },
 			doc: { selector: "#MainContent_ctl00_tbCollectionDateTime_tbDate_tbText", default: "" },
 			rd: { selector: "#MainContent_ctl00_tbReceivedDateTime_tbDate_tbText", default: "" },
+			acsStatus: { default: acsStatus },
 			lab: { 
 				selector: "#ddPerformingLabId option:checked", 
 				preprocess: (value, el) => el ? el.innerText : ""
@@ -265,7 +275,6 @@ if (PCX.preferredUserMode()) {
 				default: "IATSERV"
 			}
 		};
-
 
 	}
 

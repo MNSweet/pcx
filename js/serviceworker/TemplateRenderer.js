@@ -1,6 +1,7 @@
 // TemplateRenderer.js
 class TemplateRenderer {
 	static templateCache = {};
+	static activeData = {};
 
 	static async loadTemplate(path) {
 		if (this.templateCache[path]) {
@@ -13,6 +14,9 @@ class TemplateRenderer {
 			if (!res.ok) throw new Error(`Template not found: ${path}`);
 			const text = await res.text();
 			this.templateCache[path] = text;
+			if (!text.trim()) {
+				logger.log(`Template "${path}" loaded but is empty.`,'TemplateRenderer');
+			}
 			return text;
 		} catch {
 			// Silently return null for fallback logic
@@ -27,6 +31,19 @@ class TemplateRenderer {
 		});
 	}
 
+	static async runTemplateScript(jsPath) {
+		try {
+			const fullPath = chrome.runtime.getURL(`js/serviceworker/SidePanelTemplates/${jsPath}`);
+			const module = await import(fullPath);
+			if (typeof module.default === "function") {
+				await module.default(TemplateRenderer.activeData);
+			}
+		} catch (err) {
+			// Silently fail if JS module is missing or invalid
+			Logger.log(`[TemplateRenderer] No page.js loaded for: ${jsPath}`);
+		}
+	}
+
 	static async render(lims, templateKey, pageState, nameHint = "") {
 		const pathsToTry = [
 			`${lims}/${templateKey}${nameHint ? "-" + nameHint : ""}.html`,
@@ -38,11 +55,16 @@ class TemplateRenderer {
 		for (const path of pathsToTry) {
 			const template = await this.loadTemplate(path);
 			if (template) {
-				return this.renderTemplate(template, pageState);
+				const jsPath = path.replace(/\.html$/, ".js");
+				TemplateRenderer.activeData = pageState;
+				console.log("before TemplateRenderer.activeData: ",TemplateRenderer.activeData);
+				await this.runTemplateScript(jsPath);
+				console.log("after TemplateRenderer.activeData: ",TemplateRenderer.activeData);
+				return this.renderTemplate(template, TemplateRenderer.activeData);
 			}
 		}
 
-		console.warn(`[TemplateRenderer] No template found for ${lims}/${templateKey}. Tried:\n${pathsToTry.join("\n")}`);
+		Logger.log(`[TemplateRenderer] No template found for ${lims}/${templateKey}. Tried:\n${pathsToTry.join("\n")}`);
 		return `<h1>Template Missing</h1><p>No usable template for lims: ${lims}, key: ${templateKey}</p>`;
 	}
 }

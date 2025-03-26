@@ -7,6 +7,22 @@ body {
 	font-size: 14px;
 }
 
+#coverOverlay {
+	display: block;
+	width: 100vw;
+	height: 100vh;
+	position: absolute;
+	top: 0;
+	left: 0;
+	background-color: #eaeff7;
+	z-index: 100;
+}
+@media (prefers-color-scheme: dark) {
+	#coverOverlay {
+		background-color: #282828;
+	}
+}
+
 .tab-container {
 	display: flex;
 	background-color: #eaeaea;
@@ -179,4 +195,213 @@ button.tab-button:not(:last-child) {
 	-webkit-text-fill-color: transparent; /* Chrome, Edge & Safari: Hides Text revealing Gradient background "Text" */
 	-moz-text-fill-color: transparent; /* FireFox: Hides Text revealing Gradient background "Text" */
 }
+
+/* == Information Block (template titles, subtitles) == */
+.info-block h2 {
+	font-size: 20px;
+	font-weight: bold;
+	margin-bottom: 5px;
+}
+
+.info-block .subtitle {
+	font-size: 14px;
+	color: #555;
+	margin-bottom: 20px;
+}
+
+/* == Controls Section (buttons, related links, etc.) == */
+.controls,
+.related-links,
+.helpful-links {
+	margin-bottom: 20px;
+}
+
+.controls h3,
+.related-links h3,
+.helpful-links h3 {
+	margin: 10px 0;
+	font-size: 16px;
+	color: #333;
+}
+
+.controls button,
+.related-links a,
+.helpful-links a {
+	display: inline-block;
+	margin: 4px 6px 4px 0;
+	padding: 6px 12px;
+	background-color: #d6c3ff;
+	border: none;
+	border-radius: 5px;
+	color: #333;
+	cursor: pointer;
+	font-weight: bold;
+	font-size: 13px;
+	text-decoration: none;
+	transition: background 0.2s ease;
+}
+
+.controls button:hover,
+.related-links a:hover,
+.helpful-links a:hover {
+	background-color: #bca8ff;
+}
+
+/* == Feedback Message Area (JS injected) == */
+.feedback-area {
+	margin-bottom: 20px;
+	padding: 10px;
+	border-left: 4px solid #bca8ff;
+	background-color: #f4f0ff;
+	font-size: 13px;
+	color: #333;
+}
+
+/* == Debug Dump Styling == */
+.debug-dump {
+	font-family: monospace;
+	background-color: #f0f0f0;
+	padding: 10px;
+	border-radius: 5px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	color: #444;
+	font-size: 12px;
+	margin-bottom: 20px;
+}
+
+#stabilityCard {
+	font-family: system-ui, sans-serif;
+	background: #fff;
+	border-radius: 12px;
+	padding: 16px;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+#stabilityCard h2 {
+	font-size: 1.1rem;
+	margin-bottom: 1rem;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-weight: 600;
+}
+
+.stability-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 12px;
+	border-bottom: 1px solid #eee;
+	padding-bottom: 8px;
+}
+
+.stability-row:last-child {
+	border-bottom: none;
+	margin-bottom: 0;
+	padding-bottom: 0;
+}
+
+.label {
+	font-weight: 500;
+	color: #444;
+}
+
+.pill {
+	background-color: #eee6ff;
+	color: #222;
+	padding: 4px 10px;
+	border-radius: 999px;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.value {
+	color: #222;
+	font-weight: 500;
+	white-space: nowrap;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+	#stabilityCard {
+		background: #1e1e1e;
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+	}
+
+	#stabilityCard h2 {
+		color: #f2f2f2;
+	}
+
+	.label {
+		color: #ccc;
+	}
+
+	.value {
+		color: #fff;
+	}
+
+	.pill {
+		background-color: #4b3c6f;
+		color: #f6f6f6;
+	}
+	
+	.stability-row {
+		border-bottom: 1px solid #333;
+	}
+}
+
+/* Pill status classes */
+.pill.good {
+	background-color: #e0f5e9;
+	color: #1e4620;
+}
+
+.pill.warning {
+	background-color: #fff4e5;
+	color: #7a4900;
+}
+
+.pill.critical {
+	background-color: #ffe8e5;
+	color: #8b1d13;
+}
+
+.pill.expired {
+	background-color: #fbeaea;
+	color: #a30000;
+}
+
+.pill.neutral {
+	background-color: #e6e6e6;
+	color: #444;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+	.pill.good {
+		background-color: #2e573a;
+		color: #b6f1c3;
+	}
+	.pill.warning {
+		background-color: #664c00;
+		color: #fff2c0;
+	}
+	.pill.critical {
+		background-color: #5a1c16;
+		color: #ffcfcf;
+	}
+	.pill.expired {
+		background-color: #5e1c1c;
+		color: #ff9d9d;
+	}
+	.pill.neutral {
+		background-color: #444;
+		color: #ccc;
+	}
+}
+
+
 

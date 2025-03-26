@@ -369,6 +369,7 @@ class TabTracker {
 	static getActiveTabData() {
 		return new Promise((resolve) => {
 			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+				if(tabs.length == 0) {resolve({})}
 				const tabId = tabs[0].id;
 				console.log("getActiveTabData:getTabData",TabTracker.getTabData(tabId));
 				resolve(TabTracker.getTabData(tabId)||{});

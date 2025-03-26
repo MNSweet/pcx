@@ -1,9 +1,28 @@
-<section class="info-block">
-	<h2>Update Accession</h2>
-	<p class="subtitle">Review and manage accession details.</p>
+<section id="info-block">
+	<h1>{{patient}}</h1>
+	<h2>{{test}} | {{data.status - data.subStatus}}</h2>
+</section>
+<section id="stabilityCard">
+	<h2>🧪 Sample Stability</h2>
+	<div class="stability-row">
+		<span class="label">Internal</span>
+		<span class="pill {{stability.internal.class}}">{{stability.internal.text}}</span>
+	</div>
+	<div class="stability-row">
+		<span class="label">Reference</span>
+		<span class="pill {{stability.reference.class}}">{{stability.reference.text}}</span>
+	</div>
+	<div class="stability-row">
+		<span class="label">Recommendation</span>
+		<span class="value">{{stability.recommendation.text}}</span>
+	</div>
+	<div class="stability-row">
+		<span class="label">Collection Date</span>
+		<span class="value">{{doc}}</span>
+	</div>
 </section>
 
-<section class="controls">
+<section id="controls">
 	<h3>Get Filename for:</h3>
 	<button data-copy="filename-1">Requistion Form</button>
 	<button data-copy="filename-2">Hold Form</button>
@@ -11,7 +30,7 @@
 	<button data-copy="filename-2">Face Sheet</button>
 </section>
 
-<section class="related-links">
+<section id="related-links">
 	<h3>Deep Search</h3>
 	<ul>
 		<li><a href="#" data-related="same-provider">Check for Duplcates</a></li>
@@ -22,6 +41,7 @@
 </section>
 
 <section class="feedback-area" id="feedback-area">
+	
 	<!-- Runtime messages like record status or errors will go here -->
 </section>
 
