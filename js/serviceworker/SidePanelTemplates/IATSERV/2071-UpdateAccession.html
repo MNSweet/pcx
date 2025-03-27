@@ -1,6 +1,6 @@
 <section id="info-block">
 	<h1>{{patient}}</h1>
-	<h2>{{test}} | {{data.status - data.subStatus}}</h2>
+	<h3>{{test}} | {{status}} - {{subStatus}}</h2>
 </section>
 <section id="stabilityCard">
 	<h2>🧪 Sample Stability</h2>
@@ -23,11 +23,31 @@
 </section>
 
 <section id="controls">
-	<h3>Get Filename for:</h3>
-	<button data-copy="filename-1">Requistion Form</button>
-	<button data-copy="filename-2">Hold Form</button>
-	<button data-copy="filename-2">Results Sheet</button>
-	<button data-copy="filename-2">Face Sheet</button>
+	<h3>Filename</h3>
+	
+	<h5>Requistion Form</h5>
+	<div class="tagButtons">
+		<button class="tagButton button" data-copy="{{clipboard.requestForm}}.pdf" title="Copy Requistion Form Name">Copy</button>
+		<span class="tagCaption">{{clipboard.requestForm}}.pdf</span>
+	</div>
+
+	<h5>Hold Form</h5>
+	<div class="tagButtons">
+		<button class="tagButton button" data-copy="{{clipboard.HoldForm}}.pdf" title="Copy Hold Form Name">Copy</button>
+		<span class="tagCaption">{{clipboard.holdForm}}.pdf</span>
+	</div>
+	
+	<h5>Results</h5>
+	<div class="tagButtons">
+		<button class="tagButton button" data-copy="{{clipboard.results}}.pdf" title="Copy Results Sheet Name">Copy</button>
+		<span class="tagCaption">{{clipboard.results}}.pdf</span>
+	</div>
+	
+	<h5>Facesheet</h5>
+	<div class="tagButtons">
+		<button class="tagButton button" data-copy="{{clipboard.facesheet}}.pdf" title="Copy Facesheet Name">Copy</button>
+		<span class="tagCaption">{{clipboard.facesheet}}.pdf</span>
+	</div>
 </section>
 
 <section id="related-links">

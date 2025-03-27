@@ -265,6 +265,14 @@ if (PCX.preferredUserMode()) {
 				multiple: true,
 				preprocess: (value, el, elements) => Array.from(elements).map(file => file.innerText)
 			},
+			clipboard : {
+				default: {
+					requestForm: IATSERV.scanFilenamer(true),
+					holdForm: IATSERV.scanFilenamer(true),
+					results: IATSERV.scanFilenamer(true),
+					facesheet: IATSERV.scanFilenamer(true),
+				}
+			},
 			pageTemplate: { 
 				default: IATSERV.linkId
 			},
@@ -275,7 +283,7 @@ if (PCX.preferredUserMode()) {
 				default: "IATSERV"
 			}
 		};
-
+console.log("pageData: ",pageData);
 	}
 
 	// Patient

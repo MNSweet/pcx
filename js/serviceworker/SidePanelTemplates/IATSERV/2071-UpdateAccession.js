@@ -1,4 +1,65 @@
 // 2071-UpdateAccession.js
+
+const stabilityThresholds = {
+	CGX:     { internal: 0, reference: 90 },
+	IMMUNO:  { internal: 60, reference: 90 },
+	CARDIO:  { internal: 60, reference: 90 },
+	NEURO:   { internal: 60, reference: 90 },
+	THYROID: { internal: 60, reference: 90 },
+	UTI:     { internal: 4, reference: 0 },
+	WOUND:   { internal: 4, reference: 0 },
+};
+
+function getPillClass(days) {
+	if (typeof days !== "number") return "expired";
+	if (days > 30) return "good";
+	if (days > 10) return "warning";
+	if (days > 0) return "critical";
+	return "expired";
+}
+
+function evaluateStability(data) {
+	const testType = data.test.toUpperCase();
+	const thresholds = stabilityThresholds[testType] || { internal: 0, reference: 0 };
+	const daysSinceCollection = Math.ceil((Date.now() - new Date(data.doc).getTime()) / 86400000);
+
+	const internalRemaining = thresholds.internal > 0 ? thresholds.internal - daysSinceCollection : null;
+	const referenceRemaining = thresholds.reference > 0 ? thresholds.reference - daysSinceCollection : null;
+
+	// Internal
+	if (internalRemaining === null) {
+		data.stability.internal = { text: "Not Available", class: "neutral" };
+	} else if (internalRemaining >= 0) {
+		data.stability.internal = {
+			text: `${internalRemaining} days remaining`,
+			class: getPillClass(internalRemaining),
+		};
+	} else {
+		data.stability.internal = { text: "Out of Lab Stability", class: "expired" };
+	}
+
+	// Reference
+	if (referenceRemaining === null) {
+		data.stability.reference = { text: "Internal Only", class: "neutral" };
+	} else if (referenceRemaining >= 0) {
+		data.stability.reference = {
+			text: `${referenceRemaining} days remaining`,
+			class: getPillClass(referenceRemaining),
+		};
+	} else {
+		data.stability.reference = { text: "Out of Lab Stability", class: "expired" };
+	}
+
+	// Recommendation
+	if (internalRemaining !== null && internalRemaining >= 0) {
+		data.stability.recommendation = { text: "Test Internally", class: "good" };
+	} else if (referenceRemaining !== null && referenceRemaining >= 0) {
+		data.stability.recommendation = { text: "Send to Reference Lab", class: "warning" };
+	} else {
+		data.stability.recommendation = { text: "Discard", class: "expired" };
+	}
+}
+
 export default async function (data) {
 	console.log("UpdateAccession data", data);
 	try {
@@ -7,59 +68,20 @@ export default async function (data) {
 		}
 		data.test = data.pageContext.test;
 		data.doc = data.pageContext.doc;
-		
+
 		data.stability = {
 			internal: { text: "Expired", class: "expired" },
 			reference: { text: "Expired", class: "expired" },
 			recommendation: { text: "Discard", class: "expired" }
 		};
+		data.clipboard = data.pageContext.clipboard;
 
 		data.status = data.pageContext.acsStatus[0];
 		data.subStatus = data.pageContext.acsStatus[1];
 
-		const stability = Math.ceil(((new Date()).getTime() - (new Date(data.doc)).getTime()) / 86400000);
-
+		// Skip evaluation if the test is fully resulted
 		if (data.status.toUpperCase() !== 'RESULTED') {
-			const testType = data.test.toUpperCase();
-
-			if (["IMMUNO", "CARDIO", "NEURO", "THYROID", "CGX"].includes(testType) && stability <= 120) {
-				// Internal
-				const intMaxNGS = 60;//Internal Stablity Threshold
-				if (testType === "CGX") {
-					data.stability.internal = { text: "Test Not Available", class: "neutral" };
-				} else if (stability <= intMaxNGS) {
-					data.stability.internal = { text: `${intMaxNGS - stability} days remaining`, class: (intMaxNGS - stability) > 20 ? "good" : (intMaxNGS - stability) > 10 ? "warning" : "critical" };
-				} else {
-					data.stability.internal = { text: "Out of Lab Stability", class: "expired" };
-				}
-
-				// Reference
-				const refMaxNGS = 90;//Reference Stablity Threshold
-				if (stability < refMaxNGS) {
-					data.stability.reference = { text: `${refMaxNGS - stability} days remaining`, class: (refMaxNGS - stability) > 30 ? "good" : (refMaxNGS - stability) > 10 ? "warning" : "critical" };
-				} else {
-					data.stability.reference = { text: "Out of Lab Stability", class: "expired" };
-				}
-
-				// Recommendation
-				data.stability.recommendation = (stability <= intMaxNGS && testType !== "CGX")
-					? { text: "Test Internally", class: "good" }
-					: stability < refMaxNGS
-						? { text: "Send to Reference Lab", class: "warning" }
-						: { text: "Discard", class: "expired" };
-			}
-
-			if (["UTI", "WOUND"].includes(testType) && stability <= 4) {
-				const intMaxPGX = 4;//Internal Stablity Threshold
-				data.stability.internal = (stability <= intMaxPGX)
-					? { text: `${intMaxPGX - stability} days remaining`, class: (4 - stability) > 2 ? "good" : (intMaxPGX - stability) > 1 ? "warning" : "critical" }
-					: { text: "Out of Lab Stability", class: "expired" };
-
-				data.stability.reference = { text: "Internal Only", class: "neutral" };
-				data.stability.recommendation = (stability <= intMaxPGX)
-					? { text: "Test Internally", class: "good" }
-					: { text: "Discard", class: "expired" };
-			}
+			evaluateStability(data);
 		}
 
 		delete data.pageContext;
