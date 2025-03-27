@@ -21,6 +21,14 @@ body {
 	z-index: 100;
 }
 
+a {
+	color: #ddd5ff;
+}
+
+a:hover {
+	color: #bca8ff;
+}
+
 /* ==========================================================
    Tabs (Light Mode)
 ========================================================== */
@@ -237,7 +245,6 @@ body {
 #helpful-links h3 {
 	margin: 10px 0;
 	font-size: 16px;
-	color: #333;
 }
 
 #controls h5,
@@ -277,7 +284,8 @@ body {
 }
 
 /* Debug Dump */
-.debug-dump {
+.debug-dump,
+#ebug-dump {
 	font-family: monospace;
 	background-color: #f0f0f0;
 	padding: 10px;
@@ -409,6 +417,7 @@ body {
 .tagButtons .tagCaption {
 	padding: 6px 0;
 	overflow: hidden;
+	color:#000;
 }
 
 
@@ -419,10 +428,11 @@ body {
 
 ========================================================== */
 
+@media (prefers-color-scheme: dark) {
+
 /* ==========================================================
    Base Layout (Dark Mode)
 ========================================================== */
-@media (prefers-color-scheme: dark) {
 	body {
 		background-color: #2b2b2b;
 		color: #ddd5ff;
@@ -504,13 +514,11 @@ body {
    Template-Specific Sections (Dark Mode)
 ========================================================== */
 	#info-block .subtitle {
-		color: #bbb;
 	}
 
 	#controls h3,
 	#related-links h3,
 	#helpful-links h3 {
-		color: #eee;
 	}
 
 	.button {

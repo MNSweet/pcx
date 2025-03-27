@@ -173,7 +173,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	// Render the sidePanel's content.
 	function renderSidePanel(pageState) {
-		DOMHelper.getEl("#loading").innerHTML = `<h4>${new Date()}</h4><pre>${JSON.stringify(pageState, null, "\t")}</pre>`;
+		DOMHelper.getEl("#debug-dump").innerHTML = `${JSON.stringify(pageState, null, "\t")}`;
 		buildFormFromData(pageState).then((content) => {
 			DOMHelper.getEl("#information-container").innerHTML = content;
 		});

@@ -73,7 +73,6 @@ class IATSERV extends LIMS {
 		const el = super.selectors;
 		// Set default inputs.
 		super.getEl(el.BillType).value = 1;
-		super.getEl(el.Status).value = "Received";
 		super.getEl(el.newPatientBtn, true).addEventListener("click", IATSERV.newPatientBtn);
 		super.getEl(el.newPatientBtn).classList.add("disabled");
 		super.getEl(el.locationInput).addEventListener("blur", IATSERV.locationBlur);
@@ -516,6 +515,7 @@ class IATSERV extends LIMS {
 			}
 			if(event.target.value.match("^(5556).*")){
 				super.getEl(el.BillType,true).value = "3";
+				super.getEl(el.Status).value = "Received";
 			}
 			super.getEl(el.newPatientBtn).classList.remove("disabled");
 		} else if (event.target.value === "" && !super.getEl(el.newPatientBtn).classList.contains("disabled")) {
