@@ -72,7 +72,7 @@ class Logger {
 	static init(config) {
 		config = config || {};
 		let params = new URLSearchParams(window.location.search);
-		Logger.enabled = true;//(params.get('debug') === 'true') || config.enabled || false;
+		Logger.enabled = (params.get('debug') === 'true') || config.enabled || false;
 		Logger.outputBrowserConsole = (params.get('console') === 'true') || config.outputBrowserConsole || false;
 		if (Logger.enabled) {
 			Logger.createDevLog();

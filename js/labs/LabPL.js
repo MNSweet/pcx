@@ -235,14 +235,12 @@ if (PCX.preferredUserMode()) {
 			DOMHelper.getEl('body').classList.add(`substatus${acsStatus[1].replace(" ","")}`);
 		}
 
+		const ascNum = DOMHelper.getEl(`#MainContent_ctl00_tbAccession`).value;
+		const patient = DOMHelper.getEl(`#MainContent_ctl00_tbPatient_tbText`).value.toUpperCase();
 		pageData = {
 			acsNum: { selector: "#MainContent_ctl00_tbAccession", default: "" },
 			acsID: { selector: "#tbAccessionId", default: "" },
 			location: { selector: "#MainContent_ctl00_tbLocation_tbText", default: "" },
-			req: { 
-				preprocess: () => IATSERV.scanFilenamer(true) + ".pdf",
-				default: ""
-			},
 			patient: { 
 				selector: "#MainContent_ctl00_tbPatient_tbText", 
 				preprocess: (value) => value.toUpperCase().split(', ')
@@ -268,9 +266,9 @@ if (PCX.preferredUserMode()) {
 			clipboard : {
 				default: {
 					requestForm: IATSERV.scanFilenamer(true),
-					holdForm: IATSERV.scanFilenamer(true),
-					results: IATSERV.scanFilenamer(true),
-					facesheet: IATSERV.scanFilenamer(true),
+					holdForm: PCX.holdFormFileNamer(ascNum,patient),
+					results: PCX.resultsFileNamer(patient),
+					facesheet: PCX.facesheetFileNamer(ascNum,patient),
 				}
 			},
 			pageTemplate: { 

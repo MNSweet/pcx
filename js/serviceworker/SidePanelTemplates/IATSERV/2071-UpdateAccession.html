@@ -23,8 +23,15 @@
 </section>
 
 <section id="controls">
-	<h3>Filename</h3>
-	
+	<h4>File Check</h4>
+	<ul>
+		<li class="iconStatus {{fileCheck.req}}">REQ</li>
+		<li class="iconStatus {{fileCheck.fs}}">FS</li>
+		<li class="iconStatus {{fileCheck.res}}">RES</li>
+		<li class="iconStatus {{fileCheck.hold}}">HOLD</li>
+	</ul>
+
+	<h4>Filenames</h4>
 	<h5>Requistion Form</h5>
 	<div class="tagButtons">
 		<button class="tagButton button" data-copy="{{clipboard.requestForm}}.pdf" title="Copy Requistion Form Name">Copy</button>

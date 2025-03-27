@@ -148,6 +148,20 @@ class PCX {
 
 		});*/
 	}
+
+	static holdFormFileNamer(acs,name){
+		return `DOCUMENT REQUEST ${acs} ${name.replace(',','')}`;
+	}
+
+	static resultsFileNamer(name){
+		const today = new Date();
+		const formattedDate = `${("00" + (today.getMonth() + 1)).slice(-2)}.${("00" + today.getDate()).slice(-2)}.${today.getFullYear().toString().slice(-2)}`;
+		return `RES ${formattedDate} [NEG POS QNS] ${name.replace(',','')}`;
+	}
+
+	static facesheetFileNamer(acs,name){
+		return `FS ${acs} ${name.replace(',','')}`;
+	}
 }
 
 // Expose PCX to the global window if needed.

@@ -124,13 +124,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 	// Template name registry
 	const templateRegistry = {
 		IATSERV: {
+			"2001": "MasterList",
+			"2004": "Locations",
+			"2006": "NewMasterAccount",
+			"2011": "CreateAccession",
 			"2070": "AccessionList",
 			"2071": "UpdateAccession",
-			"2011": "CreateAccession",
 			"2461": "UpdateResults",
 			"7006": "Preauthorization",
-			"2006": "NewMasterAccount",
-			"2004": "Locations",
 		},
 		DXRESULTS: {
 			"PGX": "PGX",
