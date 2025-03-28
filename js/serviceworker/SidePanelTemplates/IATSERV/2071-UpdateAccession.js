@@ -107,11 +107,36 @@ export default async function (data) {
 			}
 		}
 
+		// Flags initialization
+		let hasReq = false;
+		let hasFs = false;
+		let hasRes = false;
+		let hasHold = false;
+
+		data.pageContext.files.forEach(file => {
+			// Check for "REQ" files (case insensitive)
+			if (/^REQ\s/i.test(file)) {
+				hasReq = true;
+			}
+			// Check for "FS", "REQ FS", or "CN" files (case insensitive)
+			if (/^REQ\sFS\s/i.test(file) || /^FS\s/i.test(file) || /^CN\s/i.test(file)) {
+				hasFs = true;
+			}
+			// Check for "RES" files (case insensitive)
+			if (/^RES\s/i.test(file)) {
+				hasRes = true;
+			}
+			// Check for "DOCUMENT" files (case insensitive)
+			if (/^DOCUMENT\s/i.test(file)) {
+				hasHold = true;
+			}
+		});
+
 		data.fileCheck = {
-			req: iconStatus.check,
-			fs: iconStatus.check,
-			res: iconStatus.check,
-			hold: iconStatus.check
+			req: hasReq ? iconStatus.check : iconStatus.important,
+			fs: hasFs ? iconStatus.check : iconStatus.important,
+			res: hasRes ? iconStatus.check : iconStatus.pending,
+			hold: hasHold ? iconStatus.check : iconStatus.null
 		}
 
 		// Skip evaluation if the test is fully resulted
