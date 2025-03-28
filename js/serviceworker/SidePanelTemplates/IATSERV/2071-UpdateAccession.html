@@ -23,13 +23,20 @@
 </section>
 
 <section id="controls">
-	<h4>File Check</h4>
-	<ul>
-		<li class="iconStatus {{fileCheck.req}}">REQ</li>
-		<li class="iconStatus {{fileCheck.fs}}">FS</li>
-		<li class="iconStatus {{fileCheck.res}}">RES</li>
-		<li class="iconStatus {{fileCheck.hold}}">HOLD</li>
-	</ul>
+	<!--
+	✅ Exists | grayscale(0)
+	❌ Not Present | grayscale(0)
+	❌ Not Present But Expected | grayscale(1)
+	❗ Not Present But Required Soon | grayscale(0)
+	⛔ Not Present But Not Expected | grayscale(1)
+	-->
+	<div class="status">
+		<h4 class="statusLabel">File<br/>Check</h4>
+		<span data-icon="{{fileCheck.req.icon}}" data-desc="{{fileCheck.req.desc}}" class="iconStatus {{fileCheck.req.class}}">REQ</span>
+		<span data-icon="{{fileCheck.fs.icon}}" data-desc="{{fileCheck.fs.desc}}" class="iconStatus {{fileCheck.fs.class}}">FS</span>
+		<span data-icon="{{fileCheck.res.icon}}" data-desc="{{fileCheck.res.desc}}" class="iconStatus {{fileCheck.res.class}}">RES</span>
+		<span data-icon="{{fileCheck.hold.icon}}" data-desc="{{fileCheck.hold.desc}}" class="iconStatus {{fileCheck.hold.class}}">HOLD</span>
+	</div>
 
 	<h4>Filenames</h4>
 	<h5>Requistion Form</h5>

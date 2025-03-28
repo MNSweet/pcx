@@ -254,6 +254,92 @@ a:hover {
 	padding-bottom: 0;
 }
 
+.status {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: space-around;
+	margin: 15px 0 0;
+	font-family: system-ui, sans-serif;
+	background: #fff;
+	border-radius: 12px;
+	padding: 16px 16px 16px 70px;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+	max-width: 100%;
+	box-sizing: border-box;
+	align-items: center;
+	position: relative;
+	overflow: hidden;
+}
+
+.statusLabel {
+	text-align: right;
+    margin: 0;
+    background-color: #e9dfff;
+    position: absolute;
+    left: 0;
+    height: 100%;
+    align-content: center;
+    padding: 0 23px 0 10px;
+}
+
+.statusLabel:after {
+	content:"";
+	background-color: #fff;
+	border-radius: 12px 0 0 12px;
+	position: absolute;
+	width: 12px;
+	height: 100%;
+	top: 0;
+	right: 0;
+}
+
+.iconStatus {
+	position: relative;
+	display: block;
+	height: 45px;
+	font-size: 16px;
+	font-weight: bold;
+	flex: 1;
+	text-align: center;
+	margin: 0.33em 0;
+}
+
+.iconStatus:not(:last-child) {
+	border-right: 1px solid #d2d2d2;
+}
+
+.iconStatus:before {
+	content: attr(data-icon);
+	position: absolute;
+	bottom: 0px;
+	justify-self: anchor-center;
+}
+
+.iconStatus.grayscale:before {
+	filter: grayscale(1);
+}
+
+.iconStatus:after {
+    content: attr(data-desc);
+    position: absolute;
+    bottom: -21px;
+    justify-self: anchor-center;
+    opacity: 1;
+    font-size: 11px;
+    align-self: anchor-center;
+    width: 100%;
+	opacity: 0;
+}
+
+.iconStatus:hover:before {
+	opacity: 0;
+}
+
+.iconStatus:hover:after {
+	opacity: 1;
+}
+
 .button {
 	display: inline-block;
 	margin: 4px 6px 4px 0;

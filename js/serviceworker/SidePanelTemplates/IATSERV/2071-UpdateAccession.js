@@ -79,6 +79,41 @@ export default async function (data) {
 		data.status = data.pageContext.acsStatus[0];
 		data.subStatus = data.pageContext.acsStatus[1];
 
+		const iconStatus = {
+			check: {
+				icon:"✅",
+				desc:"Present",
+				class:""
+			},
+			missing: {
+				icon:"❌",
+				desc:"Not Present",
+				class:""
+			},
+			pending: {
+				icon:"❌",
+				desc:"Not Present And Expected",
+				class:"grayscale"
+			},
+			important: {
+				icon:"❗",
+				desc:"Not Present And Required Soon",
+				class:""
+			},
+			null: {
+				icon:"⛔",
+				desc:"Not Present Or Expected",
+				class:"grayscale"
+			}
+		}
+
+		data.fileCheck = {
+			req: iconStatus.check,
+			fs: iconStatus.check,
+			res: iconStatus.check,
+			hold: iconStatus.check
+		}
+
 		// Skip evaluation if the test is fully resulted
 		if (data.status.toUpperCase() !== 'RESULTED') {
 			evaluateStability(data);
