@@ -375,8 +375,6 @@ class IATSERV {
 
 		// Set Bill Type to Primary Insurance as default
 		PCX.getEl(el.BillType).value = 1;
-		// Set Status to Received as default
-		PCX.getEl(el.Status).value = "Received";
 
 		PCX.getEl(el.newPatientBtn,true).addEventListener('click', IATSERV.newPatientBtn);
 
@@ -393,6 +391,9 @@ class IATSERV {
 				}
 				if(event.target.value.match("^(5556).*")){
 					PCX.getEl("#MainContent_ctl00_ctl00_ddBillType_ddControl",true).value = "3";
+					
+					// Set Status to Received as default to p revent the Auto-PA
+					PCX.getEl(el.Status).value = "Received";
 				}
 				PCX.getEl(el.newPatientBtn).classList.remove("disabled");
 			}else if(event.target.value == "" && !PCX.getEl(el.newPatientBtn).classList.contains("disabled")){
