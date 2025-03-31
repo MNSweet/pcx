@@ -210,51 +210,6 @@ if(PCX.preferedUserMode()) {
 		);
 
 		PCX.processEnabled('SOP','REQ Filename to Clipboard on Scan',IATSERV.scanFilenamer);
-
-
-		
-		let files = [];
-			PCX.getEls('[id^="MainContent_ctl00_ObjectDocuments1_ObjectDocuments_Exists_GridView1_lblTitle_"]').forEach((file)=>{files.push(file.innerText);});
-		let data = {
-			acsNum	: PCX.getEl("#MainContent_ctl00_tbAccession").value,
-			acsID	: PCX.getEl("#tbAccessionId").value,
-			location: PCX.getEl("#MainContent_ctl00_tbLocation_tbText").value,
-			req		: IATSERV.scanFilenamer(true)+".pdf",
-			patient	: PCX.getEl("#MainContent_ctl00_tbPatient_tbText").value.toUpperCase().split(', '),
-			ptID	: PCX.getEl("#MainContent_ctl00_tbPatient_tbID").value,
-			dob		: PCX.getEl("#tbPatientDOB").value,
-			doc		: PCX.getEl("#MainContent_ctl00_tbCollectionDateTime_tbDate_tbText").value,
-			rd		: PCX.getEl("#MainContent_ctl00_tbReceivedDateTime_tbDate_tbText").value,
-			lab		: PCX.getEl("#ddPerformingLabId option:checked").innerText,
-			test	: PCX.getEl("#MainContent_ctl00_ctrlOrderTestCategoryControl_ddTestCategory option:checked").innerText,
-			files	: files
-		};
-		PCX.sendPageDataToBackground(data);
-
-		chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-			if (request.action === "getPageContent") {
-				// Extract relevant data from the page		
-				let liveFiles = [];
-					PCX.getEls('[id^="MainContent_ctl00_ObjectDocuments1_ObjectDocuments_Exists_GridView1_lblTitle_"]',true).forEach((file)=>{files.push(file.innerText);});
-				let liveData = {
-					acsNum	: PCX.getEl("#MainContent_ctl00_tbAccession",true).value,
-					acsID	: PCX.getEl("#tbAccessionId",true).value,
-					location: PCX.getEl("#MainContent_ctl00_tbLocation_tbText",true).value,
-					req		: IATSERV.scanFilenamer(true)+".pdf",
-					patient	: PCX.getEl("#MainContent_ctl00_tbPatient_tbText",true).value.toUpperCase().split(', '),
-					ptID	: PCX.getEl("#MainContent_ctl00_tbPatient_tbID",true).value,
-					dob		: PCX.getEl("#tbPatientDOB",true).value,
-					doc		: PCX.getEl("#MainContent_ctl00_tbCollectionDateTime_tbDate_tbText",true).value,
-					rd		: PCX.getEl("#MainContent_ctl00_tbReceivedDateTime_tbDate_tbText",true).value,
-					lab		: PCX.getEl("#ddPerformingLabId option:checked",true).innerText,
-					test	: PCX.getEl("#MainContent_ctl00_ctrlOrderTestCategoryControl_ddTestCategory option:checked",true).innerText,
-					files	: files
-				};
-
-				console.log("Sending page content:", liveData);
-				sendResponse({ content: liveData });
-			}
-		});
 	}
 
 	// Results

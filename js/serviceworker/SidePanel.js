@@ -5,7 +5,8 @@
 // == Extension UI Setup ==
 document.addEventListener("DOMContentLoaded", async () => {
 	MessageRouter.registerHandler("showLoading", (msg) => {
-		renderSidePanel({ lims: "Loading", sidePanelTemplate: "Default" });
+		DOMHelper.getEl('#tabCheck').innerHTML = `${JSON.stringify(msg.message,null,"\t")}`;
+		//renderSidePanel({ lims: "Loading", sidePanelTemplate: "Default" });
 	});
 
 	MessageRouter.registerHandler("sidePanelReadyResponse", (message) => {/* Silence */});

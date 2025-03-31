@@ -282,28 +282,82 @@ class TabTracker {
 	static tabWhitelists = {};
 	static tabTargets = {};
 	static sidePanelState = false;
+	static activeTab = {};
+	static activeData = {};
 
 	static init() {
-		chrome.tabs.onCreated.addListener(TabTracker.processTab);
-		chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => TabTracker.processTab(tab));
-		chrome.tabs.onActivated.addListener(({ tabId }) => chrome.tabs.get(tabId, TabTracker.processTab));
+		chrome.tabs.onActivated.addListener(({ tabId }) => TabTracker.processTab);
 		chrome.tabs.onRemoved.addListener(TabTracker.handleTabRemoved);
 		chrome.webNavigation.onCommitted.addListener(TabTracker.handleOnCommitted);
+		chrome.windows.onFocusChanged.addListener((windowId) => {
+			if (windowId !== chrome.windows.WINDOW_ID_NONE) {TabTracker.processTab();}
+		});
+	}
+
+	// Required first stop of any event. First line of TabTracker.processTab().
+	static async queueActiveTab(){
+		return new Promise((resolve) => {
+			chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
+				if(tabs.length == 0) {
+					TabTracker.activeTab = {};
+					resolve(false);
+				}
+				TabTracker.activeTab = tabs[0];
+				resolve(true);
+			})
+		})
+
 	}
 
 	static async processTab(tab) {
-		if(TabTracker.sidePanelState) {
-			//SWMessageRouter.broadcastToTabs("SP", { action: "showLoading" });
-			await TabTracker.getActiveTabData().then((activeData) => {
-				SWMessageRouter.broadcastToTabs("SP", { action: "updatePageData", data: activeData });
-			});
-		}
-		const inScope = Object.values(ServiceWorker.options.domains).some(domain => tab.url.startsWith(domain));
-		const trackedTab = TabTracker.trackedTabs.get(tab.id);
-		TabTracker.trackedTabs.set(tab.id, { url: tab.url, inScope: inScope, contents: (trackedTab?trackedTab.contents:{}) });
-		TabTracker.handleTabIconUpdate(inScope);
+		console.log(`[[SP]] OPEN: ${TabTracker.sidePanelState}`, tab)
+		await TabTracker.queueActiveTab().then((hasData) => {
+
+			if(!hasData) {return;}
+
+			if(!TabTracker.getTabData(TabTracker.activeTab.id)){
+				TabTracker.activeData = {
+					url:TabTracker.activeTab.url,
+					inScope: TabTracker.inScope(TabTracker.activeTab.url),
+					contents: {
+						sidePanelTemplate: 'Default-Loading',
+						lims: "Loading"
+					}
+				}
+			}
+
+			console.log(`[[SP]] activeTab: `, TabTracker.activeTab)
+			console.log(`[[SP]] activeData: `, TabTracker.activeData)
+			
+			TabTracker.trackedTabs.set(
+				TabTracker.activeData.id,
+				{
+					url: TabTracker.activeData.url,
+					inScope: TabTracker.inScope(),
+					contents: TabTracker.activeData.contents
+				}
+			);
+			TabTracker.handleTabIconUpdate(TabTracker.inScope());
+
+			if(TabTracker.sidePanelState) {
+				SWMessageRouter.broadcastToTabs("SP", { action: "showLoading", message: TabTracker.activeData});
+				SWMessageRouter.broadcastToTabs("SP", { action: "updatePageData", data: TabTracker.activeData});
+			}
+		});
 
 	}
+
+	static inScope(url="") {
+		console.log("inScope(): ", TabTracker.activeData);
+		if(url == ""){
+			return Object.values(ServiceWorker.options.domains)
+					.some(domain => TabTracker.activeData.url.startsWith(domain));
+		}
+		return Object.values(ServiceWorker.options.domains)
+					.some(domain => url.startsWith(domain));
+	}
+
+
 
 	// Event Handlers
 	static handleTabIconUpdate(inScope) {
@@ -355,26 +409,30 @@ class TabTracker {
 	// Page Data
 	static storeTabData(tabId, pageState) {
 		try{
-			const tabData = TabTracker.trackedTabs.get(tabId);
-			TabTracker.trackedTabs.set(tabId, { "url": tabData.url, "inScope": tabData.inScope, "contents": pageState });
+			if (!TabTracker.trackedTabs.has(tabId)) {
+				TabTracker.trackedTabs.set(tabId, {
+					url:TabTracker.activeTab.url,
+					inScope: TabTracker.inScope(TabTracker.activeTab.url),
+					contents: {
+						sidePanelTemplate: 'Default-Loading',
+						lims: "Loading"
+					}
+				});
+			}else{
+				const tabData = TabTracker.trackedTabs.get(tabId);
+				TabTracker.trackedTabs.set(tabId, { "url": tabData.url, "inScope": tabData.inScope, "contents": pageState });
+			}
 		}catch(e){
 			console.log("storeTabData:ERROR",e);
 		}
 	}
 
 	static getTabData(tabId) {
-		return TabTracker.trackedTabs.get(tabId) || null;
-	}
-
-	static getActiveTabData() {
-		return new Promise((resolve) => {
-			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-				if(tabs.length == 0) {resolve({})}
-				const tabId = tabs[0].id;
-				console.log("getActiveTabData:getTabData",TabTracker.getTabData(tabId));
-				resolve(TabTracker.getTabData(tabId)||{});
-			})
-		})
+		if(TabTracker.trackedTabs.has(tabId)) {
+			TabTracker.activeData = TabTracker.trackedTabs.get(tabId);
+			return true;
+		}
+		return false;
 	}
 }
 

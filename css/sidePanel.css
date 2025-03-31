@@ -274,13 +274,13 @@ a:hover {
 
 .statusLabel {
 	text-align: right;
-    margin: 0;
-    background-color: #e9dfff;
-    position: absolute;
-    left: 0;
-    height: 100%;
-    align-content: center;
-    padding: 0 23px 0 10px;
+	margin: 0;
+	background-color: #e9dfff;
+	position: absolute;
+	left: 0;
+	height: 100%;
+	align-content: center;
+	padding: 0 23px 0 10px;
 }
 
 .statusLabel:after {
@@ -321,14 +321,14 @@ a:hover {
 }
 
 .iconStatus:after {
-    content: attr(data-desc);
-    position: absolute;
-    bottom: -21px;
-    justify-self: anchor-center;
-    opacity: 1;
-    font-size: 11px;
-    align-self: anchor-center;
-    width: 100%;
+	content: attr(data-desc);
+	position: absolute;
+	bottom: -21px;
+	justify-self: anchor-center;
+	opacity: 1;
+	font-size: 11px;
+	align-self: anchor-center;
+	width: 100%;
 	opacity: 0;
 }
 
