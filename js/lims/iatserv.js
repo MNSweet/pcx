@@ -264,27 +264,47 @@ class IATSERV {
 		const overrides = [
 			{heading:"ID1",linkId:2005,text:"Delivery"},
 			{heading:"ID2",linkId:0,text:""},
-			{heading:"ID3",linkId:0,text:""} // Available
+			{heading:"ID3",linkId:0,text:""}, // Available
+			{heading:"Phone",linkId:0,text:""},
+			{heading:"Fax",linkId:0,text:""},
+			{heading:"Location Name",linkId:0,text:""}
 		]
+
+		let LocAccount = (headings.includes("Location Name") && headings.includes("Account"));
 
 		for (const [i,column] of Object.entries(overrides)) {
 			if (headings.includes(column.heading) && headings.includes('Code')) {
 				let rowData = document.querySelectorAll('.dxgvDataRow_Metropolis');
 				if(rowData.length){
 					rowData.forEach((row) => {
-						let locationID = row.querySelector('td:nth-child('+(headings.indexOf('Code')+1)+') a').getAttribute('onclick').replace(/ShowForm\((\d*)\)/i,'$1');
-						let columnLinkTD = row.querySelector('td:nth-child('+(headings.indexOf(column.heading)+1)+')');
-						let link = PCX.createDOM("a",{class:"delivery",href:"javascript:ShowForm("+locationID+");"});
-						link.addEventListener('click', ()=>{
-							waitForElm(".fancybox-iframe").then((iframe)=> {
-								waitForIframeElm(".fancybox-iframe",'[href="#delivery"]').then((link)=> {
-									console.log('found');
-									PCX.getEl(".fancybox-iframe",true).contentWindow.document.querySelector('[href="#delivery"]').click();
+						console.log(row,column.heading,LocAccount);
+						if("Location Name" == column.heading && LocAccount) {
+							let locationCell = row.querySelector('td:nth-child('+(headings.indexOf("Location Name")+1)+')');
+							let accountCell = row.querySelector('td:nth-child('+(headings.indexOf('Account')+1)+')');
+							if(locationCell.innerText.trim() != accountCell.innerText.trim()) {
+								locationCell.style.backgroundColor="#fdf0f0";
+								accountCell.style.backgroundColor="#fdf0f0";
+							}
+						}else if(["Phone","Fax"].includes(column.heading)) {
+							let cell = row.querySelector('td:nth-child('+(headings.indexOf(column.heading)+1)+')');
+							if (cell.innerText.trim() == "" || /\D/.test(cell.innerText.trim())) {
+								cell.style.backgroundColor="#fdf0f0";
+							}
+						}else{
+							let locationID = row.querySelector('td:nth-child('+(headings.indexOf('Code')+1)+') a').getAttribute('onclick').replace(/ShowForm\((\d*)\)/i,'$1');
+							let columnLinkTD = row.querySelector('td:nth-child('+(headings.indexOf(column.heading)+1)+')');
+							let link = PCX.createDOM("a",{class:"delivery",href:"javascript:ShowForm("+locationID+");"});
+							link.addEventListener('click', ()=>{
+								waitForElm(".fancybox-iframe").then((iframe)=> {
+									waitForIframeElm(".fancybox-iframe",'[href="#delivery"]').then((link)=> {
+										console.log('found');
+										PCX.getEl(".fancybox-iframe",true).contentWindow.document.querySelector('[href="#delivery"]').click();
+									});
 								});
 							});
-						});
-						link.innerHTML = column.text;
-						columnLinkTD.appendChild(link);
+							link.innerHTML = column.text;
+							columnLinkTD.appendChild(link);
+						}
 					});
 					PCX.getEl('#MainContent_ctl00_grid_DXHeadersRow0 td:nth-child('+(headings.indexOf(column.heading)+1)+ ')',true).textContent = column.text;
 				}

@@ -262,12 +262,13 @@ if(PCX.preferedUserMode()) {
 	}
 	function checkAndReplaceIframe(){
 		waitForElm(".fancybox-iframe").then((iframe)=> {
-			waitForIframeElm(".fancybox-iframe","#MainContent_ctl00_tbName").then((input)=> {
+			let frameQuery = iframe.contentWindow.document;
+			/*waitForIframeElm(".fancybox-iframe","#MainContent_ctl00_tbName").then((input)=> {
 				let tbName = input.value;
 				input.value=input.value.replace(/[,.\"]/,"");
 				if(input.value != tbName){
 					input.style.border="2px solid #0cc90c";
-					document.querySelector('.fancybox-iframe').contentWindow.document.querySelector("#MainContent_ctl00_btnSave",true).click()
+					frameQuery.querySelector("#MainContent_ctl00_btnSave",true).click()
 				}
 				waitForElm(".fancybox-close").then((close)=> {
 					close.addEventListener('click', ()=>{
@@ -293,7 +294,43 @@ if(PCX.preferedUserMode()) {
 						delay(1000).then(checkAndReplaceIframe);
 					});
 				});
+			});*/
+			const numOnly = /[^0-9]/g;
+			let valCheck = "";
+			waitForIframeElm(".fancybox-iframe","#tbPhone").then((input)=> {
+				valCheck = input.value;
+				input.value = input.value.replace(numOnly,"");
+				if(input.value != valCheck){console.log('Phone Fixed');
+					input.style.border = "2px solid #0cc90c";
+					document.querySelector(".fancybox-iframe").contentWindow.document.querySelector(`[href="#info"]`).style.borderBottom = "2px solid #0cc90c";
+				}
 			});
+
+			waitForIframeElm(".fancybox-iframe","#tbFax").then((input)=> {
+				valCheck = input.value;
+				input.value = input.value.replace(numOnly,"");
+				if(input.value != valCheck){console.log('Fax Fixed');
+					input.style.border = "2px solid #0cc90c";
+					document.querySelector(".fancybox-iframe").contentWindow.document.querySelector(`[href="#info"]`).style.borderBottom = "2px solid #0cc90c";
+				}
+			});
+			
+			waitForIframeElm(".fancybox-iframe","#tbFaxDelivery").then((input)=> {
+				valCheck = input.value;
+				input.value = input.value.replace(numOnly,"");
+				if(input.value != valCheck){console.log('Delivery Fixed');
+					input.style.border = "2px solid #0cc90c";
+					document.querySelector(".fancybox-iframe").contentWindow.document.querySelector(`[href="#delivery"]`).style.borderBottom = "2px solid #0cc90c";
+					document.querySelector(".fancybox-iframe").contentWindow.document.querySelector("#MainContent_ctl00_btnSave",true).click()
+				}
+			});
+
+			waitForElm(".fancybox-close").then((close)=> {console.log('close');
+				close.addEventListener('click', ()=>{
+					delay(1000).then(checkAndReplaceIframe);
+				});
+			});
+			
 		})
 	}
 
