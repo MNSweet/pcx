@@ -185,11 +185,6 @@ class ServiceWorker {
 		sendResponse({ action:"getPageDataResponse", site: ServiceWorker.getCurrentSite(message, sender) });
 	});
 
-	SWMessageRouter.registerHandler("sidePanelReady",(message, sender, sendResponse) => {
-		TabTracker.sidePanelState = true;
-		sendResponse({ action:"sidePanelReadyResponse", status: "Acknowledged" });
-	});
-
 	SWMessageRouter.registerHandler("sidePanelClosed",(message, sender, sendResponse) => {
 		TabTracker.sidePanelState = false;
 		sendResponse({ action:"sidePanelClosedResponse", status: "Acknowledged" });
@@ -214,6 +209,28 @@ class ServiceWorker {
 
 		// Hey Page, do you have anything want to add? Let me know on "storePageData", Thanks
 		SWMessageRouter.broadcastToActive({ action: "getPageContent"});
+	});
+
+	SWMessageRouter.registerHandler("sidePanelReady", (message, sender, sendResponse) => {
+		console.log("[SW] Side panel reported ready");
+		TabTracker.sidePanelState = true;
+
+		// Confirm sidePanelState is now true
+		console.log("[SW] TabTracker.sidePanelState is now", TabTracker.sidePanelState);
+
+		// Immediately send current active tab data
+		TabTracker.getActiveTabData().then((activeData) => {
+			console.log("[SW] Broadcasting updatePageData from sidePanelReady", activeData);
+			SWMessageRouter.broadcastToTabs("SP", {
+				action: "updatePageData",
+				data: activeData
+			});
+		});
+
+		sendResponse({
+			action: "sidePanelReadyResponse",
+			status: "Acknowledged"
+		});
 	});
 
 /** 
@@ -286,11 +303,40 @@ class TabTracker {
 	static activeData = {};
 
 	static init() {
-		chrome.tabs.onActivated.addListener(({ tabId }) => TabTracker.processTab);
-		chrome.tabs.onRemoved.addListener(TabTracker.handleTabRemoved);
-		chrome.webNavigation.onCommitted.addListener(TabTracker.handleOnCommitted);
+		console.log("[TabTracker] Init called");
+
+		// Fires when user switches tabs in the same window
+		chrome.tabs.onActivated.addListener(({ tabId }) => {
+			console.log("[TabTracker] onActivated", tabId);
+			TabTracker.processTab();
+		});
+
+		// Fires when tab finishes reloading (e.g., after F5 or site-triggered reload)
+		chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+			if (changeInfo.status === "complete") {
+				console.log("[TabTracker] onUpdated (status: complete)", tabId);
+				TabTracker.processTab(tab);
+			}
+		});
+
+		// Fires when a tab is removed (closed)
+		chrome.tabs.onRemoved.addListener((tabId) => {
+			console.log("[TabTracker] onRemoved", tabId);
+			TabTracker.handleTabRemoved(tabId);
+		});
+
+		// Fires when switching between browser windows
 		chrome.windows.onFocusChanged.addListener((windowId) => {
-			if (windowId !== chrome.windows.WINDOW_ID_NONE) {TabTracker.processTab();}
+			console.log("[TabTracker] onFocusChanged", windowId);
+			if (windowId !== chrome.windows.WINDOW_ID_NONE) {
+				TabTracker.processTab();
+			}
+		});
+
+		// Optional: Still captures deeper transitions like site script redirects
+		chrome.webNavigation.onCommitted.addListener((info) => {
+			console.log("[TabTracker] onCommitted", info);
+			TabTracker.handleOnCommitted(info);
 		});
 	}
 
@@ -310,7 +356,49 @@ class TabTracker {
 	}
 
 	static async processTab(tab) {
-		console.log(`[[SP]] OPEN: ${TabTracker.sidePanelState}`, tab)
+		console.log("[TabTracker] processTab START");
+
+		await TabTracker.queueActiveTab().then((hasData) => {
+			console.log("[TabTracker] Active tab:", TabTracker.activeTab);
+			console.log("[TabTracker] hasData:", hasData);
+			console.log("[TabTracker] Already tracked:", TabTracker.trackedTabs.has(TabTracker.activeTab.id));
+			console.log("[TabTracker] sidePanelState:", TabTracker.sidePanelState);
+
+			if (!hasData) return;
+
+			if (!TabTracker.getTabData(TabTracker.activeTab.id)) {
+				console.log("[TabTracker] No existing data for tab. Setting loading template.");
+				TabTracker.activeData = {
+					url: TabTracker.activeTab.url,
+					inScope: TabTracker.inScope(TabTracker.activeTab.url),
+					contents: {
+						sidePanelTemplate: 'Default-Loading',
+						lims: "Loading"
+					}
+				};
+			}
+
+			console.log("[TabTracker] New activeData:", TabTracker.activeData);
+
+			TabTracker.trackedTabs.set(
+				TabTracker.activeTab.id,
+				{
+					url: TabTracker.activeData.url,
+					inScope: TabTracker.inScope(),
+					contents: TabTracker.activeData.contents
+				}
+			);
+
+			if (TabTracker.sidePanelState) {
+				console.log("[TabTracker] Broadcasting updatePageData");
+				SWMessageRouter.broadcastToTabs("SP", { action: "updatePageData", data: TabTracker.activeData });
+			}
+		});
+
+		console.log(`---- End of processTab diagnostic drop in ----`);
+		console.log(`---- Start of existing processTab code ----`);
+
+		console.log(`[[SP]] OPEN: ${TabTracker.sidePanelState}`, tab);
 		await TabTracker.queueActiveTab().then((hasData) => {
 
 			if(!hasData) {return;}
@@ -344,6 +432,7 @@ class TabTracker {
 				SWMessageRouter.broadcastToTabs("SP", { action: "updatePageData", data: TabTracker.activeData});
 			}
 		});
+		console.log(`---- End of existing processTab code ----`);
 
 	}
 

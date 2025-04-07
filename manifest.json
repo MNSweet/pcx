@@ -70,7 +70,7 @@
 				"js/lims/IATSERV.js",
 				"js/labs/LabPL.js"
 			],
-			"css": ["css/content_pl.css"],
+			"css": ["css/content_pl.css","css/iatserv_darkmode.css"],
 			"run_at": "document_end",
 			"all_frames": true
 		},

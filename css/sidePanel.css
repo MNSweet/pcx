@@ -29,6 +29,29 @@ a:hover {
 	color: #bca8ff;
 }
 
+#tabCheck {
+	position: absolute;
+	top: 0;
+	z-index: 1000000;
+	right: 0;
+	width: 17px;
+	overflow: hidden;
+	background: #00000033;
+	color: #ffffff00;
+	height: 37px;
+	margin: 0;
+	transition: color .5s, width .5s, height 1s;
+}
+
+#tabCheck:hover {
+	width: 100%;
+	color: #ffffffff;
+	background: #000000cc;
+	overflow: scroll;
+	height: inherit;
+	transition: color .25s, width .25s, height .5s;
+}
+
 /* ==========================================================
    Tabs (Light Mode)
 ========================================================== */
