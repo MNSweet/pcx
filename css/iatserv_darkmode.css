@@ -19,7 +19,7 @@
 		--dropdown-border-color: rgba(255, 255, 255, 0.15);
 		--navbar-bg-color: #1f1f1f;
 		--navbar-bg-color-hover: #2f2f2f;
-		--navbar-text-color: #e0e0e0;
+		--navbar-text-color: #337ab7;
 		--form-control-bg: #262626;
 		--form-control-border: #666666;
 		--form-control-color: #fff;
@@ -32,9 +32,9 @@
 		--color-border: #444444;
 		--color-text-primary: #e0e0e0;
 		--color-text-disabled: #777777;
-		--color-accent: #b34700;
+		--color-accent: #1a2b3b;
 		--color-hover-bg: #2c2c2c;
-		--color-hover-text: #ffae42;
+		--color-hover-text: #337ab7;
 		--color-toggle-bg-top: #3a3a3a;
 		--color-toggle-bg-bottom: #2a2a2a;
 		--color-focus-shadow: rgba(179, 71, 0, 0.6);
@@ -280,7 +280,8 @@
 	}
 
 	.order-patient-view,
-	.order-patient-view input {
+	.order-patient-view input,
+	.mltac .body {
 		background-color: var(--input-bg-color) !important;
 		border-color: #444 !important;
 		color: #fff !important;
@@ -299,7 +300,8 @@
 	.link { color: var(--primary-color) !important; }
 	.link:hover { color: #669df6 !important; }
 
-	.mobile-order-container .header {
+	.mobile-order-container .header,
+	.order_requisition_search {
 		background-color: #333 !important;
 		border: solid 1px #444 !important;
 	}
@@ -341,17 +343,21 @@
 	.dxgrid-table>tbody>tr:first-child>td:first-child>table>tbody>tr:first-child>td,
 	.grid-table th,
 	.table_header,
-	.dxgrid-table-center tr.dxgvFooter_Metropolis td:not(.dxgvIndentCell), .dxgrid-table tr.dxgvFooter_Metropolis td:not(.dxgvIndentCell) {
+	.dxgrid-table-center tr.dxgvFooter_Metropolis td:not(.dxgvIndentCell),
+	.dxgrid-table tr.dxgvFooter_Metropolis td:not(.dxgvIndentCell),
+	.btn.btn-default {
 		background: #2c2c2c !important;
 		background-color: #2c2c2c !important;
 		border-color: var(--color-border) !important;
 		color: var(--color-text-primary) !important;
 	}
-	.dxgvTable_Metropolis *{
+	.dxgvTable_Metropolis *,
+	#uploadTable,
+	.dxbButtonHover_Metropolis:hover {
 		border-color: var(--color-border) !important;
 	}
 
-	/* Accent (burnt umber/rust) interactive elements */
+	/* Accent interactive elements */
 	.dxpnl-btnHover .dxWeb_pnlExpand_Metropolis,
 	.dxpnl-btnHover .dxWeb_pnlExpandArrowBottom_Metropolis,
 	.dxpnl-btnHover .dxWeb_pnlExpandArrowLeft_Metropolis,
@@ -378,7 +384,14 @@
 	}
 
 	/* Toggle switches */
-	.dxToggle {
+	.dxToggle,
+	.dxeButtonEditButton_Metropolis:not(.dxHideContent),
+	.dxeCalendarButton_Metropolis,
+	.dxeSpinIncButton_Metropolis, 
+	.dxeSpinDecButton_Metropolis, 
+	.dxeSpinLargeIncButton_Metropolis, 
+	.dxeSpinLargeDecButton_Metropolis, 
+	.dxeColorEditButton_Metropolis {
 		background-color: var(--color-toggle-bg-bottom) !important;
 		background-image: linear-gradient(180deg, var(--color-toggle-bg-top) 0%, var(--color-toggle-bg-bottom) 100%) !important;
 	}
@@ -389,6 +402,10 @@
 
 	.dxToggle[class*='Checked'] .dxSwitcher {
 		background-color: var(--color-accent) !important;
+	}
+
+	.dxgvControl_Metropolis a {
+		color: var(--navbar-text-color) !important;
 	}
 
 	/* Borders and separators */
@@ -413,11 +430,13 @@
 	}
 
 	/* Hover effect for clarity */
+	a:focus,
 	a:hover,
+	.dxpLite_Metropolis .dxp-current,
 	.dxWeb_pPopOut_Metropolis:hover,
 	.dxWeb_mSubMenuItem_Metropolis:hover,
 	.dxbButton_Metropolis:hover {
-		color: var(--color-hover-text);
+		color: var(--color-hover-text) !important;
 		background-color: var(--color-accent) !important;
 	}
 
@@ -449,5 +468,53 @@
 	.panel-title {
 		margin-top: 5px !important;
 		margin-bottom: 5px !important;
+	}
+	#LoadingPanel_LD {
+		background-color: #0b0316 !important;
+		opacity: .9 !important;
+	}
+	.dxlpLoadingPanel_Metropolis,
+	.dxlpLoadingPanelWithContent_Metropolis {
+		filter: invert(1) !important;
+		opacity: .8 !important;
+	}
+
+	.dxpLite_Metropolis {
+		color: var(--text-color) !important;
+	}
+
+	.alert-warning,
+	#dvSelectedItems {
+		filter: invert(.8);
+	}
+
+	.all-buttons-bottom {
+		opacity: .8;
+	}
+	
+	.table-striped>tbody>tr:nth-of-type(odd) {
+		background-color: #343434 !important;
+	}
+	.table-hover>tbody>tr:hover {
+		background-color: #444444 !important;
+	}
+
+	.fancybox-skin {
+		background-color: #1c1c1c !important;
+	}
+
+	[style="background-color:#f9f9f9"],
+	.dxeBase_Metropolis.dxeReadOnly_Metropolis.dxeTAR {
+		background-color: #181818 !important;
+		color: #e0e0e0 !important;
+	}
+	.test-result-row select,
+	.test-result-row input[type="text"],
+	.table select,
+	#ddResultTableHeight,
+	#MainContent_ctl00_ctrlResultEntryList_ddAllResultStatus {
+		background-color: #1e1e1e !important;
+		color: #e1e1e1 !important;
+		border: 1px #666 solid;
 	}
 }

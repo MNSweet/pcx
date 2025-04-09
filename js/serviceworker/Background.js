@@ -203,7 +203,7 @@ class ServiceWorker {
 		sendResponse({ action:"getPageDataResponse", status: "Acknowledged"});
 		
 		// Here is what I have
-		TabTracker.getActiveTabData().then((activeData) => {
+		TabTracker.queueActiveTab().then((activeData) => {
 			SWMessageRouter.broadcastToTabs("SP", { action: "updatePageData", data: activeData });
 		});
 
@@ -219,12 +219,13 @@ class ServiceWorker {
 		console.log("[SW] TabTracker.sidePanelState is now", TabTracker.sidePanelState);
 
 		// Immediately send current active tab data
-		TabTracker.getActiveTabData().then((activeData) => {
+		TabTracker.queueActiveTab().then((activeData) => {
 			console.log("[SW] Broadcasting updatePageData from sidePanelReady", activeData);
 			SWMessageRouter.broadcastToTabs("SP", {
 				action: "updatePageData",
 				data: activeData
 			});
+			processTab(activeData);
 		});
 
 		sendResponse({
@@ -501,7 +502,7 @@ class TabTracker {
 			if (!TabTracker.trackedTabs.has(tabId)) {
 				TabTracker.trackedTabs.set(tabId, {
 					url:TabTracker.activeTab.url,
-					inScope: TabTracker.inScope(TabTracker.activeTab.url),
+					inScope: TabTracker.inScope(v.url),
 					contents: {
 						sidePanelTemplate: 'Default-Loading',
 						lims: "Loading"

@@ -83,7 +83,9 @@ class PageDataManager {
 	static attachContentListener(config) {
 		chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 			if (request.action === "getPageContent") {
+				console.log(`[^] getPageContent`)
 				const liveData = PageDataManager.getData(config);
+				console.log(`[^] > liveData`,liveData)
 				sendResponse({ content: liveData });
 			}
 		});
