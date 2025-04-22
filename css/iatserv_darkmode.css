@@ -68,6 +68,7 @@
 
 	/* Standard white, etc. */
 	--white: #ffffff;
+	--black: #000000;
 
 	/* Translucent */
 	--white-translucent-one: rgba(255, 255, 255, 0.15);
@@ -117,13 +118,11 @@
 	.btn-success.btn-outline:hover,
 	.btn-info.btn-outline:hover,
 	.btn-warning.btn-outline:hover,
-	.btn-danger.btn-outline:hover {
-		color: var(--white) !important;
-	}
-
+	.btn-danger.btn-outline:hover,
 	.panel-green > .panel-heading,
 	.panel-red > .panel-heading,
-	.panel-yellow > .panel-heading {
+	.panel-yellow > .panel-heading,
+	#MainContent_ctl00_ObjectDocuments1_ObjectDocuments_Exists_GridView1 {
 		color: var(--white) !important;
 	}
 
@@ -179,7 +178,8 @@
 		color: var(--yellow-light-one) !important;
 	}
 
-	.link {
+	.link,
+	.navbar-top-links .dropdown-menu li a {
 		color: var(--bright-blue-four) !important;
 	}
 	.link:hover {
@@ -191,7 +191,9 @@
 		border: solid 1px var(--dark-gray-seventeen) !important;
 	}
 
-	.mobile-order-container .header-body {
+	.mobile-order-container .header-body,
+	.order-container.order-form,
+	.signature-panel {
 		border: solid 1px var(--dark-gray-seventeen) !important;
 	}
 
@@ -221,7 +223,8 @@
 	}
 
 	.navbar-default .navbar-nav > li > a,
-	.navbar-default .navbar-brand {
+	.navbar-default .navbar-brand,
+	#MainContent_ctl00_grid_DXPagerBottom_PSI {
 		color: var(--bright-blue-two) !important;
 	}
 
@@ -288,6 +291,9 @@
 		border-color: var(--dark-gray-seventeen) !important;
 		color: var(--white) !important;
 	}
+	.mltac .body #label{
+		color: var(--black) !important;
+	}
 
 	.disabled {
 		background-color: var(--dark-gray-twelve) !important;
@@ -307,13 +313,19 @@
 		color: var(--light-gray-two) !important;
 	}
 
-	.dropdown-menu {
+	.dropdown-menu,
+	.dxgvSelectedRow_Metropolis,
+	.dxgvSelectedCell_Metropolis,
+	body .dxgvFocusedRow_Metropolis td.dxgvIndentCell,
+	body .dxgvFocusedGroupRow_Metropolis td.dxgvIndentCell,
+	body .dxgvSelectedRow_Metropolis td.dxgvIndentCell {
 		background-color: var(--dark-gray-fourteen) !important;
 		border-color: var(--white-translucent-one) !important;
 		color: var(--light-gray-two) !important;
 	}
 
-	.page-header {
+	.page-header,
+	.signature-panel canvas {
 		border-color: var(--dark-gray-seventeen) !important;
 	}
 
@@ -345,8 +357,9 @@
 		color: var(--light-gray-two) !important;
 	}
 	.dxgvTable_Metropolis *,
-	#uploadTable,
-	.dxbButtonHover_Metropolis:hover {
+	.dxbButtonHover_Metropolis:hover,
+	.grid-table th,
+	.grid-table>tbody>tr>td {
 		border-color: var(--dark-gray-seventeen) !important;
 	}
 
@@ -389,7 +402,8 @@
 		background-image: linear-gradient(180deg, var(--dark-gray-fifteen) 0%, var(--dark-gray-eight) 100%) !important;
 	}
 
-	.dxToggle .dxSwitcher {
+	.dxToggle .dxSwitcher,
+	#MainContent_ctl00_grid_DXPagerBottom_PSP_DXME_ {
 		background-color: var(--light-gray-two) !important;
 	}
 
@@ -428,7 +442,8 @@
 	.dxpLite_Metropolis .dxp-current,
 	.dxWeb_pPopOut_Metropolis:hover,
 	.dxWeb_mSubMenuItem_Metropolis:hover,
-	.dxbButton_Metropolis:hover {
+	.dxbButton_Metropolis:hover,
+	.nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover {
 		color: var(--bright-blue-two) !important;
 		background-color: var(--dark-blue-one) !important;
 	}
@@ -513,5 +528,31 @@
 		background-color: var(--dark-gray-three) !important;
 		color: var(--light-gray-three) !important;
 		border: 1px var(--gray-mid-two) solid;
+	}
+
+	.nav .open>a,
+	.nav .open>a:focus,
+	.nav .open>a:hover,
+	.dxgvGroupRow_Metropolis,
+	.dxgvGroupFooter_Metropolis,
+	.dxgvDataRow_Metropolis td.dxgvIndentCell,
+	.dxgvDetailRow_Metropolis td.dxgvIndentCell,
+	.dxgvAdaptiveDetailRow_Metropolis td.dxgvIndentCell,
+	.dxgvPreviewRow_Metropolis td.dxgvIndentCell,
+	.dxgvGroupRow_Metropolis td.dxgvIndentCell,
+	.dxgvGroupFooter_Metropolis td.dxgvIndentCell,
+	.dxgrid-table-center tr.dxgvGroupFooter_Metropolis td:not(.dxgvIndentCell),
+	.dxgrid-table tr.dxgvGroupFooter_Metropolis td:not(.dxgvIndentCell),
+	.dxgvHeader_Metropolis,
+	#MainContent_ctl00_grid_DXPagerBottom_PSB,
+	#MainContent_ctl00_grid_DXPagerBottom_PSI,
+	#MainContent_ctl00_grid_DXPagerBottom_DDB {
+		background-color: transparent !important;
+	}
+
+	#uploadTable,
+	.dxgrid-table tr.dxgvFooter_Metropolis td.dxgvIndentCell,
+	#MainContent_ctl00_grid_DXPagerBottom_PSB {
+		border-color: transparent !important;
 	}
 }
