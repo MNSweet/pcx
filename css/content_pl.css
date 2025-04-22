@@ -203,6 +203,14 @@
 	padding: 10px 0;
 }
 
+body button, body input, body select, body textarea,
+body .dxeEditAreaSys, body  .dxeMemoEditAreaSys, 
+body  input[type="text"].dxeEditAreaSys, body  input[type="password"].dxeEditAreaSys {
+	font-family: "Courier New", monospace;
+	font-weight: bold;
+	letter-spacing: 1.2;
+}
+
 body.statusReceived {}
 body.substatusBillingAccepted {}
 #btnFail {}
@@ -240,7 +248,8 @@ body.substatusBillingAccepted {}
 
 
 /* Physicians */
-.DEMARCHIWILLIAM {
+.DEMARCHIWILLIAM,
+.ECHEVERRYRAMIRO {
     background-color: #ff9f69;
 }
 
@@ -341,3 +350,16 @@ body.substatusBillingAccepted {}
 	background: #fff;
 	z-index: 10000;
 }*/
+
+td.dxgv.LeeannCorvo {
+    background-color: #a5edce !important;
+}
+td.dxgv.MaxSweet {
+    background-color: #ffe5b5 !important;
+}
+td.dxgv.Alexa {
+    background-color: #f9d8fb !important;
+}
+td.dxgv.JoelLima {
+    background-color: #b5d9ff !important;
+}

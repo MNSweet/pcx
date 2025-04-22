@@ -265,9 +265,9 @@ class IATSERV {
 			{heading:"ID1",linkId:2005,text:"Delivery"},
 			{heading:"ID2",linkId:0,text:""},
 			{heading:"ID3",linkId:0,text:""}, // Available
-			{heading:"Phone",linkId:0,text:""},
-			{heading:"Fax",linkId:0,text:""},
-			{heading:"Location Name",linkId:0,text:""}
+			{heading:"Phone",linkId:0,text:"Phone"},
+			{heading:"Fax",linkId:0,text:"Fax"},
+			{heading:"Location Name",linkId:0,text:"Location"}
 		]
 
 		let LocAccount = (headings.includes("Location Name") && headings.includes("Account"));
@@ -402,7 +402,7 @@ class IATSERV {
 		PCX.getEl(el.newPatientBtn).classList.add("disabled");
 		PCX.getEl(el.locationInput).addEventListener("blur", (event) => {
 			if(event.target.value != "" && PCX.getEl(el.newPatientBtn).classList.contains("disabled")) {
-				if(event.target.value.match("^(AM-|CTD-).*")){
+				if(event.target.value.match("^(AM-|CTD-|TS-).*")){
 					waitForElm(el.PhysicianOptions).then((elm) => {
 						PCX.getEl(el.Physician,true).innerHTML = `<option value="0" disabled selected hidden>Select a Physician</option>`+PCX.getEl(el.Physician).innerHTML;
 						PCX.getEl(el.PhysicianId,true).value = "";
@@ -458,13 +458,16 @@ class IATSERV {
 		},true);
 
 		const removeTabIndexSelectors = [
-			el.SearchPatient, el.PatientCode, el.PatientDOB, el.PatientAddress, el.PatientPhone, 
+			el.ReqImport, el.ReqImportSearch, el.SearchPatient, el.PatientCode, el.PatientDOB, el.PatientAddress, el.PatientPhone, 
 			el.PatientEmail, el.PrimaryInsurance, el.PrimaryInsurancePolicy, el.PrimaryInsuranceGroup, 
 			el.SecondaryInsurance, el.SecondaryInsurancePolicy, el.SecondaryInsuranceGroup, el.SpecimenType, 
 			el.Quantity, el.Requisition, el.DOCTime, el.ReceivedDate, el.ReceivedTime, el.ClearBTN, el.Medication,
 			el.MedicationBTN, el.OtherMedication, el.PhySigCaptured, el.PTSigCaptured, el.SigSuccess, el.SigClear, el.SigToggle
 		];
 		PCX.disableTabIndex(removeTabIndexSelectors);
+
+		waitForElm(el.locationInput).then((input)=>{input.focus()});
+
 	}
 
 	static upPanelChange(e) {
@@ -677,7 +680,7 @@ class IATSERV {
 
 			// ---- Disable input tabable areas ----
 				const removeIframeTabIndexSelectors = [
-					el.SSN, el.LicenseState, el.LicenseNumber, el.CopyColumnBTN1, el.CopyColumnBTN2,
+					el.SSN, el.LicenseState, el.LicenseNumber, el.MainAddress2, el.MainFax, el.MainEmail, el.CopyColumnBTN1, el.CopyColumnBTN2,
 					el.CopyColumnBTN3, el.CopyColumnBTN4, el.PrimeRelation, 
 					el.PrimeFirstName, el.PrimeLastName, el.PrimeMiddleName, el.PrimeDOB, el.PrimeSSN,
 					el.PrimeGender, el.PrimeGroupNo, el.PrimeCovStart, el.PrimeCovEnd, el.PrimeAddress1,

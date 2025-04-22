@@ -89,6 +89,8 @@ if(PCX.preferedUserMode()) {
 
 
 			// Disable Tab Index
+			ReqImport		: '#tbRequisitionSearch',
+			ReqImportSearch	: '#btnSearchPatient',
 			SearchPatient	: '#btnAddEditPatient+#btnSearchPatient',
 			PatientCode		: '#tbPatientCode',
 			PatientDOB		: '#tbPatientDOB',
@@ -121,6 +123,9 @@ if(PCX.preferedUserMode()) {
 			SSN				: '#MainContent_ctl00_tbSSN',
 			LicenseState	: '#MainContent_ctl00_ddDriverLicenseState',
 			LicenseNumber	: '#MainContent_ctl00_tbDriverLicenseNumber',
+			MainAddress2	: '#MainContent_ctl00_AddressControl1_tbAddress2',
+			MainFax			: '#MainContent_ctl00_AddressControl1_tbFax',
+			MainEmail		: '#MainContent_ctl00_AddressControl1_tbEmail',
 			CopyColumnBTN1	: '.copy-pat1 a',
 			CopyColumnBTN2	: '.copy-pat2 a',
 			CopyColumnBTN3	: '.copy-adrs1 a',
@@ -150,6 +155,8 @@ if(PCX.preferedUserMode()) {
 			SeconDOB		: '#MainContent_ctl00_SecondaryInsurance_tbDOB_tbText',
 			SeconSSN		: '#MainContent_ctl00_SecondaryInsurance_tbSSN',
 			SeconGender		: '#MainContent_ctl00_SecondaryInsurance_ddGender_ddControl',
+			SeconInserance	: '#MainContent_ctl00_SecondaryInsurance_tbInsurance_tbText',
+			SeconPolicy		: '#MainContent_ctl00_SecondaryInsurance_tbPolicy',
 			SeconGroupNo	: '#MainContent_ctl00_SecondaryInsurance_tbGroupNo',
 			SeconCovStart	: '#MainContent_ctl00_SecondaryInsurance_tbCoverageStartDate_tbText',
 			SeconCovEnd		: '#MainContent_ctl00_SecondaryInsurance_tbCoverageEndDate_tbText',
@@ -244,8 +251,8 @@ if(PCX.preferedUserMode()) {
 			result	: true
 		},false,false,"#dvFooter");
 
-		PCX.getEl('#MainContent_ctl00_ctrlResultEntryList_ctrlResultEntryFullStatus_ddResultStatus option[value="5"]').disabled = true;
-		PCX.getEl('#MainContent_ctl00_ctrlResultEntryList_ctrlResultEntryFullStatus_ddResultStatus option[value="2"]').disabled = true;
+		PCX.getEl('#MainContent_ctl00_ctrlResultEntryList_ctrlResultEntryFullStatus_ddResultStatus option[value="5"]').disabled = true; // Final
+		PCX.getEl('#MainContent_ctl00_ctrlResultEntryList_ctrlResultEntryFullStatus_ddResultStatus option[value="2"]').disabled = true; // Reject
 	}
 
 	// Locations
