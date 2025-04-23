@@ -385,6 +385,16 @@ if(PCX.preferedUserMode()) {
 					option.innerText = option.value + " - " + option.innerText;
 				});
 			});
+		waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_0")
+			.then((sales)=>{
+				sales.value = "6";
+				sales.dispatchEvent(new Event('change'));
+				waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_2")
+					.then((sales)=>{
+						sales.value = "14";
+						sales.dispatchEvent(new Event('change'));
+					});
+			});
 	}
 }
 if(PCX.currentUser() == "Joel") {
