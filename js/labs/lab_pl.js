@@ -354,6 +354,16 @@ if(PCX.preferedUserMode()) {
 
 	// Wizard New Master & Location
 	if (IATSERV.linkId == "2006") {
+
+		waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_0")
+			.then((sales)=>{
+				sales.value = "6";
+				waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_2")
+					.then((sales)=>{
+						sales.value = "14";
+					});
+			});
+
 		waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_AddressControl1_0_tbPhone_0")
 			.then((phone)=>{
 				phone.addEventListener('blur', (e) => {
@@ -366,6 +376,7 @@ if(PCX.preferedUserMode()) {
 					}
 				});
 			});
+
 		waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_AddressControl1_0_tbFax_0")
 			.then((fax)=>{
 				fax.addEventListener('blur', (e) => {
@@ -378,6 +389,7 @@ if(PCX.preferedUserMode()) {
 					}
 				});
 			});
+
 		waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_AddressControl1_0_CountryState_0_ddState_0")
 			.then((state)=>{
 				state.querySelectorAll('option').forEach((option)=>{
@@ -385,16 +397,58 @@ if(PCX.preferedUserMode()) {
 					option.innerText = option.value + " - " + option.innerText;
 				});
 			});
-		waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_0")
-			.then((sales)=>{
-				sales.value = "6";
-				sales.dispatchEvent(new Event('change'));
-				waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_2")
-					.then((sales)=>{
-						sales.value = "14";
-						sales.dispatchEvent(new Event('change'));
-					});
-			});
+
+		waitForElm("#MainContent_ctl00_CreateWizard_tbLocationsCount").then(inputCount=>{
+			PCX.getEl(`#MainContent_ctl00_CreateWizard_tbName`).focus();
+			PCX.disableTabIndex(["#MainContent_ctl00_CreateWizard_tbLocationsCount"]);
+		})
+
+		waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_btnAddExtraSale_0_I").then(inputCount=>{
+			PCX.disableTabIndex([
+				`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_AddressControl1_0_tbAddress2_0`,
+				`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_AddressControl1_0_tbName_0`,
+				`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_AddressControl1_0_tbEmail_0`,
+				`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_tbNote_0`,
+				`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_0`,
+				`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_2`,
+				`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_ddExtraSalesObjectType_0`,
+				`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_ExtraSalesSelector_0_ddSalesObject_0`,
+				`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_3`,
+				`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_btnAddExtraSale_0_I`,
+				`#MainContent_ctl00_CreateWizard_StepNavigationTemplateContainerID_StepPreviousButton`
+				]
+			);
+			PCX.getEl(`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_AddressControl1_0_tbAddress1_0`).focus();
+		})
+
+		waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_1").then(select =>{
+			const options = Array.from(select.options);
+			const predefined = ["0","7", "12", "1"];
+			const disabled = ["16", "4", "13"];
+
+			const getOption = (arr, value) => {
+			    const index = arr.findIndex(opt => opt.value === value);
+			    return index !== -1 ? arr.splice(index, 1)[0] : null;
+			};
+
+			const spacerOption = document.createElement("option");
+			spacerOption.disabled = true;
+			spacerOption.textContent = "────────────";
+
+			const predefinedOptions = predefined.map(val => getOption(options, val)).filter(Boolean);
+			const middleOptions = options.filter(opt => !predefined.includes(opt.value) && !disabled.includes(opt.value));
+			const disabledOptions = disabled.map(val => {
+				const opt = getOption(options, val);
+				if (opt) {
+					opt.disabled = true;
+					opt.textContent = opt.textContent.replace("(***Disabled)", "").trim();
+				}
+				return opt;
+			}).filter(Boolean);
+
+			select.innerHTML = "";
+			[...predefinedOptions, spacerOption, ...middleOptions, ...disabledOptions].forEach(opt => select.appendChild(opt));
+})();
 	}
 }
 if(PCX.currentUser() == "Joel") {
