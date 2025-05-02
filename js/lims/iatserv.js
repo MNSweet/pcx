@@ -506,20 +506,34 @@ class IATSERV {
 				inputDOB.addEventListener('blur', (e) => {
 					let docAttempt 	 = 0;
 					const docIntervalId = setInterval(() => { // Wait for date picker
+						let dobNotice = false;
+						let dobError = frame.querySelector('#MainContent_ctl00_tbDOB_ctl00');
 						if (e.target.value !== docLastValue) {
 							docLastValue = e.target.value;
 							clearInterval(docIntervalId);
 
 							let dob = e.target.value;
+							dobError.style.display = "none";
 							if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= Date.now()){
+								dobNotice = true;
 								QAManager.addNotice("DOB","It seems that your patient hasn't been born yet. Is this birthday correct? " + dob);
 							}else if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= minorDate.getTime()){ // 18+ Minor check
+								dobNotice = true;
 								QAManager.addNotice("DOB","Intesting, your patient is a minor. Just a quick check. Is this birthday correct? " + dob);
 							}else if(Number.isInteger(Date.parse(dob)) && Date.parse(dob) >= 946702800000){ //Jan 1 2000
+								dobNotice = true;
 								QAManager.addNotice("DOB","Just being vigilant, Though I may be wrong: Is this birthday correct? " + dob);
 							}else {
 								QAManager.removeNotice("DOB");
 							}
+						}
+						if (dobNotice) {
+							dobError.style.position = "absolute";
+							dobError.style.top = "2px";
+							dobError.style.right = "32px";
+							dobError.style.display = "block";
+							dobError.style.fontWeight = "900";
+							dobError.innerText = "?";
 						}
 						if (++docAttempt >= 5) {
 							clearInterval(docIntervalId);
@@ -535,6 +549,23 @@ class IATSERV {
 					if(![0,10].includes(e.target.value.length)){
 						e.target.style.backgroundColor = "#ffcece";
 						e.target.style.border = "1px #872626 solid";
+					} else {
+						e.target.style.backgroundColor = null;
+						e.target.style.border = null;
+					}
+				});
+
+			// ---- Address 1  ----
+				console.log(el.IframeAddress1);
+				const inputAddr1 = frame.querySelector(el.IframeAddress1);
+				inputAddr1.addEventListener('blur', (e) => {
+					console.log(e);
+					console.log(e.target);
+					console.log(e.target.value);
+					console.log(e.target.value.length);
+					if(e.target.value.length > 0 && e.target.value.length < 10){
+						e.target.style.backgroundColor = "#fff0e2";
+						e.target.style.border = "1px #c18c2a solid";
 					} else {
 						e.target.style.backgroundColor = null;
 						e.target.style.border = null;

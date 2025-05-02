@@ -67,6 +67,7 @@ if(PCX.preferedUserMode()) {
 			FancyBox		: ".fancybox-overlay.fancybox-overlay-fixed iframe",
 			Iframe			: '[class="fancybox-iframe"',
 			IframeDOB		: "#MainContent_ctl00_tbDOB_tbText",
+			IframeAddress1	: '#MainContent_ctl00_AddressControl1_tbAddress1',
 			IframeZip		: '#MainContent_ctl00_AddressControl1_tbZipCode',
 			IframePhone		: '#MainContent_ctl00_AddressControl1_tbPhone',
 			IframePolicy	: '#MainContent_ctl00_PrimaryInsurance_tbPolicy',
@@ -358,6 +359,15 @@ if(PCX.preferedUserMode()) {
 		waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_0")
 			.then((sales)=>{
 				sales.value = "6";
+				
+				/* SunShine
+				sales.value = "11";
+				waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_1")
+					.then((rep)=>{
+						rep.value = "20";
+					});
+				//*/
+
 				waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_2")
 					.then((sales)=>{
 						sales.value = "14";
