@@ -10,7 +10,9 @@ class Keybinding {
 
 			const key = event.code.toLowerCase().replace('key', '');
 			const isShift = event.shiftKey;
-			const bindingKey = `${isShift ? "shift+" : ""}${key}`;
+			let bindingKey = `${key}`;
+				bindingKey = `${isAlt ? "alt+" : ""}${bindingKey}`;
+				bindingKey = `${isShift ? "shift+" : ""}${bindingKey}`;
 			
 			if (this.bindings[bindingKey]) {
 				event.preventDefault();

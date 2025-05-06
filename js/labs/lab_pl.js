@@ -31,12 +31,12 @@ if(PCX.preferedUserMode()) {
 	});
 	
 	const keybindings = new Keybinding({
-		"n"			: { type: "open", target: "_accessionNew", 	url: "https://prince.iatserv.com/?LinkId=2011&type=acs&_ml=7&_mlp=5", whitelist: ["LinkId=2011","LinkId=2071"] },
+		"alt+n"			: { type: "open", target: "_accessionNew", 	url: "https://prince.iatserv.com/?LinkId=2011&type=acs&_ml=7&_mlp=5", whitelist: ["LinkId=2011","LinkId=2071"] },
 		"shift+n"	: { type: "open", target: "_accessionList",	url: "https://prince.iatserv.com/?LinkId=2070&_ml=9&_mlp=5", whitelist: ["LinkId=2070"] },
-		"d"			: { type: "open", target: "_locationNew",	url: "https://prince.iatserv.com/?LinkId=2006&_ml=30&_mlp=12", whitelist: ["LinkId=2006"] },
+		"alt+d"			: { type: "open", target: "_locationNew",	url: "https://prince.iatserv.com/?LinkId=2006&_ml=30&_mlp=12", whitelist: ["LinkId=2006"] },
 		"shift+d"	: { type: "open", target: "_locationList",	url: "https://prince.iatserv.com/?LinkId=2004&_ml=31&_mlp=12", whitelist: ["LinkId=2004"] },
 		//"s"			: { type: "click", selector: "button.submit" },
-		"ESC": { type: "callback", callback: () => {
+		"esc": { type: "callback", callback: () => {
 			var frame = window;
 			try {
 				while (frame.parent.document !== frame.document) {frame = frame.parent;}
@@ -45,8 +45,41 @@ if(PCX.preferedUserMode()) {
 			if(frame.document.querySelectorAll('.fancybox-close').length>0){
 				frame.document.querySelectorAll('.fancybox-close').forEach((close)=>{console.log([close]);close.click()});
 			}
-		}}
+		}},
+		"enter": {
+			type: "callback",
+			callback: () => {
+				enterKey(IATSERV.linkId);
+			}
+		},
+		"numpadenter": {
+			type: "callback",
+			callback: () => {
+				enterKey(IATSERV.linkId);
+			}
+		}
 	});
+
+	function enterKey(id) {
+		//if (["2070","2004"].includes(id)) {
+			const filterForm = document.querySelector('.search-form');
+			const activeElement = document.activeElement;
+
+			if (
+				filterForm &&
+				filterForm.contains(activeElement) &&
+				(
+					activeElement.matches('input, textarea, select') ||
+					(activeElement.matches('input[type="checkbox"]') || activeElement.matches('input[type="radio"]'))
+				)
+			) {
+				const searchButton = document.getElementById('MainContent_ctl00_btnSearch_CD');
+				if (searchButton) {
+					searchButton.click();
+				}
+			}
+		//}
+	}
 
 	// Accession List
 	if (IATSERV.linkId == "2070") {
@@ -357,7 +390,7 @@ if(PCX.preferedUserMode()) {
 	if (IATSERV.linkId == "2006") {
 
 		waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_0")
-			.then((sales)=>{
+			.then((sales)=>{ 
 				sales.value = "6";
 				
 				/* SunShine
