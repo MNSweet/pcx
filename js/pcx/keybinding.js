@@ -16,19 +16,20 @@ class Keybinding {
 				bindingKey = `${isShift ? "shift+" : ""}${bindingKey}`;
 			
 			if (this.bindings[bindingKey]) {
-				event.preventDefault();
-				this.executeBinding(this.bindings[bindingKey]);
+				this.executeBinding(event,this.bindings[bindingKey]);
 			}
 		});
 	}
 
-	executeBinding(binding) {
+	executeBinding(event,binding) {
 		if (binding.type === "open") {
+			event.preventDefault();
 			this.requestOpenWindow(binding.target, binding.url, binding.whitelist);
 		} else if (binding.type === "click") {
+			event.preventDefault();
 			this.clickElement(binding.selector);
 		} else if (binding.type === "callback" && typeof binding.callback === "function") {
-			binding.callback();
+			binding.callback(event);
 		}
 	}
 

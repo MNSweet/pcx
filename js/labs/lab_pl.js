@@ -36,7 +36,7 @@ if(PCX.preferedUserMode()) {
 		"alt+d"		: { type: "open", target: "_locationNew",	url: "https://prince.iatserv.com/?LinkId=2006&_ml=30&_mlp=12", whitelist: ["LinkId=2006"] },
 		"shift+alt+d"	: { type: "open", target: "_locationList",	url: "https://prince.iatserv.com/?LinkId=2004&_ml=31&_mlp=12", whitelist: ["LinkId=2004"] },
 		//"s"			: { type: "click", selector: "button.submit" },
-		"esc": { type: "callback", callback: () => {
+		"esc": { type: "callback", callback: (event) => {
 			var frame = window;
 			try {
 				while (frame.parent.document !== frame.document) {frame = frame.parent;}
@@ -48,19 +48,19 @@ if(PCX.preferedUserMode()) {
 		}},
 		"enter": {
 			type: "callback",
-			callback: () => {
-				enterKey(IATSERV.linkId);
+			callback: (event) => {
+				enterKey(event,IATSERV.linkId);
 			}
 		},
 		"numpadenter": {
 			type: "callback",
-			callback: () => {
-				enterKey(IATSERV.linkId);
+			callback: (event) => {
+				enterKey(event,IATSERV.linkId);
 			}
 		}
 	});
 
-	function enterKey(id) {
+	function enterKey(event,id) {
 		//if (["2070","2004"].includes(id)) {
 			const filterForm = document.querySelector('.search-form');
 			const activeElement = document.activeElement;
@@ -75,6 +75,7 @@ if(PCX.preferedUserMode()) {
 			) {
 				const searchButton = document.getElementById('MainContent_ctl00_btnSearch_CD');
 				if (searchButton) {
+					event.preventDefault();
 					searchButton.click();
 				}
 			}
@@ -393,7 +394,7 @@ if(PCX.preferedUserMode()) {
 			.then((sales)=>{ 
 				sales.value = "6";
 				
-				/* SunShine
+				///* SunShine
 				sales.value = "11";
 				waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_1")
 					.then((rep)=>{
