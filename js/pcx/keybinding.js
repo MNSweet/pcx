@@ -6,8 +6,6 @@ class Keybinding {
 
 	initListener() {
 		document.addEventListener("keydown", (event) => {
-			//if (!event.altKey) { return; }
-
 			const key = event.code.toLowerCase().replace('key', '');
 			const isShift	= event.shiftKey;
 			const isAlt		= event.altKey;

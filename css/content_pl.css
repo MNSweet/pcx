@@ -363,3 +363,22 @@ td.dxgv.Alexa {
 td.dxgv.JoelLima {
     background-color: #b5d9ff !important;
 }
+
+.repBTN {
+	display: inline-block;
+	padding: 4px 6px;
+	border: 1px solid #ddd;
+	margin: 0 2px 11px;
+	border-radius: 5px;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+.repBTN:hover {
+	background-color: #eeeeee;
+}
+
+#reps {
+	border-bottom: 1px solid #ddd;
+	margin-bottom: 10px;
+}

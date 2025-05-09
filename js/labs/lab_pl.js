@@ -31,10 +31,11 @@ if(PCX.preferedUserMode()) {
 	});
 	
 	const keybindings = new Keybinding({
-		"alt+n"	: { type: "open", target: "_accessionNew", 	url: "https://prince.iatserv.com/?LinkId=2011&type=acs&_ml=7&_mlp=5", whitelist: ["LinkId=2011","LinkId=2071"] },
+		"alt+n"			: { type: "open", target: "_accessionNew", 	url: "https://prince.iatserv.com/?LinkId=2011&type=acs&_ml=7&_mlp=5", whitelist: ["LinkId=2011","LinkId=2071"] },
 		"shift+alt+n"	: { type: "open", target: "_accessionList",	url: "https://prince.iatserv.com/?LinkId=2070&_ml=9&_mlp=5", whitelist: ["LinkId=2070"] },
-		"alt+d"		: { type: "open", target: "_locationNew",	url: "https://prince.iatserv.com/?LinkId=2006&_ml=30&_mlp=12", whitelist: ["LinkId=2006"] },
+		"alt+d"			: { type: "open", target: "_locationNew",	url: "https://prince.iatserv.com/?LinkId=2006&_ml=30&_mlp=12", whitelist: ["LinkId=2006"] },
 		"shift+alt+d"	: { type: "open", target: "_locationList",	url: "https://prince.iatserv.com/?LinkId=2004&_ml=31&_mlp=12", whitelist: ["LinkId=2004"] },
+		"shift+alt+f"	: { type: "open", target: "_masterList",	url: "https://prince.iatserv.com/?LinkId=2001&_ml=31&_mlp=12", whitelist: ["LinkId=2001"] },
 		//"s"			: { type: "click", selector: "button.submit" },
 		"esc": { type: "callback", callback: (event) => {
 			var frame = window;
@@ -391,10 +392,40 @@ if(PCX.preferedUserMode()) {
 	if (IATSERV.linkId == "2006") {
 
 		waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_0")
-			.then((sales)=>{ 
-				sales.value = "6";
+			.then((sales)=>{
+				const reps = PCX.createDOM("div",{"id":"reps"});
+				const lif = PCX.createDOM("span",{"id":"LIF","innerText":"Life/Safe","classList":"repBTN"});
+					  lif.addEventListener("click",(e)=>{repBTN(e,sales,6,7)})
+					  reps.appendChild(lif);
+
+				const pre = PCX.createDOM("span",{"id":"PRE","innerText":"Prestige","classList":"repBTN"});
+					  pre.addEventListener("click",(e)=>{repBTN(e,sales,11,21)})
+					  reps.appendChild(pre);
+
+				const sun = PCX.createDOM("span",{"id":"SUN","innerText":"Sunshine","classList":"repBTN"});
+					  sun.addEventListener("click",(e)=>{repBTN(e,sales,11,20)})
+					  reps.appendChild(sun);
+
+				const vib = PCX.createDOM("span",{"id":"VIB","innerText":"Vibrant","classList":"repBTN"});
+					  vib.addEventListener("click",(e)=>{repBTN(e,sales,6,1)})
+					  reps.appendChild(vib);
+
+				const oth = PCX.createDOM("span",{"id":"OTH","innerText":"Other","classList":"repBTN"});
+					  oth.addEventListener("click",(e)=>{repBTN(e,sales,6,0)})
+					  reps.appendChild(oth);
+
+				PCX.getEl('#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_tbVisible_0').parentNode
+					.insertAdjacentElement("beforebegin",reps);
+
+				function repBTN(e,sales,salesVal,repVal) {
+					sales.value = salesVal;
+					waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_1")
+						.then((rep)=>{
+							rep.value = repVal;
+						});
+				}
 				
-				///* SunShine
+				/* SunShine
 				sales.value = "11";
 				waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_1")
 					.then((rep)=>{
@@ -500,7 +531,7 @@ if(PCX.preferedUserMode()) {
 
 			select.innerHTML = "";
 			[...predefinedOptions, spacerOption, ...middleOptions, ...disabledOptions].forEach(opt => select.appendChild(opt));
-})();
+		});
 	}
 }
 if(PCX.currentUser() == "Joel") {
