@@ -122,7 +122,8 @@
 	.panel-green > .panel-heading,
 	.panel-red > .panel-heading,
 	.panel-yellow > .panel-heading,
-	#MainContent_ctl00_ObjectDocuments1_ObjectDocuments_Exists_GridView1 {
+	#MainContent_ctl00_ObjectDocuments1_ObjectDocuments_Exists_GridView1,
+	.dropdown-menu>li>a {
 		color: var(--white) !important;
 	}
 
@@ -443,7 +444,12 @@
 	.dxWeb_pPopOut_Metropolis:hover,
 	.dxWeb_mSubMenuItem_Metropolis:hover,
 	.dxbButton_Metropolis:hover,
-	.nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover {
+	.nav-tabs>li.active>a,
+	.nav-tabs>li.active>a:focus,
+	.nav-tabs>li.active>a:hover,
+	.nav .open>a,
+	.nav .open>a:focus,
+	.nav .open>a:hover {
 		color: var(--bright-blue-two) !important;
 		background-color: var(--dark-blue-one) !important;
 	}
@@ -535,6 +541,9 @@
 	.nav .open>a:hover,
 	.dxgvGroupRow_Metropolis,
 	.dxgvGroupFooter_Metropolis,
+	.dxgvHeader_Metropolis,
+	.dxgvGroupRow_Metropolis,
+	.dxgvBatchEditChangesPreviewGroupRow_Metropolis,
 	.dxgvDataRow_Metropolis td.dxgvIndentCell,
 	.dxgvDetailRow_Metropolis td.dxgvIndentCell,
 	.dxgvAdaptiveDetailRow_Metropolis td.dxgvIndentCell,
@@ -555,4 +564,9 @@
 	#MainContent_ctl00_grid_DXPagerBottom_PSB {
 		border-color: transparent !important;
 	}
+
+	.dxgrid-table tr.dxgvGroupFooter_Metropolis td:not(.dxgvIndentCell) {
+		background-color: transparent !important;
+	}
+
 }
