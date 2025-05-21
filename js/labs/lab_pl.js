@@ -289,6 +289,27 @@ if(PCX.preferedUserMode()) {
 
 		PCX.getEl('#MainContent_ctl00_ctrlResultEntryList_ctrlResultEntryFullStatus_ddResultStatus option[value="5"]').disabled = true; // Final
 		PCX.getEl('#MainContent_ctl00_ctrlResultEntryList_ctrlResultEntryFullStatus_ddResultStatus option[value="2"]').disabled = true; // Reject
+
+		let showBtns = PCX.getEl('#page-wrapper > div.container-fluid > div[style="margin-top:-50px"]');
+		console.log(showBtns);
+		if (showBtns) {
+			[...showBtns.childNodes].forEach(node => {
+				if (node.nodeType === Node.TEXT_NODE && !/\S/.test(node.nodeValue)) {
+					showBtns.removeChild(node);
+				}
+			});
+
+			showBtns.querySelectorAll('a').forEach(anchor => {
+				anchor.classList.add('showBtns');
+				anchor.innerHTML = anchor.innerHTML.replace(/&nbsp;/g, '').trim();
+			});
+		}
+		waitForElm('#MainContent_ctl00_ctrlResultEntryList_btnRelease').then(async(submit)=>{
+			await delay(100);
+			submit.disabled = true;
+			console.log(PCX.getEl('#MainContent_ctl00_ctrlResultEntryList_btnRelease',true).disabled)
+		});
+		
 	}
 
 	// Locations
@@ -390,8 +411,9 @@ if(PCX.preferedUserMode()) {
 
 	// Wizard New Master & Location
 	if (IATSERV.linkId == "2006") {
-
-		waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_0")
+		const wizPrefix = `#MainContent_ctl00_CreateWizard_ctrlLocations_`;
+		const wizLoc	= `rptLocations_ctrlLocation_0_`;
+		waitForElm(`${wizPrefix}${wizLoc}LocationSalesSelector_0_rptSales_0_ddSalesObject_0`)
 			.then((sales)=>{
 				const reps = PCX.createDOM("div",{"id":"reps"});
 				const lif = PCX.createDOM("span",{"id":"LIF","innerText":"Life/Safe","classList":"repBTN"});
@@ -414,12 +436,12 @@ if(PCX.preferedUserMode()) {
 					  oth.addEventListener("click",(e)=>{repBTN(e,sales,6,0)})
 					  reps.appendChild(oth);
 
-				PCX.getEl('#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_tbVisible_0').parentNode
+				PCX.getEl(`${wizPrefix}${wizLoc}LocationSalesSelector_0_rptSales_0_tbVisible_0`).parentNode
 					.insertAdjacentElement("beforebegin",reps);
 
 				function repBTN(e,sales,salesVal,repVal) {
 					sales.value = salesVal;
-					waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_1")
+					waitForElm(`${wizPrefix}${wizLoc}LocationSalesSelector_0_rptSales_0_ddSalesObject_1`)
 						.then((rep)=>{
 							rep.value = repVal;
 						});
@@ -427,7 +449,7 @@ if(PCX.preferedUserMode()) {
 				
 				/* SunShine
 				sales.value = "11";
-				waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_1")
+				waitForElm(`${wizPrefix}${wizLoc}LocationSalesSelector_0_rptSales_0_ddSalesObject_1`)
 					.then((rep)=>{
 						rep.value = "20";
 					});
@@ -435,19 +457,33 @@ if(PCX.preferedUserMode()) {
 
 				/* Prestigue
 				sales.value = "11";
-				waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_1")
+				waitForElm(`${wizPrefix}${wizLoc}LocationSalesSelector_0_rptSales_0_ddSalesObject_1`)
 					.then((rep)=>{
 						rep.value = "21";
 					});
 				//*/
 
-				waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_2")
+				waitForElm(`${wizPrefix}${wizLoc}LocationSalesSelector_0_rptSales_0_ddSalesObject_2`)
 					.then((sales)=>{
 						sales.value = "14";
 					});
+
+				const phys = PCX.getEl(`${wizPrefix}${wizLoc}ctrlLocationPhysicians_0_ddPhysician_0_tbText_0`);
+
+				phys.addEventListener('change',(e)=>{
+					if(e.dtarget.value.length == 10) {
+						e.target.dataset.npi = e.target.value;
+					waitForElm(`#app-form-dialog #btnOk`)
+						.then((btn)=>{
+							btn.addEventListener('click',(e)=>{
+								phys.value = phys.dataset.npi;
+							});
+						});
+					}
+				})
 			});
 
-		waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_AddressControl1_0_tbPhone_0")
+		waitForElm(`${wizPrefix}${wizLoc}AddressControl1_0_tbPhone_0`)
 			.then((phone)=>{
 				phone.addEventListener('blur', (e) => {
 					if(![0,10].includes(e.target.value.length)){
@@ -460,7 +496,7 @@ if(PCX.preferedUserMode()) {
 				});
 			});
 
-		waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_AddressControl1_0_tbFax_0")
+		waitForElm(`${wizPrefix}${wizLoc}AddressControl1_0_tbFax_0`)
 			.then((fax)=>{
 				fax.addEventListener('blur', (e) => {
 					if(![0,10].includes(e.target.value.length)){
@@ -473,7 +509,7 @@ if(PCX.preferedUserMode()) {
 				});
 			});
 
-		waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_AddressControl1_0_CountryState_0_ddState_0")
+		waitForElm(`${wizPrefix}${wizLoc}AddressControl1_0_CountryState_0_ddState_0`)
 			.then((state)=>{
 				state.querySelectorAll('option').forEach((option)=>{
 					if(["","AA","AE","AP"].includes(option.value)){return;}
@@ -486,25 +522,25 @@ if(PCX.preferedUserMode()) {
 			PCX.disableTabIndex(["#MainContent_ctl00_CreateWizard_tbLocationsCount"]);
 		})
 
-		waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_btnAddExtraSale_0_I").then(inputCount=>{
+		waitForElm(`${wizPrefix}${wizLoc}LocationSalesSelector_0_btnAddExtraSale_0_I`).then(inputCount=>{
 			PCX.disableTabIndex([
-				`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_AddressControl1_0_tbAddress2_0`,
-				`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_AddressControl1_0_tbName_0`,
-				`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_AddressControl1_0_tbEmail_0`,
-				`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_tbNote_0`,
-				`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_0`,
-				`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_2`,
-				`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_ddExtraSalesObjectType_0`,
-				`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_ExtraSalesSelector_0_ddSalesObject_0`,
-				`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_3`,
-				`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_btnAddExtraSale_0_I`,
+				`${wizPrefix}${wizLoc}AddressControl1_0_tbAddress2_0`,
+				`${wizPrefix}${wizLoc}AddressControl1_0_tbName_0`,
+				`${wizPrefix}${wizLoc}AddressControl1_0_tbEmail_0`,
+				`${wizPrefix}${wizLoc}tbNote_0`,
+				`${wizPrefix}${wizLoc}LocationSalesSelector_0_rptSales_0_ddSalesObject_0`,
+				`${wizPrefix}${wizLoc}LocationSalesSelector_0_rptSales_0_ddSalesObject_2`,
+				`${wizPrefix}${wizLoc}LocationSalesSelector_0_ddExtraSalesObjectType_0`,
+				`${wizPrefix}${wizLoc}LocationSalesSelector_0_ExtraSalesSelector_0_ddSalesObject_0`,
+				`${wizPrefix}${wizLoc}LocationSalesSelector_0_rptSales_0_ddSalesObject_3`,
+				`${wizPrefix}${wizLoc}LocationSalesSelector_0_btnAddExtraSale_0_I`,
 				`#MainContent_ctl00_CreateWizard_StepNavigationTemplateContainerID_StepPreviousButton`
 				]
 			);
-			PCX.getEl(`#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_AddressControl1_0_tbAddress1_0`).focus();
+			PCX.getEl(`${wizPrefix}${wizLoc}AddressControl1_0_tbAddress1_0`).focus();
 		})
 
-		waitForElm("#MainContent_ctl00_CreateWizard_ctrlLocations_rptLocations_ctrlLocation_0_LocationSalesSelector_0_rptSales_0_ddSalesObject_1").then(select =>{
+		waitForElm(`${wizPrefix}${wizLoc}LocationSalesSelector_0_rptSales_0_ddSalesObject_1`).then(select =>{
 			const options = Array.from(select.options);
 			const predefined = ["0","7", "12", "1"];
 			const disabled = ["16", "4", "13"];

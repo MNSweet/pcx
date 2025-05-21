@@ -382,3 +382,17 @@ td.dxgv.JoelLima {
 	border-bottom: 1px solid #ddd;
 	margin-bottom: 10px;
 }
+
+#page-wrapper div[class="container-fluid"] div[style="margin-top:-50px"] {
+	display: flex;
+	max-width: calc(100% - 310px);
+	flex-wrap: wrap;
+	justify-content: center;
+}
+.btn[href="javascript:ShowActivityForm()"],
+.btn[href="javascript:ShowTestActivityForm()"],
+.btn[href="javascript:ShowReport('')"],
+.btn[href="javascript:ShowReport('&action=pdf')"],
+.btn[href="javascript:ShowPreviousResultForm()"] {
+	margin: 0 10px 10px;
+}
