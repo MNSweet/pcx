@@ -4,6 +4,12 @@ PCX.log(IATSERV.linkId);
 
 if(PCX.preferedUserMode()) {
 
+document.addEventListener('blur', function(e) {
+    if (e.target.tagName === 'INPUT' && e.target.type === 'text') {
+      e.target.value = e.target.value.toUpperCase();
+    }
+  }, true);
+
 	IATSERV.setLabs({
 		   2: {Code:"IP",	Label:"Ipseity Diagnostics LLC",Stability:{NGS: 90}},
 		1010: {Code:"SQ",	Label:"SureQuest Diagnostics", 	Stability:{NGS: 90}},

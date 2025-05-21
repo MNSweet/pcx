@@ -58,7 +58,7 @@ if(PCX.preferedUserMode()) {
 				"Male"					:'#ContentPlaceHolder1_rblGender_0',
 				"Female"				:'#ContentPlaceHolder1_rblGender_1'},
 			Ethnicity		: 	{
-				"Hispanic/Latino"		: '#ContentPlaceHolder1_rdrace_1',
+				"Hispanic/Latino"		: '#ContentPlaceHolder1_rdrace_0',
 				"Not Specified"			: '#ContentPlaceHolder1_rdrace_2'},
 			Race		: 	{
 				"African American"		: '#ContentPlaceHolder1_rdethnicity_0',
