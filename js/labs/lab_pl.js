@@ -306,7 +306,7 @@ if(PCX.preferedUserMode()) {
 		}
 		waitForElm('#MainContent_ctl00_ctrlResultEntryList_btnRelease').then(async(submit)=>{
 			await delay(100);
-			submit.disabled = true;
+			//submit.disabled = true;
 			console.log(PCX.getEl('#MainContent_ctl00_ctrlResultEntryList_btnRelease',true).disabled)
 		});
 		
