@@ -176,3 +176,27 @@ class QAManager {
 
 // Expose QAManager to the window
 window.QAManager = QAManager;
+
+
+(() => {
+	'use strict';
+
+	const enableSpellcheck = root =>
+		root.querySelectorAll(
+			'input[type="text"], input[type="search"], input:not([type]), textarea, [contenteditable]'
+		).forEach(el => {
+			if (el.getAttribute('spellcheck') !== 'false') {
+				el.setAttribute('spellcheck', 'true');
+			}
+		});
+
+	enableSpellcheck(document);
+
+	new MutationObserver(muts =>
+		muts.forEach(m =>
+			m.addedNodes.forEach(n =>
+				n.nodeType === 1 && enableSpellcheck(n)
+			)
+		)
+	).observe(document.documentElement, { childList: true, subtree: true });
+})();

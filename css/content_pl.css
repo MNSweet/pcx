@@ -396,3 +396,44 @@ td.dxgv.JoelLima {
 .btn[href="javascript:ShowPreviousResultForm()"] {
 	margin: 0 10px 10px;
 }
+
+input[type="text"]:focus,
+select:focus {
+	transform: scale(1.6);
+	position: relative;
+	z-index: 1010;
+	letter-spacing: 2.5px;
+	box-shadow: 0px 1px 5px 0px #000 !important;
+	transform-origin: left;
+}
+input.hasDatepicker[type="text"]:focus {
+	transform-origin: center 55px;
+}
+
+
+.form-group {
+	position: relative;
+}
+
+
+.form-group:focus-within:not(:has(.form-group:focus-within)) > label {
+	position: absolute;
+	top: -30px;
+    left: 18px;
+	transform: scale(1.6);
+    transform-origin: left;
+	line-height: 1;
+    padding: 4px 5px 0;
+	background: #fff;
+    border-radius: 4px 4px 0 0;
+	color: #666;
+	pointer-events: none;
+	z-index: 1020;
+	transition: top 0.15s ease, font-size 0.15s ease;
+}
+
+
+.form-group:not(:focus-within):not(:has(.form-group:focus-within)) > label {
+	transition: top 0.15s ease, font-size 0.15s ease;
+}
+
