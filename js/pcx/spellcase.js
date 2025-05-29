@@ -8,11 +8,12 @@
 
 (() => {
 	'use strict';
+	if(typeof PCX.getUrlParams()['LinkId'] == "undefined") {return;}
 
 	const style = document.createElement('style');
 	style.textContent = `
 		[data-spellcase] {
-			text-transform: uppercase;
+			text-transform: capitalize;
 			position: relative;
 		}
 
