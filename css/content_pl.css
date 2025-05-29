@@ -398,16 +398,13 @@ td.dxgv.JoelLima {
 }
 
 input[type="text"]:focus,
+input[type="tel"]:focus,
 select:focus {
-	transform: scale(1.6);
-	position: relative;
-	z-index: 1010;
 	letter-spacing: 2.5px;
 	box-shadow: 0px 1px 5px 0px #000 !important;
-	transform-origin: left;
 }
 input.hasDatepicker[type="text"]:focus {
-	transform-origin: center 55px;
+	transform-origin: left 80px;
 }
 
 
@@ -416,12 +413,17 @@ input.hasDatepicker[type="text"]:focus {
 }
 
 
+.form-group:focus-within:not(:has(.form-group:focus-within)) {
+	transform: scale(1.4);
+	position: relative;
+	z-index: 1010;
+	transform-origin: left;
+
+}
 .form-group:focus-within:not(:has(.form-group:focus-within)) > label {
 	position: absolute;
-	top: -30px;
+	top: -16px;
     left: 18px;
-	transform: scale(1.6);
-    transform-origin: left;
 	line-height: 1;
     padding: 4px 5px 0;
 	background: #fff;
@@ -437,3 +439,8 @@ input.hasDatepicker[type="text"]:focus {
 	transition: top 0.15s ease, font-size 0.15s ease;
 }
 
+.ui-datepicker[style="position: absolute; top: 504.734px; left: 537.5px; z-index: 1011; display: block;"] {
+	transform: scale(2);
+	transform-origin: right bottom;
+	z-index: 1021;
+}

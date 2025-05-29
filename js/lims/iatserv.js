@@ -356,7 +356,8 @@ class IATSERV {
 							PCX.getEl(el.PreformingLab,true).dispatchEvent(new Event('change'));
 						//}
 
-			PCX.getEl(el.ICDCodesInput+"~.body",true).insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
+						PCX.getEl(el.ICDCodesInput+"~.body",true).insertAdjacentHTML("afterbegin",`<div id="icdCodePreviewer"></div>`);
+						
 						PCX.getEl(el.UpPanel).addEventListener('change', IATSERV.upPanelChange);
 					});
 					document.querySelector('#MainContent_ctl00_ctl00_upPanel').removeEventListener('load',watchForLaterNode,true);

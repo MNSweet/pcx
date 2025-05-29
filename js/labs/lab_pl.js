@@ -3,12 +3,22 @@ PCX.setLabPortal('PL');
 PCX.log(IATSERV.linkId);
 
 if(PCX.preferedUserMode()) {
-
-document.addEventListener('blur', function(e) {
+/*
+	document.addEventListener('blur', function(e) {
     if (e.target.tagName === 'INPUT' && e.target.type === 'text') {
       e.target.value = e.target.value.toUpperCase();
     }
-  }, true);
+  }, true);*/
+
+		waitForElm(".fancybox-iframe").then((iframe)=> {
+			const doc = document.querySelector(".fancybox-iframe")?.contentDocument;
+			doc?.addEventListener('blur', function(e) {
+				console.log([e.target]);
+				if (e.target.tagName === 'INPUT' && e.target.type === 'text') {
+					e.target.value = e.target.value.toUpperCase();
+				}
+			}, true);
+		})
 
 	IATSERV.setLabs({
 		   2: {Code:"IP",	Label:"Ipseity Diagnostics LLC",Stability:{NGS: 90}},
@@ -477,7 +487,7 @@ document.addEventListener('blur', function(e) {
 				const phys = PCX.getEl(`${wizPrefix}${wizLoc}ctrlLocationPhysicians_0_ddPhysician_0_tbText_0`);
 
 				phys.addEventListener('change',(e)=>{
-					if(e.dtarget.value.length == 10) {
+					if(e.target.value.length == 10) {
 						e.target.dataset.npi = e.target.value;
 					waitForElm(`#app-form-dialog #btnOk`)
 						.then((btn)=>{

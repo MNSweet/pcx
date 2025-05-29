@@ -11,12 +11,12 @@
 
 	const style = document.createElement('style');
 	style.textContent = `
-		[data-spellcase] {
-			text-transform: uppercase;
+		[data-spellcase]:focus {
+			text-transform: capitalize;
 			position: relative;
 		}
 
-		[data-spellcase][data-capslock="on"]{
+		[data-spellcase][data-capslock="on"]:focus{
 			padding-right: 28px;
 			background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='18'%20height='14'%20viewBox='0%200%2018%2014'%3E%3Crect%20width='18'%20height='14'%20rx='3'%20fill='%23666'/%3E%3Ctext%20x='9'%20y='11'%20text-anchor='middle'%20font-family='system-ui,%20sans-serif'%20font-size='10'%20fill='%23fff'%3E%E2%87%AA%3C/text%3E%3C/svg%3E");
 			background-repeat: no-repeat;
@@ -35,13 +35,15 @@
 	const EDITABLE =
 		'input[type="text"], input[type="search"], input:not([type]), textarea, [contenteditable]';
 
-	const toLower = el =>
+	const toLower = el => {console.log([el]);
 		el.isContentEditable ? (el.innerText = el.innerText.toLowerCase())
 							 : (el.value     = el.value.toLowerCase());
+	}
 
-	const toUpper = el =>
+	const toUpper = el => {console.log([el]);
 		el.isContentEditable ? (el.innerText = el.innerText.toUpperCase())
 							 : (el.value     = el.value.toUpperCase());
+	}
 
 	const setCapsAttr = (el, e) => {
 		if (!e.getModifierState) return;
@@ -78,9 +80,10 @@
 		)
 	).observe(document.documentElement, { childList: true, subtree: true });
 
-
+/*
 	document.addEventListener('submit', ev => {
 		if (!ev.target.matches('form')) return;
 		ev.target.querySelectorAll(EDITABLE).forEach(toUpper);
-	}, true);
+	}, true);*/
+
 })();
