@@ -726,6 +726,59 @@ class IATSERV {
 
 
 
+			// ---- QA Duplicate Field Check ----
+				const inputDupCheck = [
+					el.IframeFName, el.IframeLName, el.IframeMName, el.IframeDOB, el.IframeAddress1,
+					el.IframeCity, el.IframeZip, el.IframePhone, el.IframePolicy, el.IframeForm
+				]
+
+				inputDupCheck.forEach((input)=>{
+					frame.querySelector(input).addEventListener('blur',(e)=>{
+						console.log([e.target]);
+						checkForDups();
+					});
+				});
+
+				function checkForDups() {
+					frame.querySelectorAll(".dup").forEach((dup)=>{dup.classList.remove('dup')})
+					let ledger = {_index:[]}
+					inputDupCheck.forEach((input)=>{
+						let value = frame.querySelector(input).value;
+						ledger._index.push(value);
+						if(!ledger[value]) {
+							ledger[value] = [];
+						}
+						ledger[value].push(input);
+					})
+					const uniqueElements = new Set();
+					const loggedDuplicates = new Set();
+					const duplicates = [];
+
+					ledger._index.forEach(item => {
+						if (typeof item === 'string' && (!item || item.trim() === '')) {
+							return;
+						}
+
+						if (uniqueElements.has(item)) {
+							if(!loggedDuplicates.has(item)){
+								duplicates.push(item);
+								loggedDuplicates.add(item)
+							}
+						} else {
+							uniqueElements.add(item);
+						}
+					});
+
+					duplicates.forEach((key)=>{
+						console.log(ledger[key]);
+						ledger[key].forEach((dup)=>{
+							frame.querySelector(dup).classList.add('dup')
+						})
+					});
+
+				}
+
+
 			// ---- QA Submit Check ----
 				PCX.getEl(el.FancyBox).contentWindow.document.querySelector(el.IframeForm).addEventListener('submit', (eventSubmit) => {
 					if(QAManager.getNoticeCount() > 0) {
@@ -748,10 +801,14 @@ class IATSERV {
 			"AXXESSRX": fs,
 			"MONROE": fs,
 			"RELIABLE": "",
+			"AEM": "",
 			"TKS": fs,
 			"SNL": fs,
 			"VIBRANT": fs
-			//"SAFE": ""
+			//"SAFE": "",
+			//"LIF": "",
+			//"SUN": "",
+			//"PRE": "",
 		};
 
 		// Function to generate the string

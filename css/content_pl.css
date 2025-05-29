@@ -397,6 +397,10 @@ td.dxgv.JoelLima {
 	margin: 0 10px 10px;
 }
 
+.dup {
+	background-color: #ffe4e1 !important;
+}
+
 input[type="text"]:focus,
 input[type="tel"]:focus,
 select:focus {
@@ -413,6 +417,7 @@ input.hasDatepicker[type="text"]:focus {
 }
 
 
+
 .form-group:focus-within:not(:has(.form-group:focus-within)) {
 	transform: scale(1.4);
 	position: relative;
@@ -420,7 +425,7 @@ input.hasDatepicker[type="text"]:focus {
 	transform-origin: left;
 
 }
-.form-group:focus-within:not(:has(.form-group:focus-within)) > label {
+.form-group:focus-within:not(:has(.form-group:focus-within)):not(:has(a:focus)) > label {
 	position: absolute;
 	top: -16px;
     left: 18px;
@@ -435,7 +440,7 @@ input.hasDatepicker[type="text"]:focus {
 }
 
 
-.form-group:not(:focus-within):not(:has(.form-group:focus-within)) > label {
+.form-group:not(:focus-within):not(:has(.form-group:focus-within)):not(:has(a:focus)) > label {
 	transition: top 0.15s ease, font-size 0.15s ease;
 }
 

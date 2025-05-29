@@ -8,6 +8,7 @@
 
 (() => {
 	'use strict';
+	if(typeof PCX.getUrlParams()['LinkId'] == "undefined") {return;}
 
 	const style = document.createElement('style');
 	style.textContent = `

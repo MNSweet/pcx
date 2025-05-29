@@ -115,14 +115,6 @@ if(PCX.preferedUserMode()) {
 			PhysicianOptions: "#ddPhysician option",
 			newPatientBtn	: "#btnAddEditPatient",
 			DOC				: "#MainContent_ctl00_ctl00_tbCollectionDateTime_tbDate_tbText",
-			FancyBox		: ".fancybox-overlay.fancybox-overlay-fixed iframe",
-			Iframe			: '[class="fancybox-iframe"',
-			IframeDOB		: "#MainContent_ctl00_tbDOB_tbText",
-			IframeAddress1	: '#MainContent_ctl00_AddressControl1_tbAddress1',
-			IframeZip		: '#MainContent_ctl00_AddressControl1_tbZipCode',
-			IframePhone		: '#MainContent_ctl00_AddressControl1_tbPhone',
-			IframePolicy	: '#MainContent_ctl00_PrimaryInsurance_tbPolicy',
-			IframeForm		: "#form1",
 			PhysicianId		: "#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianId",
 			PhysicianName	: "#MainContent_ctl00_ctl00_ctrlLocationPhysicianPatient_LocationPhysician_tbPhysicianName",
 			Category		: "#MainContent_ctl00_ctl00_ctrlOrderTestCategoryControl1_ddTestCategory",
@@ -138,6 +130,20 @@ if(PCX.preferedUserMode()) {
 			InsuranceLookup	: '#MainContent_ctl00_PrimaryInsurance_tbInsurance_tbText',
 			InsuranceID		: '#MainContent_ctl00_PrimaryInsurance_tbInsurance_tbID',
 			InsuranceList	: '#ui-id-2',
+
+			// Iframe Add Patient
+			FancyBox		: ".fancybox-overlay.fancybox-overlay-fixed iframe",
+			Iframe			: '[class="fancybox-iframe"',
+			IframeFName		: "#tbFirstName",
+			IframeLName		: "#tbLastName",
+			IframeMName		: "#MainContent_ctl00_tbMiddleName",
+			IframeDOB		: "#MainContent_ctl00_tbDOB_tbText",
+			IframeAddress1	: '#MainContent_ctl00_AddressControl1_tbAddress1',
+			IframeCity		: "#MainContent_ctl00_AddressControl1_tbCity",
+			IframeZip		: '#MainContent_ctl00_AddressControl1_tbZipCode',
+			IframePhone		: '#MainContent_ctl00_AddressControl1_tbPhone',
+			IframePolicy	: '#MainContent_ctl00_PrimaryInsurance_tbPolicy',
+			IframeForm		: "#form1",
 
 
 			// Disable Tab Index
