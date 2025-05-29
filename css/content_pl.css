@@ -237,8 +237,8 @@ body.substatusBillingAccepted {}
 }
 
 .Billed {
-    background-color: #e3e3e3;
-    color: #767676;
+	background-color: #e3e3e3;
+	color: #767676;
 }
 
 /* Tests */
@@ -250,7 +250,7 @@ body.substatusBillingAccepted {}
 /* Physicians */
 .DEMARCHIWILLIAM,
 .ECHEVERRYRAMIRO {
-    background-color: #ff9f69;
+	background-color: #ff9f69;
 }
 
 /* Labs  */
@@ -326,11 +326,11 @@ body.substatusBillingAccepted {}
 
 #patientDataClone {
 	border: 1px solid #ffffff;
-    padding: 7px 14px;
-    font-size: 14px;
-    color: #ffffff;
-    font-weight: bold;
-    background-color: #8775a7;
+	padding: 7px 14px;
+	font-size: 14px;
+	color: #ffffff;
+	font-weight: bold;
+	background-color: #8775a7;
 }
 
 #patientDataTimer {
@@ -352,16 +352,16 @@ body.substatusBillingAccepted {}
 }*/
 
 td.dxgv.LeeannCorvo {
-    background-color: #a5edce !important;
+	background-color: #a5edce !important;
 }
 td.dxgv.MaxSweet {
-    background-color: #ffe5b5 !important;
+	background-color: #ffe5b5 !important;
 }
 td.dxgv.Alexa {
-    background-color: #f9d8fb !important;
+	background-color: #f9d8fb !important;
 }
 td.dxgv.JoelLima {
-    background-color: #b5d9ff !important;
+	background-color: #b5d9ff !important;
 }
 
 .repBTN {
@@ -418,21 +418,21 @@ input.hasDatepicker[type="text"]:focus {
 
 
 
-.form-group:focus-within:not(:has(.form-group:focus-within)) {
+.form-group:focus-within:not(:has(.form-group:focus-within)):not(:has(a:focus)) {
 	transform: scale(1.4);
 	position: relative;
 	z-index: 1010;
 	transform-origin: left;
-
 }
+
 .form-group:focus-within:not(:has(.form-group:focus-within)):not(:has(a:focus)) > label {
 	position: absolute;
 	top: -16px;
-    left: 18px;
+	left: 18px;
 	line-height: 1;
-    padding: 4px 5px 0;
+	padding: 4px 5px 0;
 	background: #fff;
-    border-radius: 4px 4px 0 0;
+	border-radius: 4px 4px 0 0;
 	color: #666;
 	pointer-events: none;
 	z-index: 1020;
