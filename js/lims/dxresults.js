@@ -126,7 +126,8 @@ class DXRESULTS {
 			PCX.getEl(el.DOBYear,true).value	= patientData.DOB[2];
 			PCX.getEl(el.DOC).value				= patientData.DOC;
 
-			PCX.getEl(el.Gender[patientData.Gender],true).click();
+			//PCX.getEl(el.Gender[patientData.Gender],true).click();
+			PCX.getEl(el.Gender,true).value	= patientData.Gender;
 
 			PCX.getEl(el.Ethnicity[(DXRESULTS.raceTranslation[patientData.Race])[0]]).click();
 			PCX.getEl(el.Race[(DXRESULTS.raceTranslation[patientData.Race])[1]]).click();

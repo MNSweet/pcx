@@ -804,6 +804,7 @@ class IATSERV {
 			"AEM": "",
 			"TKS": fs,
 			"SNL": fs,
+			"Murray Medical Center": fs,
 			"VIBRANT": fs
 			//"SAFE": "",
 			//"LIF": "",

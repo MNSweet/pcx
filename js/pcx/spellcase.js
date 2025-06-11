@@ -6,7 +6,7 @@
  * – Shows ⇪ outline while Caps-Lock is on
  */
 
-(() => {
+(() => {return;
 	'use strict';
 	if(typeof PCX.getUrlParams()['LinkId'] == "undefined") {return;}
 
@@ -25,6 +25,8 @@
 			background-size: 18px 14px;
 		}`;
 	document.head.appendChild(style);
+	
+	const isVisible = el => !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
 
 	let capsOn = false;
 	['keydown','keyup'].forEach(evt =>
@@ -33,15 +35,14 @@
 		}, true)					// capture → always fires
 	);
 
-	const EDITABLE =
-		'input[type="text"], input[type="search"], input:not([type]), textarea, [contenteditable]';
+	const EDITABLE = 'input[type="text"]:not([type="hidden"])';
 
-	const toLower = el => {console.log([el]);
+	const toLower = el => {
 		el.isContentEditable ? (el.innerText = el.innerText.toLowerCase())
 							 : (el.value     = el.value.toLowerCase());
 	}
 
-	const toUpper = el => {console.log([el]);
+	const toUpper = el => {
 		el.isContentEditable ? (el.innerText = el.innerText.toUpperCase())
 							 : (el.value     = el.value.toUpperCase());
 	}
@@ -57,7 +58,7 @@
 			toLower(el);
 			el.dataset.capslock = capsOn ? 'on' : 'off';
 		});
-		if (el.__spellcaseWired) return;
+		if (el.__spellcaseWired || !isVisible(el)) return;
 		el.__spellcaseWired = true;
 		el.dataset.spellcase = '';
 

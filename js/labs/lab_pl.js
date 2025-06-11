@@ -2,13 +2,17 @@ PCX.log("Prince Laboratories");
 PCX.setLabPortal('PL');
 PCX.log(IATSERV.linkId);
 
+console.log(IATSERV.linkId,PCX.preferedUserMode());
+if(typeof IATSERV.linkId != 'undefined') {
+	document.body.classList.add('link'+IATSERV.linkId);
+}
 if(PCX.preferedUserMode()) {
 /*
 	document.addEventListener('blur', function(e) {
-    if (e.target.tagName === 'INPUT' && e.target.type === 'text') {
-      e.target.value = e.target.value.toUpperCase();
-    }
-  }, true);*/
+		if (e.target.tagName === 'INPUT' && e.target.type === 'text') {
+			e.target.value = e.target.value.toUpperCase();
+		}
+	}, true);*/
 
 		waitForElm(".fancybox-iframe").then((iframe)=> {
 			const doc = document.querySelector(".fancybox-iframe")?.contentDocument;
@@ -21,7 +25,7 @@ if(PCX.preferedUserMode()) {
 		})
 
 	IATSERV.setLabs({
-		   2: {Code:"IP",	Label:"Ipseity Diagnostics LLC",Stability:{NGS: 90}},
+			 2: {Code:"IP",	Label:"Ipseity Diagnostics LLC",Stability:{NGS: 90}},
 		1010: {Code:"SQ",	Label:"SureQuest Diagnostics", 	Stability:{NGS: 90}},
 		1011: {Code:"RR",	Label:"Reliable Result Labs", 	Stability:{NGS: 60}},
 		1012: {Code:"PL",	Label:"Prince Laboratories", 	Stability:{NGS: 60}},
@@ -30,7 +34,7 @@ if(PCX.preferedUserMode()) {
 
 	IATSERV.setTestCategories({
 		 1: {Code:"Toxicology",		Test:"",		Lab:'PL', LabCode:1012},// --
-		 3: {Code:"PGX",			Test:"PHARMA",	Lab:'PL', LabCode:1012},// Panel - PHARMACOGENOMICSCOMPREHENSIVE
+		 3: {Code:"PGX",			Test:"PHARMA",	Lab:'PD', LabCode:1013},// Panel - PHARMACOGENOMICSCOMPREHENSIVE
 		 4: {Code:"CGX",			Test:"CANCER",	Lab:'PD', LabCode:1013},// Panel - COMPREHENSICE CANCER
 		 5: {Code:"STI",			Test:"STI",		Lab:'PL', LabCode:1012},// Panel - STI Panel
 		 6: {Code:"UTI",			Test:"UTI",		Lab:'PL', LabCode:1012},// Panel - UTI Panel
@@ -98,6 +102,22 @@ if(PCX.preferedUserMode()) {
 			}
 		//}
 	}
+
+	const root = document.querySelector('#MainContent_ctl00_updatePanel1');
+	if (root) {
+		const handler = e => {
+			if (e.target.tagName === 'INPUT' && e.target.type === 'text') {
+				e.target.select();
+			}
+		};
+		root.addEventListener('focusin', e => {
+			const form = root.querySelector('.search-form');
+			if (form && form.contains(e.target)) handler(e);
+		});
+	}
+
+
+
 
 	// Accession List
 	if (IATSERV.linkId == "2070") {
@@ -309,7 +329,7 @@ if(PCX.preferedUserMode()) {
 			result	: true
 		},false,false,"#dvFooter");
 
-		PCX.getEl('#MainContent_ctl00_ctrlResultEntryList_ctrlResultEntryFullStatus_ddResultStatus option[value="5"]').disabled = true; // Final
+		//PCX.getEl('#MainContent_ctl00_ctrlResultEntryList_ctrlResultEntryFullStatus_ddResultStatus option[value="5"]').disabled = true; // Final
 		PCX.getEl('#MainContent_ctl00_ctrlResultEntryList_ctrlResultEntryFullStatus_ddResultStatus option[value="2"]').disabled = true; // Reject
 
 		let showBtns = PCX.getEl('#page-wrapper > div.container-fluid > div[style="margin-top:-50px"]');
@@ -439,24 +459,24 @@ if(PCX.preferedUserMode()) {
 			.then((sales)=>{
 				const reps = PCX.createDOM("div",{"id":"reps"});
 				const lif = PCX.createDOM("span",{"id":"LIF","innerText":"Life/Safe","classList":"repBTN"});
-					  lif.addEventListener("click",(e)=>{repBTN(e,sales,6,7)})
-					  reps.appendChild(lif);
+						lif.addEventListener("click",(e)=>{repBTN(e,sales,6,7)})
+						reps.appendChild(lif);
 
 				const pre = PCX.createDOM("span",{"id":"PRE","innerText":"Prestige","classList":"repBTN"});
-					  pre.addEventListener("click",(e)=>{repBTN(e,sales,11,21)})
-					  reps.appendChild(pre);
+						pre.addEventListener("click",(e)=>{repBTN(e,sales,11,21)})
+						reps.appendChild(pre);
 
 				const sun = PCX.createDOM("span",{"id":"SUN","innerText":"Sunshine","classList":"repBTN"});
-					  sun.addEventListener("click",(e)=>{repBTN(e,sales,11,20)})
-					  reps.appendChild(sun);
+						sun.addEventListener("click",(e)=>{repBTN(e,sales,11,20)})
+						reps.appendChild(sun);
 
 				const vib = PCX.createDOM("span",{"id":"VIB","innerText":"Vibrant","classList":"repBTN"});
-					  vib.addEventListener("click",(e)=>{repBTN(e,sales,6,1)})
-					  reps.appendChild(vib);
+						vib.addEventListener("click",(e)=>{repBTN(e,sales,6,1)})
+						reps.appendChild(vib);
 
 				const oth = PCX.createDOM("span",{"id":"OTH","innerText":"Other","classList":"repBTN"});
-					  oth.addEventListener("click",(e)=>{repBTN(e,sales,6,0)})
-					  reps.appendChild(oth);
+						oth.addEventListener("click",(e)=>{repBTN(e,sales,6,0)})
+						reps.appendChild(oth);
 
 				PCX.getEl(`${wizPrefix}${wizLoc}LocationSalesSelector_0_rptSales_0_tbVisible_0`).parentNode
 					.insertAdjacentElement("beforebegin",reps);
@@ -505,9 +525,11 @@ if(PCX.preferedUserMode()) {
 				})
 			});
 
+		const numOnly = /[^0-9]/g;
 		waitForElm(`${wizPrefix}${wizLoc}AddressControl1_0_tbPhone_0`)
 			.then((phone)=>{
 				phone.addEventListener('blur', (e) => {
+					e.target.value = e.target.value.replace(numOnly,"");
 					if(![0,10].includes(e.target.value.length)){
 						e.target.style.backgroundColor = "#ffcece";
 						e.target.style.border = "1px #872626 solid";
@@ -521,6 +543,7 @@ if(PCX.preferedUserMode()) {
 		waitForElm(`${wizPrefix}${wizLoc}AddressControl1_0_tbFax_0`)
 			.then((fax)=>{
 				fax.addEventListener('blur', (e) => {
+					e.target.value = e.target.value.replace(numOnly,"");
 					if(![0,10].includes(e.target.value.length)){
 						e.target.style.backgroundColor = "#ffcece";
 						e.target.style.border = "1px #872626 solid";
@@ -568,8 +591,8 @@ if(PCX.preferedUserMode()) {
 			const disabled = ["16", "4", "13"];
 
 			const getOption = (arr, value) => {
-			    const index = arr.findIndex(opt => opt.value === value);
-			    return index !== -1 ? arr.splice(index, 1)[0] : null;
+					const index = arr.findIndex(opt => opt.value === value);
+					return index !== -1 ? arr.splice(index, 1)[0] : null;
 			};
 
 			const spacerOption = document.createElement("option");
