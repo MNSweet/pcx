@@ -382,26 +382,6 @@ class PCX {
 		if(!PCX.getEl('.userName',true)){return;}
 		return PCX.getEl('.userName').textContent.replace('Welcome ','').replace(' ','');
 	}
-
-	/**
-	 * mergeOptsIntoDefaults
-	 * @param  OBJ	defaults	Preset Values
-	 * @param  OBJ	opts		Overrides
-	 * @return OBJ				Merged Object
-	 *
-	 * PCX.mergeOptsIntoDefaults(defaults,opts);
-	 */
-	static mergeOptsIntoDefaults(defaults,opts) {
-		return [defaults,opts].reduce((result, item) => {
-			if (typeof item === 'object' && item !== null) {
-				result.push(Object.assign({}, ...result.filter(x => typeof x === 'object' && x !== null), item));
-			} else {
-				result.push(item);
-			}
-			return result;
-		}, []);
-	}
-
 	static log(message) {
 		if (PCX.getUrlParams()['debug']==true) {
 			console.log(message);
