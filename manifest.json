@@ -64,7 +64,7 @@
 		{
 			"resources": [
 				"css/modal.css",
-				"css/content_pr.css",
+				"css/content_pl.css",
 				"css/content_rr.css",
 				"css/content_pd.css",
 				"js/pcx/pcx_controller.js",
@@ -79,7 +79,7 @@
 				"js/pcx/keybinding.js",
 				"js/pcx/settings.js",
 				"js/pcx/domobserver.js",
-				"js/data/permissions.js"
+				"js/data/permissions.json"
 			],
 			"matches": [
 				"https://prince.iatserv.com/*",
