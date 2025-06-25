@@ -25,7 +25,7 @@ if(PCX.preferedUserMode()) {
 		})
 
 	IATSERV.setLabs({
-			 2: {Code:"IP",	Label:"Ipseity Diagnostics LLC",Stability:{NGS: 90}},
+		   2: {Code:"IP",	Label:"Ipseity Diagnostics LLC",Stability:{NGS: 90}},
 		1010: {Code:"SQ",	Label:"SureQuest Diagnostics", 	Stability:{NGS: 90}},
 		1011: {Code:"RR",	Label:"Reliable Result Labs", 	Stability:{NGS: 60}},
 		1012: {Code:"PL",	Label:"Prince Laboratories", 	Stability:{NGS: 60}},

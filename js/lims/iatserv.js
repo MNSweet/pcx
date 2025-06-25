@@ -799,6 +799,7 @@ class IATSERV {
 		const locationKeywords = {
 			"ABCO": "",
 			"AXXESSRX": fs,
+			"AXXCESS RX": fs,
 			"MONROE": fs,
 			"RELIABLE": "",
 			"AEM": "",
