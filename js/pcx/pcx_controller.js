@@ -8,6 +8,7 @@ class PCX {
 	}
 	static preferedUserMode(){
 		if(PCX.activeLabPortal == "PL") {
+			console.log(PCX.currentUser());
 			return PCX.currentUser() == "Max";
 		}
 		if(PCX.activeLabPortal == "PD" || PCX.activeLabPortal == "RR") {
@@ -59,10 +60,14 @@ class PCX {
 	 * Used to recall data from the storage
 	 */
 	static getLocalStorage(key, callback) {
-		chrome.storage.local.get([key], (result) => {
-			PCX.log(`Fetched ${key}: ${result[key]}`);
-			return callback(result[key]);
-		});
+		try {
+			chrome.storage.local.get(key, (result) => {
+				PCX.log(`Fetched ${key}: ${result[key]}`);
+				return callback(result[key]);
+			});
+		}catch(err) {
+			console.log(err);
+		}
 	}
 
 
@@ -456,9 +461,25 @@ class PCX {
 	 * currentUser
 	 * @return STRING/BOOL
 	 */
-	static currentUser() {
-		if(!PCX.getEl('.userName',true)){return;}
-		return PCX.getEl('.userName').textContent.replace('Welcome ','').replace(' ','');
+	static async currentUser() {
+		if (PCX.currentUser) { return PCX.currentUser;}
+		if(!PCX.getEl('.userName',true)){
+			if(PCX.getUrlDirectory().pop() == "Pupup.aspx") {
+				console.log('Pupup.aspx');
+				PCX.currentUser = await chrome.storage.local.get('currentUser',
+					data =>{
+						console.log("data: ",data);
+						return data.currentUser;
+					}
+				);
+			}
+			console.log('Unknown');
+			return "";
+		}
+		console.log('standard');
+		PCX.currentUser = PCX.getEl('.userName').textContent.replace('Welcome ','').replace(' ','');
+		PCX.setLocalStorage('currentUser',PCX.currentUser);
+		return PCX.currentUser;
 	}
 
 	/**

@@ -164,6 +164,34 @@ class ServiceWorker {
 		}
 	}
 
+	static injectShowBatchAccessionsEdit(tabId, url) {
+
+	console.log("inject");
+	console.log("- tabId: ", tabId);
+	console.log("- url: ", url);
+		let u;
+		try {
+			u = new URL(url);
+		} catch {
+			return;
+		}
+console.log('searchParams',u.searchParams);
+		if (u.searchParams.get('LinkId') !== '2074') return;
+console.log('found 2074');
+		chrome.scripting.executeScript({
+			target: { tabId },
+			func: () => {
+				document.addEventListener('DOMContentLoaded', function() {
+					console.log('set function');
+					window.ShowBatchAccessionsEdit = batchNumber => {
+						const url = '?LinkId=2099&batchNumber=' + batchNumber;
+						window.open(url);
+					};
+				})
+			}
+		});
+	}
+
 	static changeExtensionIcon(change=false) {
 		chrome.action.setIcon({ path:{
 				"16"	: change ? "../icons/alt-icon-16.png"	: "../icons/default-icon-16.png",
@@ -231,6 +259,8 @@ function createNewTab(target, url, whitelist) {
 
 // Listen for web navigation events to enforce whitelists
 chrome.webNavigation.onCommitted.addListener((details) => {
+	console.log("onCommitted");
+	console.log("- details: ", details);
     const whitelist = tabWhitelists[details.tabId];
 
     if (!whitelist) {
@@ -253,6 +283,7 @@ chrome.webNavigation.onCommitted.addListener((details) => {
 
 // Cleanup when a tab is closed
 chrome.tabs.onRemoved.addListener((tabId) => {
+	console.log("onRemoved");
     delete tabWhitelists[tabId];
 
     // Remove from `tabTargets` if the tabId was associated with a target
@@ -265,14 +296,23 @@ chrome.tabs.onRemoved.addListener((tabId) => {
 
 // Listen for tab activations
 chrome.tabs.onActivated.addListener(function (info) {
+	console.log("onActivated");
+	console.log("- info: ", info);
 	chrome.tabs.get(info.tabId, function (tab) {
+		console.log("- tab: ", tab);
 		ServiceWorker.handleTabUpdate(tab.id, tab.url);
 	});
 });
 
 // Listen for tab updates
 chrome.tabs.onUpdated.addListener(function (tabId, change, tab) {
+	console.log("onUpdated");
+	console.log("- change: ", change);
+	console.log("- tab: ", tab);
 	if (change.url) {
 		ServiceWorker.handleTabUpdate(tabId, change.url);
+	}
+	if (change.status == 'complete' && tab.url) {
+		ServiceWorker.injectShowBatchAccessionsEdit(tabId, tab.url);
 	}
 });
