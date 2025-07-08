@@ -519,6 +519,76 @@ if(PCX.preferedUserMode()) {
 						.then((btn)=>{
 							btn.addEventListener('click',(e)=>{
 								phys.value = phys.dataset.npi;
+								waitForElmAfterChange(`${wizPrefix}${wizLoc}ctrlLocationPhysicians_0_ddPhysician_0_tbText_0`, document.querySelector('#MainContent_ctl00_updatePanel'))
+									.then(async target => {
+										ensureInputFocus(target);
+										await delay(500).then(()=>{
+										// Shift key
+										target.dispatchEvent(new KeyboardEvent("keydown", {
+											key: "Shift",
+											code: "ShiftLeft",
+											keyCode: 16,
+											location: 1,
+											shiftKey: true,
+											bubbles: true,
+											cancelable: true
+										}));
+
+										target.dispatchEvent(new KeyboardEvent("keyup", {
+											key: "Shift",
+											code: "ShiftLeft",
+											keyCode: 16,
+											location: 1,
+											shiftKey: false,
+											bubbles: true,
+											cancelable: true
+										}));
+
+
+
+										// Tab key
+										target.dispatchEvent(new KeyboardEvent("keydown", {
+											key: "Tab",
+											code: "Tab",
+											keyCode: 9,
+											which: 9,
+											bubbles: true,
+											cancelable: true
+										}));
+
+										target.dispatchEvent(new KeyboardEvent("keyup", {
+											key: "Tab",
+											code: "Tab",
+											keyCode: 9,
+											which: 9,
+											bubbles: true,
+											cancelable: true
+										}));
+
+										// New focused element receives the space key
+										setTimeout(() => {
+											const newTarget = document.activeElement;
+
+											newTarget.dispatchEvent(new KeyboardEvent("keydown", {
+												key: " ",
+												code: "Space",
+												keyCode: 32,
+												which: 32,
+												bubbles: true,
+												cancelable: true
+											}));
+
+											newTarget.dispatchEvent(new KeyboardEvent("keyup", {
+												key: " ",
+												code: "Space",
+												keyCode: 32,
+												which: 32,
+												bubbles: true,
+												cancelable: true
+											}));
+										}, 50); // Delay gives time for Tab to shift focus
+								});
+								});
 							});
 						});
 					}

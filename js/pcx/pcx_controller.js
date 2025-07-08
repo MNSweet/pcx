@@ -570,6 +570,40 @@ function waitForIframeElm(frame,selector) {
 		});
 	});
 }
+function waitForElmAfterChange(selector, root = document.body) {
+	return new Promise(resolve => {
+		const observer = new MutationObserver(() => {
+			const el = document.querySelector(selector);
+			if (el && el.isConnected) {
+				observer.disconnect();
+				resolve(el);
+			}
+		});
+
+		observer.observe(root, {
+			childList: true,
+			subtree: true
+		});
+	});
+}
 function delay(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
+}
+function ensureInputFocus(input) {
+	if (!document.body.contains(input) || input.disabled || input.readOnly || input.offsetParent === null) {
+		console.warn("Input is not focusable.");
+		return false;
+	}
+
+	input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+	requestAnimationFrame(() => {
+		input.focus();
+		if (input.setSelectionRange) {
+			const len = input.value.length;
+			input.setSelectionRange(len, len);
+		}
+	});
+
+	return true;
 }
